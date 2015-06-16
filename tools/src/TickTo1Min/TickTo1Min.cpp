@@ -104,6 +104,27 @@ string cszCutDouble(double& dbPrice)
 	return cszTmp;
 }
 
+int getMinEpochFromDateTime(int iDateYYYYMMDD, int iTimeHHMMSS)
+{
+	struct tm t = {0};  // Initalize to all 0's
+	t.tm_year = iDateYYYYMMDD/10000-1900;  // This is year-1900, so 112 = 2012
+	t.tm_mon = ((iDateYYYYMMDD/100)%100)-1;
+	t.tm_mday = iDateYYYYMMDD%100;
+	t.tm_hour = iTimeHHMMSS/10000;
+	t.tm_min = (iTimeHHMMSS/100)%100;
+	t.tm_sec = iTimeHHMMSS%100;
+	time_t timeSinceEpoch = mktime(&t);
+	return timeSinceEpoch/60;
+}
+
+void vGetDateTimeFromMinEpoch(int iMinEpoch, int *piDateYYYYMMDD, int *piTimeHHMMSS)
+{
+	time_t timeSinceEpoch = iMinEpoch*60;
+	struct tm* tmTime = localtime(&timeSinceEpoch);
+	*piDateYYYYMMDD = (tmTime->tm_year+1900)*10000+(tmTime->tm_mon+1)*100+tmTime->tm_mday;
+	*piTimeHHMMSS = tmTime->tm_hour*10000+tmTime->tm_min*100+tmTime->tm_sec;
+}
+
 int iGoParse1MinFromStdin(char* pszSymbol, int iDebug, int iFmtId)
 {
 	char* pszDate;
@@ -140,10 +161,8 @@ int iGoParse1MinFromStdin(char* pszSymbol, int iDebug, int iFmtId)
 		pszTickPrc = pszData[2];
 		pszTickVol = pszData[3];
 		int iDataTradeDate = atoi(pszDate);
-		int iEncodeTradingDate = (iDataTradeDate/10000-1900)*13*32+((iDataTradeDate/100)%100)*32+(iDataTradeDate%100);
-		int iTradeTime = atof(pszTime)+0.999;
-		int iEncodeTradingTime = ((iTradeTime/10000)*60 + (iTradeTime/100)%100) + 1;//«áÂk
-		int iEncodeTradeDateTime = iEncodeTradingDate*60*60 + iEncodeTradingTime;
+		int iTradeTime = atof(pszTime);
+		int iEncodeTradeDateTime = getMinEpochFromDateTime(iDataTradeDate, iTradeTime)+1;//+1min 
 		double dbCurPrice = atof(pszTickPrc);
 		if (dbCurPrice == 0.0)
 		{
@@ -178,17 +197,14 @@ int iGoParse1MinFromStdin(char* pszSymbol, int iDebug, int iFmtId)
 		for(mapItTimeTradeData = objTimeTradeData.begin();mapItTimeTradeData!=objTimeTradeData.end();mapItTimeTradeData++)
 		{
 			const int* piEncodeTradeDateTime = &(*mapItTimeTradeData).first;
-			int iEncodeTradingDate = *piEncodeTradeDateTime/(60*60);
-			int iEncodeTradingTime = *piEncodeTradeDateTime%(60*60);
-			int iTradingDate = (iEncodeTradingDate/(13*32)+1900)*10000 + (iEncodeTradingDate%(13*32))/32*100 + (iEncodeTradingDate%32);
-			int iTradingTime = (iEncodeTradingTime/60)*100 + (iEncodeTradingTime%60);
-
+			int iTradingDate,iTradingTime;
+			vGetDateTimeFromMinEpoch(*piEncodeTradeDateTime, &iTradingDate, &iTradingTime);
 			CTradeData* pTradeData = &(*mapItTimeTradeData).second;
 			if (iFmtId == 1)
-				fprintf(stdout, "%04d-%02d-%02d %02d:%02d:00,%s,%s,%s,%s,%d\n", iTradingDate/10000, (iTradingDate/100)%100, iTradingDate%100, iTradingTime/100, iTradingTime%100, 
+				fprintf(stdout, "%04d-%02d-%02d %02d:%02d:00,%s,%s,%s,%s,%d\n", iTradingDate/10000, (iTradingDate/100)%100, iTradingDate%100, iTradingTime/10000, (iTradingTime/100)%100, 
 				cszCutDouble(pTradeData->dbOpen).c_str(), cszCutDouble(pTradeData->dbHigh).c_str(), cszCutDouble(pTradeData->dbLow).c_str(), cszCutDouble(pTradeData->dbClose).c_str(), (int)pTradeData->dbVol);
 			else
-				fprintf(stdout, "%04d%02d%02d,%02d%02d00,%s,%s,%s,%s,%d\n", iTradingDate/10000, (iTradingDate/100)%100, iTradingDate%100, iTradingTime/100, iTradingTime%100,
+				fprintf(stdout, "%04d%02d%02d,%02d%02d00,%s,%s,%s,%s,%d\n", iTradingDate/10000, (iTradingDate/100)%100, iTradingDate%100, iTradingTime/10000, (iTradingTime/100)%100,
         	                cszCutDouble(pTradeData->dbOpen).c_str(), cszCutDouble(pTradeData->dbHigh).c_str(), cszCutDouble(pTradeData->dbLow).c_str(), cszCutDouble(pTradeData->dbClose).c_str(), (int)pTradeData->dbVol);
 		}
 	} 

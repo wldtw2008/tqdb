@@ -1,4 +1,5 @@
 #!/bin/bash
+. /etc/profile.d/profile_tqdb.sh
 
 TQDB="tqdb1"
 SYMBOL=$1
@@ -10,18 +11,18 @@ fi
 
 EPID=-1
 DTBEG=`date +%Y-%m-%d --date="$(($NDAYAGO+1)) day ago"`
-DTEND=`date +%Y-%m-%d --date="$NDAYAGO day ago"`
+DTEND=`date +'%Y-%m-%d 00:00:01' --date="$NDAYAGO day ago"`
 ALLSYM=''
 if [ "$SYMBOL" != "ALL" ] ; then
 	ALLSYM=$SYMBOL
 else
-	ALLSYM=`./qsym  $CASS_IP $CASS_PORT  ${TQDB}.symbol 0 ALL|grep -E "^symbol=" | cut -f 2 -d '='`
+	ALLSYM=`$TQDB_DIR/tools/bin/qsym  $CASS_IP $CASS_PORT  ${TQDB}.symbol 0 ALL|grep -E "^symbol=" | cut -f 2 -d '='`
 fi
 
 for SYM in $ALLSYM
 do
 	SYMBOL=$SYM
-	CMD="./qtick $CASS_IP $CASS_PORT ${TQDB}.tick 0 '$SYMBOL' $DTBEG $DTEND $EPID | ./tick21min | python Min2Cass.py $CASSIP $CASSPORT $TQDB '$SYMBOL'"
+	CMD="$TQDB_DIR/tools/bin/qtick $CASS_IP $CASS_PORT ${TQDB}.tick 0 '$SYMBOL' '$DTBEG' '$DTEND' $EPID | $TQDB_DIR/tools/bin/tick21min | python Min2Cass.py $CASS_IP $CASS_PORT $TQDB '$SYMBOL'"
 	echo "ready to run:"$CMD
 	eval $CMD	
 done

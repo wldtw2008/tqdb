@@ -22,6 +22,8 @@ def loopReadFromStdin():
 
 	str2KairosDB = ""
 	iLineCnt=0
+	iShowInsertLog=0
+	print("Ready to insert min bars to db")
 	for line in sys.stdin:
 		linesplit = line.replace('\r','').replace('\n','').split(',')
 		iYYYYMMDD = int(linesplit[0])
@@ -33,9 +35,19 @@ def loopReadFromStdin():
 		straa="insert into %s (symbol, datetime, open, high, low, close, vol) values ('%s', %d, %f, %f, %f, %f, %f);" % (szCassTable, szSymbol, tagTime, float(linesplit[2]), float(linesplit[3]), float(linesplit[4]), float(linesplit[5]), float(linesplit[6]))
 		#print straa
 		iLineCnt = iLineCnt+1
-		if ((iLineCnt%1000) == 0):
-			print("Ineserted %d Bars"%iLineCnt)
+		
 		session.execute(straa)
+		iShowInsertLog = 0
+		if (iLineCnt<10):
+			iShowInsertLog=1
+		elif (iLineCnt<100 and (iLineCnt%10) == 0):
+			iShowInsertLog=1
+		elif (iLineCnt<1000 and (iLineCnt%100) == 0):
+			iShowInsertLog=1
+		elif ((iLineCnt%1000) == 0):
+			iShowInsertLog=1
+		if (iShowInsertLog!=0):
+			print("Ineserted %d Bars"%iLineCnt)
 		#print mapData
 		#mTable.insert(mapData)
 		#put wtx.c 1417096644358 9002
@@ -43,7 +55,7 @@ def loopReadFromStdin():
 			sys.stdout.write(str2KairosDB)
 			sys.stdout.flush()
 
-
+	print("Ineserted %d Bars"%iLineCnt)
 szCassIP1=sys.argv[1];
 szCassPort=sys.argv[2];
 szCassDB=sys.argv[3];
