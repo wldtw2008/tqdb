@@ -1,2 +1,2 @@
 #!/bin/bash
-g++ TickTo1Min.cpp -o ../../bin/tick21min
+g++ TickTo1Min.cpp -o ../../tick21min

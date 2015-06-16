@@ -1,8 +1,8 @@
 #!/bin/bash
 SRCROOTDIR=/usr/local # ../../cpp-driver/
 CASSLIB=/usr/local/lib/libcassandra.so #../../cpp-driver/build/libcassandra.so
-SRC=./src
-BIN=./bin
+SRC=./
+BIN=../
 rm *.o
 
 CC=/usr/bin/cc

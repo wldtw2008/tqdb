@@ -8,7 +8,7 @@ import os
 import subprocess
 import urllib
 
-szBinDir='/home/tqdb/codes/tqdb/scripts/'
+szBinDir='/home/tqdb/codes/tqdb/tools/'
 szSymbol = "SIN"; #"TXO;201506;9200P";
 timeoffset=0	
 iLocalTimeOff=480 #TW

@@ -8,7 +8,6 @@ if [ "$1" = "" ] ; then
 fi
 
 
-BINDIR="$TQDB_DIR/tools/bin/"
 TQDB_DB="tqdb1"
 SYMBOL=$1
 DTBEG=$2
@@ -23,7 +22,7 @@ fi
 if [ -f $FILE ] ; then
 	rm $FILE
 fi
-CMD="$BINDIR/q1min $CASS_IP $CASS_PORT ${TQDB_DB}.minbar 0 '${SYMBOL}' '$DTBEG' '$DTEND'"
+CMD="$TQDB_DIR/tools/q1min $CASS_IP $CASS_PORT ${TQDB_DB}.minbar 0 '${SYMBOL}' '$DTBEG' '$DTEND'"
 eval $CMD >> $FILE
 
 TAILLINE=`tail -1 $FILE | sed 's/ //g'`
@@ -35,7 +34,7 @@ else
 fi
 
 if [ "$TAILDATE" != "" ] ; then	
-	CMD="$BINDIR/qtick $CASS_IP $CASS_PORT ${TQDB_DB}.tick 0 '${SYMBOL}' '$TAILDATE' '$DTEND' -1| $BINDIR/tick21min"
+	CMD="$TQDB_DIR/tools/qtick $CASS_IP $CASS_PORT ${TQDB_DB}.tick 0 '${SYMBOL}' '$TAILDATE' '$DTEND' -1| $TQDB_DIR/tools/tick21min"
 	eval $CMD >> $FILE
 fi
 

@@ -8,7 +8,6 @@ if [ "$1" = "" ] ; then
 fi
 
 
-BINDIR="$TQDB_DIR/tools/bin/"
 TQDB_DB="tqdb1"
 SYMBOL=$1
 DTBEG=$2
@@ -23,7 +22,7 @@ fi
 if [ -f $FILE ] ; then
 	rm $FILE
 fi
-CMD="$BINDIR/q1min $CASS_IP $CASS_PORT ${TQDB_DB}.minbar 0 '${SYMBOL}' '$DTBEG' '$DTEND'"
+CMD="$TQDB_DIR/tools/q1min $CASS_IP $CASS_PORT ${TQDB_DB}.minbar 0 '${SYMBOL}' '$DTBEG' '$DTEND'"
 eval $CMD >> $FILE
 
 if [ "$GZIP" == "1" ] ; then
