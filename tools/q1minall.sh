@@ -15,6 +15,8 @@ DTEND=$3
 EPID=-1
 FILE=$4
 GZIP=$5
+
+DBG=0
 if [ "$FILE" == "" ] ; then
 	FILE=/tmp/1min
 fi
@@ -23,6 +25,9 @@ if [ -f $FILE ] ; then
 	rm $FILE
 fi
 CMD="$TQDB_DIR/tools/q1min $CASS_IP $CASS_PORT ${TQDB_DB}.minbar 0 '${SYMBOL}' '$DTBEG' '$DTEND'"
+if [ $DBG -eq 1 ] ; then
+	echo $CMD
+fi
 eval $CMD >> $FILE
 
 TAILLINE=`tail -1 $FILE | sed 's/ //g'`
@@ -35,6 +40,10 @@ fi
 
 if [ "$TAILDATE" != "" ] ; then	
 	CMD="$TQDB_DIR/tools/qtick $CASS_IP $CASS_PORT ${TQDB_DB}.tick 0 '${SYMBOL}' '$TAILDATE' '$DTEND' -1| $TQDB_DIR/tools/tick21min"
+	if [ $DBG -eq 1 ] ; then
+        	echo $CMD
+	fi
+
 	eval $CMD >> $FILE
 fi
 

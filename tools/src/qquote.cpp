@@ -16,29 +16,38 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <cassandra.h>
 #include <time.h>
 #include <stdint.h>
-
+#include <string.h>
 #include "common.h"
+
 void vCheckSystex(int argc, char *argv[]) {
-	if (argc >= 8)
+	if (argc >= 10)
 	{
 		//good
 	}
 	else
 	{
 		printf("Systex Error\n");
-		printf("Systex: %s IP Port dbname dbgflag Symbol DateTimeBeg DateTimeEnd\n", argv[0]);
-		printf("    Ex: %s 127.0.0.1 9042 tqdb1.minbar 1 WTX 2015-03-05 2015-03-06\n", argv[0]);
+		printf("Systex: %s IP Port dbname dbgflag Symbol QuoteItem DateTimeBeg DateTimeEnd EPID\n", argv[0]);
+		printf("    Ex: %s 127.0.0.1 9042 tqdb1.tick 1 WTX BID 2015-03-05 2015-03-06 0\n", argv[0]);
 		exit(0);
 	}
 }
+typedef struct _ST_TICKDATA
+{
+      double dbDateTime;//float is microsec
+      int iEPID;
+      double dbPrc;
+      int iVol;
+}ST_TickData;
+
 int main(int argc, char *argv[]) {
-	char *pszIP, *pszPort, *pszDBName, *pszQSym, *pszQDateBeg, *pszQDateEnd;
+	char *pszIP, *pszPort, *pszDBName, *pszQSym, *pszQItem, *pszQDateBeg, *pszQDateEnd;
 	char szQStr[2048];
-        int i, iDBGFlag, iEPIDFilter;
+        int i, iDBGFlag, iEPIDFilter, iQItemLen;
+	ST_TickData objTickData;
 	/* Setup and connect to cluster */
 	CassFuture* connect_future = NULL;
 	CassCluster* cluster = cass_cluster_new();
@@ -51,10 +60,12 @@ int main(int argc, char *argv[]) {
         pszDBName = argv[i++];
 	iDBGFlag = atoi(argv[i++]);
 	pszQSym = argv[i++];
+	pszQItem = argv[i++];
+	iQItemLen = atoi(pszQItem);
 	pszQDateBeg = argv[i++];
 	pszQDateEnd = argv[i++];
-	iEPIDFilter = -1;//atoi(argv[i++]);
-	sprintf(szQStr, "SELECT datetime,open,high,low,close,vol from %s where symbol='%s' and  datetime>='%s' and datetime<'%s' order by datetime; ",
+	iEPIDFilter = atoi(argv[i++]);
+	sprintf(szQStr, "SELECT * from %s where symbol='%s' and  datetime>='%s' and datetime<'%s' order by datetime; ",
                 pszDBName,
 	pszQSym, pszQDateBeg, pszQDateEnd);
 	if (iDBGFlag)
@@ -90,41 +101,68 @@ int main(int argc, char *argv[]) {
 			CassFuture* result_future = cass_session_execute(session, statement);
 			if(cass_future_error_code(result_future) == CASS_OK) {
 				/* Retrieve result set and iterator over the rows */
-				CassResult* result = cass_future_get_result(result_future);
+				const CassResult* result = cass_future_get_result(result_future);
 				CassIterator* rows = cass_iterator_from_result(result);
 				time_t t2 = time(NULL);
 				if (iDBGFlag) 
 					printf("page: %d, execute time=%d Secs\n", ++iPage, t2-t1);
 				char kk[32];
 				//scanf("%s",kk);
-
-				cass_int64_t datetime;
-				cass_double_t open,high,low,close,vol;
-				char szOpen[32], szHigh[32], szLow[32], szClose[32], szVol[32];
-				int iDate, iTime, iMSec;
-				double dbDateTime;
+				char szPrc[32];
 				while(cass_iterator_next(rows)) {
 					const CassRow* row = cass_iterator_get_row(rows);
+					const CassValue* sym = cass_row_get_column_by_name(row, "symbol");
+					cass_int64_t datetime;
 					cass_value_get_int64(cass_row_get_column_by_name(row, "datetime"), (cass_int64_t*)&datetime);
-					dbDateTime = ((uint64_t)datetime)/1000.0;
-					cass_value_get_double(cass_row_get_column_by_name(row, "open"), (cass_double_t*)&open);
-					cass_value_get_double(cass_row_get_column_by_name(row, "high"), (cass_double_t*)&high);
-					cass_value_get_double(cass_row_get_column_by_name(row, "low"), (cass_double_t*)&low);
-					cass_value_get_double(cass_row_get_column_by_name(row, "close"), (cass_double_t*)&close);
-					cass_value_get_double(cass_row_get_column_by_name(row, "vol"), (cass_double_t*)&vol);
+					cass_int32_t type;
+					cass_value_get_int32(cass_row_get_column_by_name(row, "type"), (cass_int32_t*)&type);
 
-					vEpoch2DateTime(&dbDateTime, &iDate, &iTime, &iMSec);
-					if (iDBGFlag)
-                                        {
-	                                        if (iFirstLine==0)
-                                                {
-        	                                        printf("Date,Time,TickPrc,TickVol,EPID\n");
-                                                        iFirstLine=1;
-                                                }
-                                        }
-					printf("%d,%06d,%s,%s,%s,%s,%s\n",iDate, iTime,
-						szDb2Str(szOpen, &open),szDb2Str(szHigh, &high),szDb2Str(szLow, &low),szDb2Str(szClose, &close),szDb2Str(szVol, &vol));
-					iDataCnt++;
+					if (type!=0) continue;
+
+					//CassString keyspace_name;
+					//cass_value_get_string(value, &keyspace_name);
+
+					const char* pszSym;
+					size_t iSymLen;
+					cass_value_get_string(sym, &pszSym, &iSymLen);
+
+					if (1)
+					{
+						CassIterator* iterMap = cass_iterator_from_map(cass_row_get_column_by_name(row, "keyval"));
+						uint64_t i64DateTime = datetime;
+						objTickData.dbDateTime = i64DateTime/1000.0;
+						while (cass_iterator_next(iterMap)) {
+							const char* pszMapKey;
+							size_t iMapKeyLen;
+							cass_double_t mapValue;
+							cass_value_get_string(cass_iterator_get_map_key(iterMap), &pszMapKey, &iMapKeyLen);
+							cass_value_get_double(cass_iterator_get_map_value(iterMap), &mapValue);
+							if (strncmp(pszMapKey, "EPID", max(iMapKeyLen,4)) == 0)
+							objTickData.iEPID = (int)mapValue;
+							else if(strncmp(pszMapKey, pszQItem, max(iMapKeyLen, iQItemLen)) == 0)
+							objTickData.dbPrc = mapValue;
+							//else if(strncmp(szMapKey, "V") == 0)
+							//objTickData.iVol = (int)mapValue;
+						}
+						if (iEPIDFilter==-1 || iEPIDFilter==objTickData.iEPID)
+						{
+							int iDate, iTime, iMSec;
+							vEpoch2DateTime(&objTickData.dbDateTime, &iDate, &iTime, &iMSec);
+							if (iDBGFlag)
+							{
+								if (iFirstLine==0)
+								{
+									printf("Date,Time,%s.Value,EPID\n", pszQItem);
+									iFirstLine=1;
+								}
+								printf("%d,%06d.%03d,%s,%d\n",iDate, iTime, iMSec, szDb2Str(szPrc, &objTickData.dbPrc), objTickData.iEPID);
+							}
+							else
+
+								printf("%d,%06d.%03d,%s\n", iDate, iTime, iMSec, szDb2Str(szPrc, &objTickData.dbPrc) );	
+						}
+						iDataCnt++;
+					}
 				}
 
 				iIsMorePage = cass_result_has_more_pages(result);
@@ -136,7 +174,7 @@ int main(int argc, char *argv[]) {
 			} else {
 				/* Handle error */
 				const char* pszMsg;
-				int iMsgLen;
+				size_t iMsgLen;
 				cass_future_error_message(result_future, &pszMsg, &iMsgLen);
 				fprintf(stderr, "Unable to run query: '%.*s'\n", iMsgLen, pszMsg);
 			} 
@@ -153,7 +191,7 @@ int main(int argc, char *argv[]) {
 	} else {
 		/* Handle error */
                 const char* pszMsg;
-                int iMsgLen;
+                size_t iMsgLen;
                 cass_future_error_message(connect_future, &pszMsg, &iMsgLen);
 		fprintf(stderr, "Unable to connect: '%.*s'\n", iMsgLen, pszMsg);
 	}

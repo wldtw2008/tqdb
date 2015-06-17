@@ -17,6 +17,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <cassandra.h>
 #include <time.h>
 #include <stdint.h>
@@ -99,7 +100,7 @@ int main(int argc, char *argv[]) {
 			CassFuture* result_future = cass_session_execute(session, statement);
 			if(cass_future_error_code(result_future) == CASS_OK) {
 				/* Retrieve result set and iterator over the rows */
-				CassResult* result = cass_future_get_result(result_future);
+				const CassResult* result = cass_future_get_result(result_future);
 				CassIterator* rows = cass_iterator_from_result(result);
 				time_t t2 = time(NULL);
 				if (iDBGFlag) 
@@ -121,7 +122,7 @@ int main(int argc, char *argv[]) {
 					//cass_value_get_string(value, &keyspace_name);
 
 					const char* pszSym;
-					int iSymLen;
+					size_t iSymLen;
 					cass_value_get_string(sym, &pszSym, &iSymLen);
 
 					if (type ==1)
@@ -131,7 +132,7 @@ int main(int argc, char *argv[]) {
 						objTickData.dbDateTime = i64DateTime/1000.0;
 						while (cass_iterator_next(iterMap)) {
 							const char* pszMapKey;
-							int iMapKeyLen;
+							size_t iMapKeyLen;
 							cass_double_t mapValue;
 							cass_value_get_string(cass_iterator_get_map_key(iterMap), &pszMapKey, &iMapKeyLen);
 							cass_value_get_double(cass_iterator_get_map_value(iterMap), &mapValue);
@@ -172,7 +173,7 @@ int main(int argc, char *argv[]) {
 			} else {
 				/* Handle error */
 				const char* pszMsg;
-				int iMsgLen;
+				size_t iMsgLen;
 				cass_future_error_message(result_future, &pszMsg, &iMsgLen);
 				fprintf(stderr, "Unable to run query: '%.*s'\n", iMsgLen, pszMsg);
 			} 
@@ -189,7 +190,7 @@ int main(int argc, char *argv[]) {
 	} else {
 		/* Handle error */
                 const char* pszMsg;
-                int iMsgLen;
+                size_t iMsgLen;
                 cass_future_error_message(connect_future, &pszMsg, &iMsgLen);
 		fprintf(stderr, "Unable to connect: '%.*s'\n", iMsgLen, pszMsg);
 	}

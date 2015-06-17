@@ -5,15 +5,14 @@ SRC=./
 BIN=../
 rm *.o
 
-CC=g++ #/usr/bin/cc
-STRIP=strip
+CC=/usr/bin/cc
 
 function buildObj(){
 	TRG=$1
 	if [ -e ${SRC}/${TRG}.o ] ; then
 		rm ${SRC}/${TRG}.o
 	fi
-	${CC}  -DCASS_USE_OPENSSL -D_GNU_SOURCE -I${SRCROOTDIR}/include -I${SRCROOTDIR}/src -I${SRCROOTDIR}/src/third_party/rapidjson -I${SRCROOTDIR}/src/third_party/boost -D_GNU_SOURCE -Wall -pedantic -Wextra -Wno-long-long -Wno-deprecated-declarations -Wno-unused-parameter -Wno-unused-local-typedefs -o ${SRC}/${TRG}.o   -c ${SRC}/${TRG}.cpp
+	${CC}  -DCASS_USE_OPENSSL -D_GNU_SOURCE -I${SRCROOTDIR}/include -I${SRCROOTDIR}/src -I${SRCROOTDIR}/src/third_party/rapidjson -I${SRCROOTDIR}/src/third_party/boost -std=c99    -D_GNU_SOURCE -Wall -pedantic -Wextra -Wno-long-long -Wno-deprecated-declarations -Wno-unused-parameter -Wno-unused-local-typedefs -o ${SRC}/${TRG}.o   -c ${SRC}/${TRG}.c
 
 
 	if [ "$?" == "1" ] ; then
@@ -33,7 +32,6 @@ function buildExe(){
                 echo "!!!Some error while linking..."
                 exit 1
         fi
-	${STRIP} ${BIN}/${TRG}
 }
 
 buildObj common

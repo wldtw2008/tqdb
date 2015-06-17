@@ -16,31 +16,29 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <cassandra.h>
 #include <time.h>
 #include <stdint.h>
+
 #include "common.h"
 void vCheckSystex(int argc, char *argv[]) {
-	if (argc >= 6)
+	if (argc >= 8)
 	{
 		//good
 	}
 	else
 	{
 		printf("Systex Error\n");
-		printf("Systex: %s IP Port dbname dbgflag Symbol\n", argv[0]);
-		printf("    Ex: %s 127.0.0.1 9042 tqdb1.symbol 1 WTX \n", argv[0]);
-		printf("    Ex: %s 127.0.0.1 9042 tqdb1.symbol 0 ALL \n", argv[0]);
+		printf("Systex: %s IP Port dbname dbgflag Symbol DateTimeBeg DateTimeEnd\n", argv[0]);
+		printf("    Ex: %s 127.0.0.1 9042 tqdb1.minbar 1 WTX 2015-03-05 2015-03-06\n", argv[0]);
 		exit(0);
-
 	}
 }
-
 int main(int argc, char *argv[]) {
-	char *pszIP, *pszPort, *pszDBTblName, *pszQSym, *pszQDateBeg, *pszQDateEnd;
+	char *pszIP, *pszPort, *pszDBName, *pszQSym, *pszQDateBeg, *pszQDateEnd;
 	char szQStr[2048];
         int i, iDBGFlag, iEPIDFilter;
-	int iJSON = 0;
 	/* Setup and connect to cluster */
 	CassFuture* connect_future = NULL;
 	CassCluster* cluster = cass_cluster_new();
@@ -50,13 +48,15 @@ int main(int argc, char *argv[]) {
         i = 1;
 	pszIP = argv[i++];
 	pszPort = argv[i++];
-        pszDBTblName = argv[i++];
+        pszDBName = argv[i++];
 	iDBGFlag = atoi(argv[i++]);
 	pszQSym = argv[i++];
-	if (strcmp(pszQSym,"ALL")==0)
-		sprintf(szQStr, "SELECT * from %s", pszDBTblName);
-	else
-		sprintf(szQStr, "SELECT * from %s where symbol='%s' ", pszDBTblName, pszQSym);
+	pszQDateBeg = argv[i++];
+	pszQDateEnd = argv[i++];
+	iEPIDFilter = -1;//atoi(argv[i++]);
+	sprintf(szQStr, "SELECT datetime,open,high,low,close,vol from %s where symbol='%s' and  datetime>='%s' and datetime<'%s' order by datetime; ",
+                pszDBName,
+	pszQSym, pszQDateBeg, pszQDateEnd);
 	if (iDBGFlag)
 		printf("ready to query '%s'\n", szQStr);
 	cass_cluster_set_port(cluster, atoi(pszPort));
@@ -90,58 +90,41 @@ int main(int argc, char *argv[]) {
 			CassFuture* result_future = cass_session_execute(session, statement);
 			if(cass_future_error_code(result_future) == CASS_OK) {
 				/* Retrieve result set and iterator over the rows */
-				CassResult* result = cass_future_get_result(result_future);
+				const CassResult* result = cass_future_get_result(result_future);
 				CassIterator* rows = cass_iterator_from_result(result);
 				time_t t2 = time(NULL);
 				if (iDBGFlag) 
 					printf("page: %d, execute time=%d Secs\n", ++iPage, t2-t1);
 				char kk[32];
 				//scanf("%s",kk);
-				int iSymbolCnt = 0;
+
+				cass_int64_t datetime;
+				cass_double_t open,high,low,close,vol;
+				char szOpen[32], szHigh[32], szLow[32], szClose[32], szVol[32];
+				int iDate, iTime, iMSec;
+				double dbDateTime;
 				while(cass_iterator_next(rows)) {
 					const CassRow* row = cass_iterator_get_row(rows);
-					const CassValue* sym = cass_row_get_column_by_name(row, "symbol");
+					cass_value_get_int64(cass_row_get_column_by_name(row, "datetime"), (cass_int64_t*)&datetime);
+					dbDateTime = ((uint64_t)datetime)/1000.0;
+					cass_value_get_double(cass_row_get_column_by_name(row, "open"), (cass_double_t*)&open);
+					cass_value_get_double(cass_row_get_column_by_name(row, "high"), (cass_double_t*)&high);
+					cass_value_get_double(cass_row_get_column_by_name(row, "low"), (cass_double_t*)&low);
+					cass_value_get_double(cass_row_get_column_by_name(row, "close"), (cass_double_t*)&close);
+					cass_value_get_double(cass_row_get_column_by_name(row, "vol"), (cass_double_t*)&vol);
 
-					const char* pszSym;
-					int iSymLen;
-					cass_value_get_string(sym, &pszSym, &iSymLen);
-					if (iJSON)
-					{
-						if (iSymbolCnt!=0) printf(",\n");
-						printf("{'symbol':'%.*s','keyval':{", iSymLen, pszSym);
-					}
-					else
-					{
-						printf("symbol=%.*s\n", iSymLen, pszSym);
-					}
-					iSymbolCnt++;
-					while (1)
-					{
-						int iKeyValCnt = 0;
-						CassIterator* iterMap = cass_iterator_from_map(cass_row_get_column_by_name(row, "keyval"));
-						if (iterMap == NULL)
-							break;
-						while (cass_iterator_next(iterMap)) {
-							const char* pszMapKey, *pszMapVal;
-							int iMapKeyLen, iMapValLen;							
-							cass_value_get_string(cass_iterator_get_map_key(iterMap), &pszMapKey, &iMapKeyLen);
-							cass_value_get_string(cass_iterator_get_map_value(iterMap), &pszMapVal, &iMapValLen);
-							if (iJSON)
-							{
-								if (iKeyValCnt!=0) printf(",");
-								printf("'%.*s':'%.*s'", iMapKeyLen, pszMapKey, iMapValLen, pszMapVal);
-							}
-							else
-							{
-								printf("  %.*s=%.*s\n", iMapKeyLen, pszMapKey, iMapValLen, pszMapVal);
-							}
-							iKeyValCnt++;
-						}
-						iDataCnt++;
-						break;
-					}
-					if (iJSON)
-						printf("}}");
+					vEpoch2DateTime(&dbDateTime, &iDate, &iTime, &iMSec);
+					if (iDBGFlag)
+                                        {
+	                                        if (iFirstLine==0)
+                                                {
+        	                                        printf("Date,Time,TickPrc,TickVol,EPID\n");
+                                                        iFirstLine=1;
+                                                }
+                                        }
+					printf("%d,%06d,%s,%s,%s,%s,%s\n",iDate, iTime,
+						szDb2Str(szOpen, &open),szDb2Str(szHigh, &high),szDb2Str(szLow, &low),szDb2Str(szClose, &close),szDb2Str(szVol, &vol));
+					iDataCnt++;
 				}
 
 				iIsMorePage = cass_result_has_more_pages(result);
@@ -153,7 +136,7 @@ int main(int argc, char *argv[]) {
 			} else {
 				/* Handle error */
 				const char* pszMsg;
-				int iMsgLen;
+				size_t iMsgLen;
 				cass_future_error_message(result_future, &pszMsg, &iMsgLen);
 				fprintf(stderr, "Unable to run query: '%.*s'\n", iMsgLen, pszMsg);
 			} 
@@ -170,7 +153,7 @@ int main(int argc, char *argv[]) {
 	} else {
 		/* Handle error */
                 const char* pszMsg;
-                int iMsgLen;
+                size_t iMsgLen;
                 cass_future_error_message(connect_future, &pszMsg, &iMsgLen);
 		fprintf(stderr, "Unable to connect: '%.*s'\n", iMsgLen, pszMsg);
 	}

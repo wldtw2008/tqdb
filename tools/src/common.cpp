@@ -21,6 +21,10 @@
 #include <string.h>
 #include <sys/time.h>
 #include <stdarg.h>
+#include <vector>
+#include <map>
+#include <string>
+#include "common.h"
 char g_szDBStr[128];
 const char* szDb2Str(char *pszDB, double* pdbVal)
 {
@@ -154,3 +158,87 @@ void vMyLog(FILE*fp, int iLogType, const char* cmd, ...)
 				g_szLogBuf2);
 	fprintf(fp, "%s", g_szLogBuf);
 }
+
+
+int iQAllSymbol(std::vector<ST_SymbolInfo>* pvecSymbolInfo, const char *pszTQDB, CassSession* session, CassCluster* cluster)
+{
+    char szQStr[128];
+    pvecSymbolInfo->clear();
+
+    /*
+    CassFuture* connect_future = cass_session_connect(session, cluster);
+    if (cass_future_error_code(connect_future) != CASS_OK)
+    {
+	const char* pszMsg;
+        size_t iMsgLen;
+        cass_future_error_message(connect_future, &pszMsg, &iMsgLen);
+        fprintf(stderr, "Unable to connect: '%.*s'\n", (int)iMsgLen, pszMsg);
+        cass_future_free(connect_future);
+        return pvecSymbolInfo->size();
+    }*/
+
+    sprintf(szQStr, "SELECT * from %s.symbol;", pszTQDB);
+
+    const char* pszSym;
+    size_t iSymLen;
+    if (1) {
+        CassStatement* statement = cass_statement_new(szQStr, 0);
+        const int page_size = 40000;
+        cass_statement_set_paging_size(statement, page_size);
+        int iIsMorePage = 0;
+        do{
+            iIsMorePage = 0;
+            CassFuture* result_future = cass_session_execute(session, statement);
+            if(cass_future_error_code(result_future) == CASS_OK) {
+                const CassResult* result = cass_future_get_result(result_future);
+                CassIterator* rows = cass_iterator_from_result(result);
+                while(cass_iterator_next(rows)) 
+                {
+                    const CassRow* row = cass_iterator_get_row(rows);
+                    const CassValue* sym = cass_row_get_column_by_name(row, "symbol");
+                    cass_value_get_string(sym, &pszSym, &iSymLen);
+                    ST_SymbolInfo tmpSymbolInfo;
+                    tmpSymbolInfo.symbol.assign(pszSym, iSymLen);
+                    while (1)
+                    {
+                        CassIterator* iterMap = cass_iterator_from_map(cass_row_get_column_by_name(row, "keyval"));
+                        if (iterMap == NULL)
+                        break;
+                        while (cass_iterator_next(iterMap)) {
+                            const char* pszMapKey, *pszMapVal;
+                            size_t iMapKeyLen, iMapValLen;
+                            cass_value_get_string(cass_iterator_get_map_key(iterMap), &pszMapKey, &iMapKeyLen);
+                            cass_value_get_string(cass_iterator_get_map_value(iterMap), &pszMapVal, &iMapValLen);
+                            std::string strKey, strVal;
+                            strKey.assign(pszMapKey, iMapKeyLen);
+                            strVal.assign(pszMapVal, iMapValLen);
+                            tmpSymbolInfo.mapKeyVal[pszMapKey] = pszMapVal;
+                        }
+                        break;
+                    }
+                    pvecSymbolInfo->push_back(tmpSymbolInfo);
+                }
+
+                iIsMorePage = cass_result_has_more_pages(result);
+                if (iIsMorePage) {
+                    cass_statement_set_paging_state(statement, result);
+                }
+                cass_result_free(result);
+                cass_iterator_free(rows);
+            } else {
+                /* Handle error */
+                const char* pszMsg;
+                size_t iMsgLen;
+                cass_future_error_message(result_future, &pszMsg, &iMsgLen);
+                fprintf(stderr, "Unable to run query: '%.*s'\n", (int)iMsgLen, pszMsg);
+            }
+            cass_future_free(result_future);
+
+        }while(iIsMorePage);
+        cass_statement_free(statement);
+    } else {
+    }
+
+    return pvecSymbolInfo->size();
+}
+

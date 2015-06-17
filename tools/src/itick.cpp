@@ -52,14 +52,14 @@ int iCassConnect(CassSession* session, const CassCluster* cluster)
         iRet = 1;
     } else {
         const char* pszMsg;
-        int iMsgLen;
+        size_t iMsgLen;
         cass_future_error_message(connect_future, &pszMsg, &iMsgLen);
         fprintf(stderr, "Unable to connect: '%.*s'\n", iMsgLen, pszMsg);
     }
     cass_future_free(connect_future);
     return iRet;
 }
-int iCassExecuteInsertStatement(const CassSession* session, const char* pszInsert)
+int iCassExecuteInsertStatement(CassSession* session, const char* pszInsert)
 {
     CassStatement* statement = cass_statement_new(pszInsert, 0);
     CassFuture* result_future = cass_session_execute(session, statement);
@@ -68,7 +68,7 @@ int iCassExecuteInsertStatement(const CassSession* session, const char* pszInser
         iRet = 1;
     } else {
         const char* pszMsg;
-        int iMsgLen;
+        size_t iMsgLen;
         cass_future_error_message(result_future, &pszMsg, &iMsgLen);
         fprintf(stderr, "Unable to execute statement: '%.*s'\n", iMsgLen, pszMsg);
     }
