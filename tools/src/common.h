@@ -13,7 +13,7 @@ typedef struct {
     std::map<std::string, std::string> mapKeyVal;
 }ST_SymbolInfo;
 int iQAllSymbol(std::vector<ST_SymbolInfo>* pvecSymbolInfo, const char *pszTQDB, CassSession* session, CassCluster* cluster);
-
+int iUpdateSymbol(ST_SymbolInfo* pSymbolInfo, const char *pszTQDB, CassSession* session, CassCluster* cluster);
 
 
 

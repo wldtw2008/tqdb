@@ -241,4 +241,58 @@ int iQAllSymbol(std::vector<ST_SymbolInfo>* pvecSymbolInfo, const char *pszTQDB,
 
     return pvecSymbolInfo->size();
 }
+int iUpdateSymbol(ST_SymbolInfo* pSymbolInfo, const char *pszTQDB, CassSession* session, CassCluster* cluster)
+{
+    char szQStr[2048];
+    int iRet = 0;
+    /*
+    CassFuture* connect_future = cass_session_connect(session, cluster);
+    if (cass_future_error_code(connect_future) != CASS_OK)
+    {
+        const char* pszMsg;
+        size_t iMsgLen;
+        cass_future_error_message(connect_future, &pszMsg, &iMsgLen);
+        fprintf(stderr, "Unable to connect: '%.*s'\n", (int)iMsgLen, pszMsg);
+        cass_future_free(connect_future);
+        return pvecSymbolInfo->size();
+    }*/
 
+    sprintf(szQStr, "insert into %s.symbol (symbol,keyval) values ('%s',{", pszTQDB, pSymbolInfo->symbol.c_str());
+    int iKeyValCnt = 0;
+    std::map<std::string, std::string>::iterator iter;
+    for (iter=pSymbolInfo->mapKeyVal.begin( ); iter != pSymbolInfo->mapKeyVal.end( ); ++iter)
+    {
+        sprintf(szQStr+strlen(szQStr), "%c'%s':'%s'", (iKeyValCnt!=0?',':' '), iter->first.c_str(), iter->second.c_str());
+        iKeyValCnt++;
+    }
+    sprintf(szQStr+strlen(szQStr), "});");
+printf("---->%s\n", szQStr);
+
+    if (1) {
+        CassStatement* statement = cass_statement_new(szQStr, 0);
+        const int page_size = 40000;
+        cass_statement_set_paging_size(statement, page_size);
+        int iIsMorePage = 0;
+        do{
+            iIsMorePage = 0;
+            CassFuture* result_future = cass_session_execute(session, statement);
+            if(cass_future_error_code(result_future) == CASS_OK) {
+                iRet = 1;
+            } else {
+                /* Handle error */
+                const char* pszMsg;
+                size_t iMsgLen;
+                cass_future_error_message(result_future, &pszMsg, &iMsgLen);
+                fprintf(stderr, "Unable to run query: '%.*s'\n", (int)iMsgLen, pszMsg);
+                iRet = -1;
+            }
+            cass_future_free(result_future);
+
+        }while(iIsMorePage);
+        cass_statement_free(statement);
+    } else {
+        iRet = -2;
+    }
+
+    return iRet;
+}

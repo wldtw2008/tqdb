@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+
 #include "common.h"
 void vCheckSystex(int argc, char *argv[]) {
 	if (argc >= 6)
@@ -76,12 +77,21 @@ int iCassExecuteInsertStatement(CassSession* session, const char* pszInsert)
     cass_statement_free(statement);
     return iRet;
 }
-
+int iGetSymbolIdx(std::vector<ST_SymbolInfo>* pvecSymbolInfo, const char* szSymbol)
+{
+	for (int i=0;i<pvecSymbolInfo->size();++i)
+	{
+		if (strcmp((*pvecSymbolInfo)[i].symbol.c_str(), szSymbol) == 0)
+			return i;
+	}
+	return -1;
+}
 int main(int argc, char *argv[]) {
 	char *pszIP, *pszPort, *pszDBName;
 	char szTQDBKeyVal[2048], szInsStr[4096];
         int i, iDBGFlag, isQuote;
 	ST_TickData objTickData;
+	std::vector<ST_SymbolInfo> vecSymbolInfo;
 	/* Setup and connect to cluster */
 	CassCluster* cluster = cass_cluster_new();
 	CassSession* session = cass_session_new();
@@ -103,8 +113,18 @@ int main(int argc, char *argv[]) {
         cass_cluster_set_num_threads_io(cluster, 2);
 	if (iCassConnect(session, cluster) == 0)
 	{
+		printf("Can't connect to cassandra\n");
 		exit(0);
 	}
+	
+	iQAllSymbol(&vecSymbolInfo, pszDBName, session, cluster);
+	for (int k=0;k<vecSymbolInfo.size();++k)
+	{
+		if (k == 0)
+			printf("All symbol count: %d\n", vecSymbolInfo.size());
+		printf("   Sym#%d: %s\n", k+1, vecSymbolInfo[k].symbol.c_str());
+	}
+
 	char szLine[2048];
 	int iLen, iQuoteOrTick;
 	char tmpC;
@@ -135,7 +155,14 @@ int main(int argc, char *argv[]) {
                 {
 			char szSymbol[32], szClose[32], szVol[32], szTC[32], szEPID[32];
 			szGetValueByKey(szLine+3, "ID", szSymbol, "");
-			
+		
+			if (iGetSymbolIdx(&vecSymbolInfo, szSymbol)<0)
+			{
+				ST_SymbolInfo tmpSymbolInfo;
+				tmpSymbolInfo.symbol = szSymbol;
+				vecSymbolInfo.push_back(tmpSymbolInfo);
+				int iUpdateRet = iUpdateSymbol(&tmpSymbolInfo, pszDBName, session, cluster);
+			}
 			szGetValueByKey(szLine+3, "C", szClose, "0");
 			szGetValueByKey(szLine+3, "V", szVol, "0");
 			szGetValueByKey(szLine+3, "TC", szTC, "0");
@@ -162,6 +189,13 @@ int main(int argc, char *argv[]) {
 			char *pKey;
 			int j, iFoundKeyCnt;
 			szGetValueByKey(szLine+3, "ID", szSymbol, "");
+			if (iGetSymbolIdx(&vecSymbolInfo, szSymbol)<0)
+                        {
+                                ST_SymbolInfo tmpSymbolInfo;
+                                tmpSymbolInfo.symbol = szSymbol;
+                                vecSymbolInfo.push_back(tmpSymbolInfo);
+                                int iUpdateRet = iUpdateSymbol(&tmpSymbolInfo, pszDBName, session, cluster);
+                        }
 			szTQDBKeyVal[0] = '\0';
 			sprintf(szTQDBKeyVal+strlen(szTQDBKeyVal), "{");
 			iFoundKeyCnt = 0;
