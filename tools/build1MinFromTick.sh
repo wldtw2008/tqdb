@@ -24,7 +24,7 @@ ALLSYM=''
 if [ "$SYMBOL" != "ALL" ] ; then
 	ALLSYM=$SYMBOL
 else
-	ALLSYM=`$TQDB_DIR/tools/qsym  $CASS_IP $CASS_PORT  ${TQDB}.symbol 0 ALL|grep -E "^symbol=" | cut -f 2 -d '='`
+	ALLSYM=`$TQDB_DIR/tools/qsym  $CASS_IP $CASS_PORT  ${TQDB}.symbol 0 ALL 0|grep -E "^symbol=" | cut -f 2 -d '='`
 fi
 
 for SYM in $ALLSYM

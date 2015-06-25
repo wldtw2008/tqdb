@@ -6,3 +6,5 @@ echo $D2TQ_IP":"$D2TQ_PORT > /tmp/d2tq.info
 
 
 cd $TQDB_DIR/tools && ./autoIns2Cass.sh > /tmp/autoIns2Cass.log &
+
+su - tqdb -c "cd /home/tqdb/.ipython && ipython notebook --profile=nbserver &"
