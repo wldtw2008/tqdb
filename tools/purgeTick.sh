@@ -46,7 +46,7 @@ do
 done
 
 echo "=================================================="
-CMD="/var/cassandra/bin/nodetool compact "${TQDB}
+CMD="/var/cassandra/bin/nodetool -h 127.0.0.1 compact "${TQDB}" tick"
 echo "Compacting DB... (This may cost several minutes, depend on your CPU/HD , be patient.)"
 echo "  Ready to run compact CMD: "$CMD
 eval $CMD
