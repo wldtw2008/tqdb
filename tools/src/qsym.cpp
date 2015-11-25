@@ -82,6 +82,7 @@ int main(int argc, char *argv[]) {
 		iQAllSymbol(&vecSymbolInfo, "tqdb1", session, cluster);
 		if (iJSON)
 			printf("[");
+		int iOutCnt = 0;
 		for (i=0;i<(int)vecSymbolInfo.size();++i)
 		{
 			if (strcmp(pszQSym, "ALL") != 0 && strcmp(pszQSym,vecSymbolInfo[i].symbol.c_str()) != 0)
@@ -89,13 +90,14 @@ int main(int argc, char *argv[]) {
 
 			if (iJSON)
 			{
-				if (i!=0) printf(",\n");
+				if (iOutCnt!=0) printf(",\n");
 				printf("{'symbol':'%s','keyval':{", vecSymbolInfo[i].symbol.c_str());
 			}
 			else
 			{
 				printf("symbol=%s\n", vecSymbolInfo[i].symbol.c_str());
 			}
+			iOutCnt++;
 			while (1)
 			{
 				int iKeyValCnt = 0;

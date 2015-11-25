@@ -5,7 +5,9 @@ echo "Note:"
 echo "  Please run this sh at sunday or no tick data day"
 echo "=================================================="
 
-OROOT_DIR=$HOME"/oldtick/"
+#OROOT_DIR=$HOME"/oldtick/"
+OROOT_DIR="/home/tqdb/oldtick/"
+
 ODIR=""
 TQDB="tqdb1"
 TODAY="2037-1-1" #$1  <== not allow input date

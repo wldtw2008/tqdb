@@ -45,6 +45,7 @@ def loopReadFromStdin():
 querystrings=os.environ.get("QUERY_STRING", "NA=NA")
 mapQS={}
 for qs in querystrings.split("&"):
+        if qs.find("=") <= 0: continue
         mapQS[qs.split("=")[0]] = urllib.unquote(qs.split("=")[1])
 if 'symbol' in mapQS:
 	szSymbol = mapQS['symbol']

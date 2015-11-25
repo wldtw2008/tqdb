@@ -1,0 +1,69 @@
+
+<html>
+<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+<script src="/js/jquery-2.1.4.min.js"></script>
+<script language='javascript'>
+function DoAjax(requestUrl, sentData, sHandler, eHandler, pageNotFoundHandler){
+        $.ajax({
+            type: 'GET',    
+            url: requestUrl,
+            cache: false,       
+            data: sentData, 
+            success: sHandler,   
+            error: eHandler,      
+            statusCode: {    
+              404: pageNotFoundHandler
+            }
+        });
+    };
+function qSymInfo()
+{
+    url='/cgi-bin/qsyminfo.py'
+    DoAjax(url, {symbol : "ALL"},
+        function(data, textStatus, jqXHR){
+		makeMainTable(data);
+        }); 
+}
+function doupdate(idx, sym){
+ desc=document.getElementById('desc'+idx).value
+ bpv=1*document.getElementById('bpv'+idx).value
+ mko=1*document.getElementById('mko'+idx).value
+ mkc=1*document.getElementById('mkc'+idx).value
+ //alert('ready to update: '+sym+', desc:'+desc+', bpv:'+bpv)
+ location.href='/cgi-bin/usymbol.py?sym='+encodeURI(sym)+'&desc='+desc+'&bpv='+bpv+'&mko='+mko+'&mkc='+mkc;
+}
+function makeMainTable(allSymInfo)
+{
+    //ex:
+    //allsymbol = [{"symbol": "WTX", "keyval": {"MKO": "84500", "DESC": "Taifex", "MKC": "134500", "BPV": "200"}}]
+    len = allSymInfo.length
+    strTable="<table border=0><tr><td>Symbol</td><td>Desc.</td><td>BigPointVal</td><td>MarketOpen<br>(HHmmSS)</td><td>MarketClose<br>(HHmmSS)</td><td>Action</td></tr>"
+    for (i=0;i<len;++i)
+    {
+        symbol=allSymInfo[i]['symbol']
+        bpv=''
+        desc=''
+        mko=''
+        mkc=''
+        if ('keyval' in allSymInfo[i])
+        {
+            if ('BPV' in allSymInfo[i]['keyval']) bpv = allSymInfo[i]['keyval']['BPV'];
+            if ('DESC' in allSymInfo[i]['keyval']) desc = allSymInfo[i]['keyval']['DESC'];
+            if ('MKO' in allSymInfo[i]['keyval']) mko = allSymInfo[i]['keyval']['MKO'];
+            if ('MKC' in allSymInfo[i]['keyval']) mkc = allSymInfo[i]['keyval']['MKC'];
+            try{desc=decodeURI(desc)}catch(e){}
+        }
+        strTable+="<tr><td>"+symbol+"</td><td><input type='text' id='desc"+i+"' value='"+desc+"'></td>"
+        strTable+="<td><input type='text' id='bpv"+i+"' value='"+bpv+"'></td>"
+        strTable+="<td><input type='text' id='mko"+i+"' value='"+mko+"'></td>"
+        strTable+="<td><input type='text' id='mkc"+i+"' value='"+mkc+"'></td>"
+        strTable+="<td><button type='button' value='' onclick=\"doupdate("+i+", '"+symbol+"')\">Update</button></td></tr>"
+    }
+    strTable+="</table>"
+    document.getElementById('mainDiv').innerHTML = strTable;
+}
+</script>
+<body onload='qSymInfo()'>
+<div id='mainDiv'></div>
+</body></html>
+
