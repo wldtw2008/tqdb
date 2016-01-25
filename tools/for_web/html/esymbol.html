@@ -1,6 +1,18 @@
 
 <html>
 <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+<style type="text/css">
+<!--
+body { background: #FFF }
+table{border:1px solid gray;}
+tr td {padding: 5px; font-size:14pt; border:0px; border-bottom: thin solid gray;}
+
+.yellowThing {background: #FE7;}
+.whiteThing {background: #FFF;}
+.grayThing {background: #DDD;}
+
+//-->
+</style>
 <script src="/js/jquery-2.1.4.min.js"></script>
 <script language='javascript'>
 function DoAjax(requestUrl, sentData, sHandler, eHandler, pageNotFoundHandler){
@@ -32,12 +44,33 @@ function doupdate(idx, sym){
  //alert('ready to update: '+sym+', desc:'+desc+', bpv:'+bpv)
  location.href='/cgi-bin/usymbol.py?sym='+encodeURI(sym)+'&desc='+desc+'&bpv='+bpv+'&mko='+mko+'&mkc='+mkc;
 }
+function doimport1min(idx, sym){
+ location.href='/i1min.html?sym='+encodeURI(sym);
+}
+function strQDay(datetime){
+    var dd = datetime.getDate();
+    var mm = datetime.getMonth()+1; //January is 0!
+    var yyyy = datetime.getFullYear();
+    return yyyy+"-"+mm+"-"+dd
+}
+function doq1min(idx, sym){
+    var begday = new Date();
+    begday.setDate(begday.getDate() - 3);
+    var endday = new Date(); 
+    endday.setDate(endday.getDate() + 3);
+
+    beg = strQDay(begday) 
+    end = strQDay(endday)
+    location.href='/cgi-bin/q1min.py?symbol='+encodeURI(sym)+'&BEG='+beg+"&END="+end;
+}
+
+
 function makeMainTable(allSymInfo)
 {
     //ex:
     //allsymbol = [{"symbol": "WTX", "keyval": {"MKO": "84500", "DESC": "Taifex", "MKC": "134500", "BPV": "200"}}]
     len = allSymInfo.length
-    strTable="<table border=0><tr><td>Symbol</td><td>Desc.</td><td>BigPointVal</td><td>MarketOpen<br>(HHmmSS)</td><td>MarketClose<br>(HHmmSS)</td><td>Action</td></tr>"
+    strTable="<table><tr class='grayThing'><td>Symbol</td><td>Desc.</td><td>BigPointVal</td><td>MarketOpen<br>(HHmmSS)</td><td>MarketClose<br>(HHmmSS)</td><td>Action</td></tr>"
     for (i=0;i<len;++i)
     {
         symbol=allSymInfo[i]['symbol']
@@ -53,11 +86,16 @@ function makeMainTable(allSymInfo)
             if ('MKC' in allSymInfo[i]['keyval']) mkc = allSymInfo[i]['keyval']['MKC'];
             try{desc=decodeURI(desc)}catch(e){}
         }
-        strTable+="<tr><td>"+symbol+"</td><td><input type='text' id='desc"+i+"' value='"+desc+"'></td>"
-        strTable+="<td><input type='text' id='bpv"+i+"' value='"+bpv+"'></td>"
-        strTable+="<td><input type='text' id='mko"+i+"' value='"+mko+"'></td>"
-        strTable+="<td><input type='text' id='mkc"+i+"' value='"+mkc+"'></td>"
-        strTable+="<td><button type='button' value='' onclick=\"doupdate("+i+", '"+symbol+"')\">Update</button></td></tr>"
+        strTable+="<tr onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\">"
+        strTable+="<td>"+symbol+"</td><td><input type='text' id='desc"+i+"' value='"+desc+"'></td>"
+        strTable+="<td><input type='text' id='bpv"+i+"' value='"+bpv+"' size='10'></td>"
+        strTable+="<td><input type='text' id='mko"+i+"' value='"+mko+"' size='10'></td>"
+        strTable+="<td><input type='text' id='mkc"+i+"' value='"+mkc+"' size='10'></td>"
+        strTable+="<td>"
+        strTable+="<button type='button' value='' onclick=\"doupdate("+i+", '"+symbol+"')\">Update</button>&nbsp;"
+        strTable+="<button type='button' value='' onclick=\"doq1min("+i+", '"+symbol+"')\">Query1Min</button>&nbsp;"
+        strTable+="<button type='button' value='' onclick=\"doimport1min("+i+", '"+symbol+"')\">Import1Min</button></td>"
+        strTable+="</tr>"
     }
     strTable+="</table>"
     document.getElementById('mainDiv').innerHTML = strTable;

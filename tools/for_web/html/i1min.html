@@ -1,0 +1,31 @@
+<html><body onload='init();'>
+<script language='javascript'>
+function getQueryParams(qs) {
+    qs = qs.split('+').join(' ');
+
+    var params = {},
+        tokens,
+        re = /[?&]?([^=]+)=([^&]*)/g;
+
+    while (tokens = re.exec(qs)) {
+        params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+    }
+
+    return params;
+}
+function init(){
+    params = getQueryParams(document.location.search)
+    if ('sym' in params){
+        document.getElementById('sym').value=params['sym']
+    }
+}
+</script>
+<form enctype="multipart/form-data" action="cgi-bin/i1min_check.py" method="post">
+<table width='400px' border='1'>
+<tr><td colspan='2'>===Import 1Min from CSV File===</td></tr>
+<tr><td width='100px'>Symbol</td><td><input type="text" name="sym" value="" id='sym'></td></tr>
+<tr><td>CsvFile</td><td><input type="file" name="file"></td></tr>
+<tr><td>Action</td><td><input type="submit" value="Upload"></td></tr>
+</table>
+</form>
+</body></html>

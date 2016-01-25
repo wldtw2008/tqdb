@@ -38,6 +38,6 @@ if sym != '':
 sys.stdout.write("Content-Type: text/html\r\n")
 sys.stdout.write("\r\n")
 #sys.stdout.write('aaa')
-sys.stdout.write("<html><body><script language='javascript'>location.href='/cgi-bin/esymbol.py'</script></body></html>")
+sys.stdout.write("<html><body><script language='javascript'>location.href='/esymbol.html'</script></body></html>")
 sys.stdout.write("\r\n")
 sys.stdout.flush()
