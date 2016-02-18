@@ -1,5 +1,8 @@
 #!/bin/bash
-
+SYM="DEMO"
+if [ "$1" != "" ] ; then
+    SYM=$1
+fi
 while [ 1 ];
 do
 
@@ -26,8 +29,8 @@ do
 		VOL=$(( $VOL+$TICKVOL))
 
 		TICKCNT=$(($TICKCNT+1))
-		TICKSTR="01_ID=DEMO,TIME="$TIME",TC="$TICKCNT",C="$CLOSE",V="$TICKVOL","
-		QUOTESTR="00_ID=DEMO,TIME="$TIME",TickCount="$TICKCNT",O="$OPEN",H="$HIGH",L="$LOW",C="$CLOSE",V="$VOL",Bid="$BID",Ask="$ASK","
+		TICKSTR="01_ID="$SYM",TIME="$TIME",TC="$TICKCNT",C="$CLOSE",V="$TICKVOL","
+		QUOTESTR="00_ID="$SYM",TIME="$TIME",TickCount="$TICKCNT",O="$OPEN",H="$HIGH",L="$LOW",C="$CLOSE",V="$VOL",Bid="$BID",Ask="$ASK","
 		echo $TICKSTR
 		echo $QUOTESTR
 		sleep 1

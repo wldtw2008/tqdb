@@ -10,4 +10,6 @@ sleep 10
 
 cd $TQDB_DIR/tools && ./autoIns2Cass.sh > /tmp/autoIns2Cass.log &
 
-su - tqdb -c "cd /home/tqdb/.ipython && ipython notebook --profile=nbserver &"
+#su - tqdb -c "cd /home/tqdb/.ipython && ipython notebook --profile=nbserver &"
+su - tqdb -c "cd /home/tqdb/ && jupyter notebook &" 
+
