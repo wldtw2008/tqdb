@@ -19,7 +19,7 @@ do
 		TIME=`date +%H%M%S00`
 		if [ $TIME -gt 23550000 ]; then break; fi;
 		#if [ $TIME -gt 15490000 ]; then break; fi;
-		CHG=`echo $RANDOM | awk '{print $0%10-5}'`
+		CHG=`echo $RANDOM | awk '{print $0%10-4.5}'`
 		TICKVOL=`echo $RANDOM | awk '{print $0%10}'`
 		CLOSE=$(( $CLOSE+$CHG ))
 		BID=$(( $CLOSE-5))
