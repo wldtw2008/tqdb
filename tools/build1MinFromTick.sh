@@ -19,7 +19,7 @@ fi
 
 EPID=-1
 DTBEG=`date +%Y-%m-%d --date="$(($NDAYAGO+1)) day ago"`
-DTEND=`date +'%Y-%m-%d 00:00:01' --date="$NDAYAGO day ago"`
+DTEND=`date +'%Y-%m-%d 00:00:00' --date="$NDAYAGO day ago"`
 ALLSYM=''
 if [ "$SYMBOL" != "ALL" ] ; then
 	ALLSYM=$SYMBOL

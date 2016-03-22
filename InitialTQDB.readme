@@ -1,0 +1,33 @@
+CREATE KEYSPACE tqdb1 WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 3 };
+
+CREATE TABLE tqdb1.tick (
+    symbol text,
+    datetime timestamp,
+    keyval map<text, double>,
+    type int,
+    PRIMARY KEY (symbol, datetime)
+);
+
+CREATE TABLE tqdb1.symbol (
+    symbol text PRIMARY KEY,
+    keyval map<text, text>
+);
+
+CREATE TABLE tqdb1.minbar (
+    symbol text,
+    datetime timestamp,
+    close double,
+    high double,
+    low double,
+    open double,
+    vol double,
+    PRIMARY KEY (symbol, datetime)
+);
+
+sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/profile_tqdb.sh /etc/profile.d/profile_tqdb.sh
+sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/tqdbStartup.sh /etc/init.d/tqdbStartup.sh
+cd /etc/init.d && sudo update-rc.d tqdbStartup.sh defaults
+
+
+
+

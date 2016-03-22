@@ -1,5 +1,8 @@
 #!/bin/bash
-
+SYM="DEMO"
+if [ "$1" != "" ] ; then
+    SYM=$1
+fi
 while [ 1 ];
 do
 
@@ -16,7 +19,7 @@ do
 		TIME=`date +%H%M%S00`
 		if [ $TIME -gt 23550000 ]; then break; fi;
 		#if [ $TIME -gt 15490000 ]; then break; fi;
-		CHG=`echo $RANDOM | awk '{print $0%10-5}'`
+		CHG=`echo $RANDOM | awk '{print $0%10-4.5}'`
 		TICKVOL=`echo $RANDOM | awk '{print $0%10}'`
 		CLOSE=$(( $CLOSE+$CHG ))
 		BID=$(( $CLOSE-5))
@@ -26,8 +29,8 @@ do
 		VOL=$(( $VOL+$TICKVOL))
 
 		TICKCNT=$(($TICKCNT+1))
-		TICKSTR="01_ID=DEMO,TIME="$TIME",TC="$TICKCNT",C="$CLOSE",V="$TICKVOL","
-		QUOTESTR="00_ID=DEMO,TIME="$TIME",TickCount="$TICKCNT",O="$OPEN",H="$HIGH",L="$LOW",C="$CLOSE",V="$VOL",Bid="$BID",Ask="$ASK","
+		TICKSTR="01_ID="$SYM",TIME="$TIME",TC="$TICKCNT",C="$CLOSE",V="$TICKVOL","
+		QUOTESTR="00_ID="$SYM",TIME="$TIME",TickCount="$TICKCNT",O="$OPEN",H="$HIGH",L="$LOW",C="$CLOSE",V="$VOL",Bid="$BID",Ask="$ASK","
 		echo $TICKSTR
 		echo $QUOTESTR
 		sleep 1
