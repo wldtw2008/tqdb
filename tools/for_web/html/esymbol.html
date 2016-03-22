@@ -41,8 +41,10 @@ function doupdate(idx, sym){
  bpv=1*document.getElementById('bpv'+idx).value
  mko=1*document.getElementById('mko'+idx).value
  mkc=1*document.getElementById('mkc'+idx).value
+ ssec=(document.getElementById('ssec'+idx).checked==true?1:0)
  //alert('ready to update: '+sym+', desc:'+desc+', bpv:'+bpv)
- location.href='/cgi-bin/usymbol.py?sym='+encodeURI(sym)+'&desc='+desc+'&bpv='+bpv+'&mko='+mko+'&mkc='+mkc;
+ location.href='/cgi-bin/usymbol.py?sym='+encodeURI(sym)+'&desc='+desc+'&bpv='+bpv+'&mko='+mko+'&mkc='+mkc+
+               '&ssec='+ssec;
 }
 function doimport1min(idx, sym){
  location.href='/i1min.html?sym='+encodeURI(sym);
@@ -63,6 +65,16 @@ function doq1min(idx, sym){
     end = strQDay(endday)
     location.href='/cgi-bin/q1min.py?symbol='+encodeURI(sym)+'&BEG='+beg+"&END="+end;
 }
+function doq1sec(idx, sym){
+    var begday = new Date();
+    begday.setDate(begday.getDate() - 3);
+    var endday = new Date();
+    endday.setDate(endday.getDate() + 3);
+
+    beg = strQDay(begday)
+    end = strQDay(endday)
+    location.href='/cgi-bin/q1sec.py?symbol='+encodeURI(sym)+'&BEG='+beg+"&END="+end;
+}
 
 
 function makeMainTable(allSymInfo)
@@ -70,7 +82,7 @@ function makeMainTable(allSymInfo)
     //ex:
     //allsymbol = [{"symbol": "WTX", "keyval": {"MKO": "84500", "DESC": "Taifex", "MKC": "134500", "BPV": "200"}}]
     len = allSymInfo.length
-    strTable="<table><tr class='grayThing'><td>Symbol</td><td>Desc.</td><td>BigPointVal</td><td>MarketOpen<br>(HHmmSS)</td><td>MarketClose<br>(HHmmSS)</td><td>Action</td></tr>"
+    strTable="<table><tr class='grayThing'><td>Symbol</td><td>Desc.</td><td>BigPointVal</td><td>MarketOpen<br>(HHmmSS)</td><td>MarketClose<br>(HHmmSS)</td><td>Store<br>Sec</td><td>Action</td></tr>"
     for (i=0;i<len;++i)
     {
         symbol=allSymInfo[i]['symbol']
@@ -78,12 +90,15 @@ function makeMainTable(allSymInfo)
         desc=''
         mko=''
         mkc=''
+        storesec_checked=''
         if ('keyval' in allSymInfo[i])
         {
             if ('BPV' in allSymInfo[i]['keyval']) bpv = allSymInfo[i]['keyval']['BPV'];
             if ('DESC' in allSymInfo[i]['keyval']) desc = allSymInfo[i]['keyval']['DESC'];
             if ('MKO' in allSymInfo[i]['keyval']) mko = allSymInfo[i]['keyval']['MKO'];
             if ('MKC' in allSymInfo[i]['keyval']) mkc = allSymInfo[i]['keyval']['MKC'];
+            if ('SSEC' in allSymInfo[i]['keyval'] && 1 == allSymInfo[i]['keyval']['SSEC'])
+                storesec_checked = 'checked';
             try{desc=decodeURI(desc)}catch(e){}
         }
         strTable+="<tr onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\">"
@@ -91,9 +106,11 @@ function makeMainTable(allSymInfo)
         strTable+="<td><input type='text' id='bpv"+i+"' value='"+bpv+"' size='10'></td>"
         strTable+="<td><input type='text' id='mko"+i+"' value='"+mko+"' size='10'></td>"
         strTable+="<td><input type='text' id='mkc"+i+"' value='"+mkc+"' size='10'></td>"
+        strTable+="<td><input type='checkbox' id='ssec"+i+"' "+storesec_checked+"/></td>"
         strTable+="<td>"
         strTable+="<button type='button' value='' onclick=\"doupdate("+i+", '"+symbol+"')\">Update</button>&nbsp;"
         strTable+="<button type='button' value='' onclick=\"doq1min("+i+", '"+symbol+"')\">Query1Min</button>&nbsp;"
+        strTable+="<button type='button' value='' onclick=\"doq1sec("+i+", '"+symbol+"')\">Query1Sec</button>&nbsp;"
         strTable+="<button type='button' value='' onclick=\"doimport1min("+i+", '"+symbol+"')\">Import1Min</button></td>"
         strTable+="</tr>"
     }

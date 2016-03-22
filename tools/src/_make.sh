@@ -37,7 +37,7 @@ function buildExe(){
 }
 
 buildObj common
-buildExe q1min
+buildExe q1minsec
 buildExe qtick
 buildExe qquote
 buildExe qsym

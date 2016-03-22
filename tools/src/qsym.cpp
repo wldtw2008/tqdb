@@ -30,7 +30,7 @@ void vCheckSystex(int argc, char *argv[]) {
 	{
 		printf("Systex Error\n");
 		printf("Systex: %s IP Port dbname dbgflag Symbol FMT\n", argv[0]);
-		printf("   FMT: 0=Txt, 1=JSON\n");
+		printf("   FMT: 0=Txt, 1=JSON, 2=OneLineTxt\n");
 		printf("    Ex: %s 127.0.0.1 9042 tqdb1.symbol 1 WTX 0 \n", argv[0]);
 		printf("    Ex: %s 127.0.0.1 9042 tqdb1.symbol 0 ALL 1 \n", argv[0]);
 		
@@ -42,7 +42,7 @@ void vCheckSystex(int argc, char *argv[]) {
 int main(int argc, char *argv[]) {
 	char *pszIP, *pszPort, *pszDBTblName, *pszQSym, *pszQDateBeg, *pszQDateEnd;
         int i, iDBGFlag, iEPIDFilter;
-	int iJSON = 0;
+	int iOutputType = 0;
 	/* Setup and connect to cluster */
 	CassFuture* connect_future = NULL;
 	CassCluster* cluster = cass_cluster_new();
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
         pszDBTblName = argv[i++];
 	iDBGFlag = atoi(argv[i++]);
 	pszQSym = argv[i++];
-	iJSON = atoi(argv[i++]);
+	iOutputType = atoi(argv[i++]);
 	/*
 	if (strcmp(pszQSym,"ALL")==0)
 		sprintf(szQStr, "SELECT * from %s", pszDBTblName);
@@ -80,22 +80,27 @@ int main(int argc, char *argv[]) {
 	if (cass_future_error_code(connect_future) == CASS_OK)
 	{
 		iQAllSymbol(&vecSymbolInfo, "tqdb1", session, cluster);
-		if (iJSON)
+		if (iOutputType == 1)
 			printf("[");
 		int iOutCnt = 0;
 		for (i=0;i<(int)vecSymbolInfo.size();++i)
 		{
 			if (strcmp(pszQSym, "ALL") != 0 && strcmp(pszQSym,vecSymbolInfo[i].symbol.c_str()) != 0)
 				continue;
-
-			if (iJSON)
+                        switch(iOutputType)
 			{
+			case 1:
 				if (iOutCnt!=0) printf(",\n");
-				printf("{'symbol':'%s','keyval':{", vecSymbolInfo[i].symbol.c_str());
-			}
-			else
-			{
+				printf("{\"symbol\":\"%s\",\"keyval\":{", vecSymbolInfo[i].symbol.c_str());
+				break;
+			case 2:
+				if (iOutCnt!=0) printf("\n");
+				printf("symbol=%s", vecSymbolInfo[i].symbol.c_str());
+				break;
+			case 0:
+			default:
 				printf("symbol=%s\n", vecSymbolInfo[i].symbol.c_str());
+				break;
 			}
 			iOutCnt++;
 			while (1)
@@ -104,24 +109,36 @@ int main(int argc, char *argv[]) {
 				std::map<std::string, std::string>::iterator iter;
 				for (iter=vecSymbolInfo[i].mapKeyVal.begin( ); iter != vecSymbolInfo[i].mapKeyVal.end( ); ++iter)
 				{
-					if (iJSON)
+					switch(iOutputType)
 					{
+					case 1:
 						if (iKeyValCnt!=0) printf(",");
-						printf("'%s':'%s'", iter->first.c_str(), iter->second.c_str());
-					}
-					else
-					{
+						printf("\"%s\":\"%s\"", iter->first.c_str(), iter->second.c_str());
+						break;
+                                        case 2:
+                                                printf(",%s=%s", iter->first.c_str(), iter->second.c_str());
+                                                break;
+
+					case 0:
+					default:
 						printf("  %s=%s\n", iter->first.c_str(), iter->second.c_str());
+						break;
 					}
 					iKeyValCnt++;
 				}
 				iDataCnt++;
 				break;
 			}
-			if (iJSON)
-				printf("}}");
+			switch(iOutputType)
+			{
+			case 1:
+				if (iOutputType==1)
+					printf("}}");
+				break;
+			}
+
 		}
-		if (iJSON)
+		if (iOutputType==1)
 			printf("]\n");
 		/* Close the session */
 		CassFuture* close_future = cass_session_close(session);

@@ -19,11 +19,12 @@ for qs in querystrings.split("&"):
 
 sym=''
 if 'sym' in mapQS: sym=mapQS['sym']
-param = {'DESC':"", 'BPV':'0.0', 'MKO':'0', 'MKC':'0'}
+param = {'DESC':"", 'BPV':'0.0', 'MKO':'0', 'MKC':'0', 'SSEC':'0'}
 if 'desc' in mapQS: param['DESC']=mapQS['desc']
 if 'bpv' in mapQS: param['BPV']=mapQS['bpv']
 if 'mko' in mapQS: param['MKO']=mapQS['mko']
 if 'mkc' in mapQS: param['MKC']=mapQS['mkc']
+if 'ssec' in mapQS: param['SSEC']=mapQS['ssec']
 
 if sym != '':
 	tmpFile="/tmp/isym.%d.%d.cql"%(os.getpid(),time.mktime(datetime.datetime.now().timetuple()))

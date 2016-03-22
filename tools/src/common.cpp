@@ -159,6 +159,27 @@ void vMyLog(FILE*fp, int iLogType, const char* cmd, ...)
 	fprintf(fp, "%s", g_szLogBuf);
 }
 
+void vSortSymbolInfo(std::vector<ST_SymbolInfo>* pvecSymbolInfo)
+{
+    int iLen = pvecSymbolInfo->size();
+    ST_SymbolInfo objSymInfo;
+    if (iLen <= 1) return;
+    for (int i=0;i<iLen-1;++i)
+        for (int j=0;j<iLen-1;++j)
+        {
+            if (strcmp((*pvecSymbolInfo)[j].symbol.c_str(), (*pvecSymbolInfo)[j+1].symbol.c_str())>0)
+            {
+                objSymInfo.symbol = (*pvecSymbolInfo)[j+1].symbol;
+		objSymInfo.mapKeyVal = (*pvecSymbolInfo)[j+1].mapKeyVal;
+ //printf("%s>%s\n",(*pvecSymbolInfo)[j].symbol.c_str(),(*pvecSymbolInfo)[j+1].symbol.c_str());
+//printf("2 %d/%d/%d\n",i,j,iLen);
+                (*pvecSymbolInfo)[j+1].symbol = (*pvecSymbolInfo)[j].symbol;
+                (*pvecSymbolInfo)[j+1].mapKeyVal = (*pvecSymbolInfo)[j].mapKeyVal;
+                (*pvecSymbolInfo)[j].symbol = objSymInfo.symbol;
+                (*pvecSymbolInfo)[j].mapKeyVal = objSymInfo.mapKeyVal;
+            }
+        }
+}
 
 int iQAllSymbol(std::vector<ST_SymbolInfo>* pvecSymbolInfo, const char *pszTQDB, CassSession* session, CassCluster* cluster)
 {
@@ -238,7 +259,7 @@ int iQAllSymbol(std::vector<ST_SymbolInfo>* pvecSymbolInfo, const char *pszTQDB,
         cass_statement_free(statement);
     } else {
     }
-
+    vSortSymbolInfo(pvecSymbolInfo);
     return pvecSymbolInfo->size();
 }
 int iUpdateSymbol(ST_SymbolInfo* pSymbolInfo, const char *pszTQDB, CassSession* session, CassCluster* cluster)
