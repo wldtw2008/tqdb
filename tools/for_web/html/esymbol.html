@@ -75,14 +75,16 @@ function doq1sec(idx, sym){
     end = strQDay(endday)
     location.href='/cgi-bin/q1sec.py?symbol='+encodeURI(sym)+'&BEG='+beg+"&END="+end;
 }
-
+function dosummery(idx, sym){
+    location.href='/cgi-bin/qsummery.py?symbol='+encodeURI(sym)
+}
 
 function makeMainTable(allSymInfo)
 {
     //ex:
     //allsymbol = [{"symbol": "WTX", "keyval": {"MKO": "84500", "DESC": "Taifex", "MKC": "134500", "BPV": "200"}}]
     len = allSymInfo.length
-    strTable="<table><tr class='grayThing'><td>Symbol</td><td>Desc.</td><td>BigPointVal</td><td>MarketOpen<br>(HHmmSS)</td><td>MarketClose<br>(HHmmSS)</td><td>Store<br>Sec</td><td>Action</td></tr>"
+    strTable="<table><tr class='grayThing'><td>Symbol</td><td>Desc.</td><td>BigPointVal</td><td>MarketOpen<br>(HHmmSS)</td><td>MarketClose<br>(HHmmSS)</td><td>Store<br>Sec</td><td>Action</td><td>Query</td><td>Import</td></tr>"
     for (i=0;i<len;++i)
     {
         symbol=allSymInfo[i]['symbol']
@@ -109,9 +111,12 @@ function makeMainTable(allSymInfo)
         strTable+="<td><input type='checkbox' id='ssec"+i+"' "+storesec_checked+"/></td>"
         strTable+="<td>"
         strTable+="<button type='button' value='' onclick=\"doupdate("+i+", '"+symbol+"')\">Update</button>&nbsp;"
-        strTable+="<button type='button' value='' onclick=\"doq1min("+i+", '"+symbol+"')\">Query1Min</button>&nbsp;"
-        strTable+="<button type='button' value='' onclick=\"doq1sec("+i+", '"+symbol+"')\">Query1Sec</button>&nbsp;"
-        strTable+="<button type='button' value='' onclick=\"doimport1min("+i+", '"+symbol+"')\">Import1Min</button></td>"
+        strTable+="</td><td>"
+        strTable+="<button type='button' value='' onclick=\"dosummery("+i+", '"+symbol+"')\">Summery</button>&nbsp;"
+        strTable+="<button type='button' value='' onclick=\"doq1min("+i+", '"+symbol+"')\">1Min</button>&nbsp;"
+        strTable+="<button type='button' value='' onclick=\"doq1sec("+i+", '"+symbol+"')\">1Sec</button>&nbsp;"
+        strTable+="</td><td>"
+        strTable+="<button type='button' value='' onclick=\"doimport1min("+i+", '"+symbol+"')\">1Min</button></td>"
         strTable+="</tr>"
     }
     strTable+="</table>"
