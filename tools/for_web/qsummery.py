@@ -24,7 +24,7 @@ for qs in querystrings.split("&"):
         mapQS[qs.split("=")[0]] = qs.split("=")[1]
 
 sym='WTX'
-if 'sym' in mapQS: sym=mapQS['sym']
+if 'symbol' in mapQS: sym=mapQS['symbol']
 summery={}
 if sym != '':
 	tmpFile="/tmp/qsummery.%d.%d.txt"%(os.getpid(),time.mktime(datetime.datetime.now().timetuple()))
