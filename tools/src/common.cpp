@@ -158,8 +158,24 @@ void vMyLog(FILE*fp, int iLogType, const char* cmd, ...)
 				g_szLogBuf2);
 	fprintf(fp, "%s", g_szLogBuf);
 }
+ST_SymbolInfo objSymInfoForSwap;
+void vSwapSymbolInfo(std::vector<ST_SymbolInfo>* pvecSymbolInfo, int i, int j)
+{
+    objSymInfoForSwap.symbol = (*pvecSymbolInfo)[j].symbol;
+    objSymInfoForSwap.mapKeyVal = (*pvecSymbolInfo)[j].mapKeyVal;
+    (*pvecSymbolInfo)[j].symbol = (*pvecSymbolInfo)[i].symbol;
+    (*pvecSymbolInfo)[j].mapKeyVal = (*pvecSymbolInfo)[i].mapKeyVal;
+    (*pvecSymbolInfo)[i].symbol = objSymInfoForSwap.symbol;
+    (*pvecSymbolInfo)[i].mapKeyVal = objSymInfoForSwap.mapKeyVal;
 
-void vSortSymbolInfo(std::vector<ST_SymbolInfo>* pvecSymbolInfo)
+}
+int iCompareSymbolInfo(std::vector<ST_SymbolInfo>* pvecSymbolInfo, int iLHS, int iRHS)
+{
+    ST_SymbolInfo* pLHS = &(*pvecSymbolInfo)[iLHS];
+    ST_SymbolInfo* pRHS = &(*pvecSymbolInfo)[iRHS];
+    return strcmp(pLHS->symbol.c_str(), pRHS->symbol.c_str());
+}
+void SlowSort(std::vector<ST_SymbolInfo>* pvecSymbolInfo)
 {
     int iLen = pvecSymbolInfo->size();
     ST_SymbolInfo objSymInfo;
@@ -167,20 +183,55 @@ void vSortSymbolInfo(std::vector<ST_SymbolInfo>* pvecSymbolInfo)
     for (int i=0;i<iLen-1;++i)
         for (int j=0;j<iLen-1;++j)
         {
-            if (strcmp((*pvecSymbolInfo)[j].symbol.c_str(), (*pvecSymbolInfo)[j+1].symbol.c_str())>0)
+            if (iCompareSymbolInfo(pvecSymbolInfo, j, j+1)>0)
             {
-                objSymInfo.symbol = (*pvecSymbolInfo)[j+1].symbol;
-		objSymInfo.mapKeyVal = (*pvecSymbolInfo)[j+1].mapKeyVal;
- //printf("%s>%s\n",(*pvecSymbolInfo)[j].symbol.c_str(),(*pvecSymbolInfo)[j+1].symbol.c_str());
-//printf("2 %d/%d/%d\n",i,j,iLen);
-                (*pvecSymbolInfo)[j+1].symbol = (*pvecSymbolInfo)[j].symbol;
-                (*pvecSymbolInfo)[j+1].mapKeyVal = (*pvecSymbolInfo)[j].mapKeyVal;
-                (*pvecSymbolInfo)[j].symbol = objSymInfo.symbol;
-                (*pvecSymbolInfo)[j].mapKeyVal = objSymInfo.mapKeyVal;
+                vSwapSymbolInfo(pvecSymbolInfo, j, j+1);
             }
         }
 }
+void QuickSort(std::vector<ST_SymbolInfo>* pvecSymbolInfo, int left, int right)
+{
+    int pivot, i, j;
 
+    if (left >= right) { return; }
+
+    pivot = left;
+
+    i = left + 1;
+    j = right;
+
+    while (1)
+    {
+        while (i <= right)
+        {
+            if (iCompareSymbolInfo(pvecSymbolInfo, i, pivot) > 0)
+            {
+                break;
+            }
+
+            i = i + 1;
+        }
+
+        while (j > left)
+        {
+            if (iCompareSymbolInfo(pvecSymbolInfo, j, pivot) < 0)
+            {
+                break;
+            }
+
+            j = j - 1;
+        }
+
+        if (i > j) { break; }
+
+        vSwapSymbolInfo(pvecSymbolInfo, i, j);
+    }
+
+    vSwapSymbolInfo(pvecSymbolInfo, left, j);
+
+    QuickSort(pvecSymbolInfo, left, j - 1);
+    QuickSort(pvecSymbolInfo, j + 1, right);
+}
 int iQAllSymbol(std::vector<ST_SymbolInfo>* pvecSymbolInfo, const char *pszTQDB, CassSession* session, CassCluster* cluster)
 {
     char szQStr[128];
@@ -259,7 +310,8 @@ int iQAllSymbol(std::vector<ST_SymbolInfo>* pvecSymbolInfo, const char *pszTQDB,
         cass_statement_free(statement);
     } else {
     }
-    vSortSymbolInfo(pvecSymbolInfo);
+    QuickSort(pvecSymbolInfo, 0, pvecSymbolInfo->size()-1);
+    //SlowSort(pvecSymbolInfo);    
     return pvecSymbolInfo->size();
 }
 int iUpdateSymbol(ST_SymbolInfo* pSymbolInfo, const char *pszTQDB, CassSession* session, CassCluster* cluster)
