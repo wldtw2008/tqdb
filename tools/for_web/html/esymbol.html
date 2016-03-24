@@ -1,19 +1,18 @@
-
 <html>
 <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
 <style type="text/css">
 <!--
 body { background: #FFF }
-table{border:1px solid gray;}
-tr td {padding: 5px; font-size:14pt; border:0px; border-bottom: thin solid gray;}
-
+table{border:1px solid gray; font-size:14pt;}
+tr td {padding: 5px;  border:0px; border-bottom: thin solid gray; text-align:center;}
 .yellowThing {background: #FE7;}
 .whiteThing {background: #FFF;}
 .grayThing {background: #DDD;}
-
+.smallfont {font-size:12pt;}
 //-->
 </style>
 <script src="/js/jquery-2.1.4.min.js"></script>
+<!--<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>-->
 <script language='javascript'>
 function DoAjax(requestUrl, sentData, sHandler, eHandler, pageNotFoundHandler){
         $.ajax({
@@ -30,6 +29,10 @@ function DoAjax(requestUrl, sentData, sHandler, eHandler, pageNotFoundHandler){
     };
 function qSymInfo()
 {
+    /*
+    makeMainTable([{"symbol":"A50","keyval":{"BPV":"1.000000","DESC":"A50%20Index"}},{"symbol":"CIF","keyval":{}},{"symbol":"ES","keyval":{}}])
+    return;
+    */
     url='/cgi-bin/qsyminfo.py'
     DoAjax(url, {symbol : "ALL"},
         function(data, textStatus, jqXHR){
@@ -60,7 +63,6 @@ function doq1min(idx, sym){
     begday.setDate(begday.getDate() - 3);
     var endday = new Date(); 
     endday.setDate(endday.getDate() + 3);
-
     beg = strQDay(begday) 
     end = strQDay(endday)
     location.href='/cgi-bin/q1min.py?symbol='+encodeURI(sym)+'&BEG='+beg+"&END="+end;
@@ -70,7 +72,6 @@ function doq1sec(idx, sym){
     begday.setDate(begday.getDate() - 3);
     var endday = new Date();
     endday.setDate(endday.getDate() + 3);
-
     beg = strQDay(begday)
     end = strQDay(endday)
     location.href='/cgi-bin/q1sec.py?symbol='+encodeURI(sym)+'&BEG='+beg+"&END="+end;
@@ -78,13 +79,15 @@ function doq1sec(idx, sym){
 function dosummery(idx, sym){
     location.href='/cgi-bin/qsummery.py?symbol='+encodeURI(sym)
 }
-
 function makeMainTable(allSymInfo)
 {
     //ex:
     //allsymbol = [{"symbol": "WTX", "keyval": {"MKO": "84500", "DESC": "Taifex", "MKC": "134500", "BPV": "200"}}]
     len = allSymInfo.length
-    strTable="<table><tr class='grayThing'><td>Symbol</td><td>Desc.</td><td>BigPointVal</td><td>MarketOpen<br>(HHmmSS)</td><td>MarketClose<br>(HHmmSS)</td><td>Store<br>Sec</td><td>Action</td><td>Query</td><td>Import</td></tr>"
+    strTable="<table>"
+    strTable+="<tr class='grayThing smallfont'><td rowspan=2>Symbol</td><td colspan=6>Symbol Settings</td><td rowspan=2>Query</td><td rowspan=2>Import</td></tr>"
+    strTable+="<tr class='grayThing smallfont'><td>Desc.</td><td>BigPoint<br>Value</td><td>MarketOpen<br>(HHmmSS)</td><td>MarketClose<br>(HHmmSS)</td><td>Store<br>Sec</td><td>Action</td></tr>"
+    
     for (i=0;i<len;++i)
     {
         symbol=allSymInfo[i]['symbol']
@@ -105,7 +108,7 @@ function makeMainTable(allSymInfo)
         }
         strTable+="<tr onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\">"
         strTable+="<td>"+symbol+"</td><td><input type='text' id='desc"+i+"' value='"+desc+"'></td>"
-        strTable+="<td><input type='text' id='bpv"+i+"' value='"+bpv+"' size='10'></td>"
+        strTable+="<td><input type='text' id='bpv"+i+"' value='"+bpv+"' size='5'></td>"
         strTable+="<td><input type='text' id='mko"+i+"' value='"+mko+"' size='10'></td>"
         strTable+="<td><input type='text' id='mkc"+i+"' value='"+mkc+"' size='10'></td>"
         strTable+="<td><input type='checkbox' id='ssec"+i+"' "+storesec_checked+"/></td>"
@@ -126,4 +129,3 @@ function makeMainTable(allSymInfo)
 <body onload='qSymInfo()'>
 <div id='mainDiv'></div>
 </body></html>
-
