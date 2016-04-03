@@ -41,7 +41,7 @@ def loopReadFromStdin():
 			if (iHHMMSS==-1 and len(testSplit) == 3):
 				iHHMMSS = int(testSplit[0])*10000+int(testSplit[1])*100+int(testSplit[2])
 			if (iHHMMSS==-1):
-				iHHMMSS = int(linesplit[1])
+				iHHMMSS = int(float(linesplit[1]))
 		except:
 			pass
 
