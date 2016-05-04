@@ -9,23 +9,24 @@ import subprocess
 import urllib
 
 szBinDir='/home/tqdb/codes/tqdb/tools/'
-szSymbol = "SIN"; #"TXO;201506;9200P";
+szSymbol = "^^NKTOPX" #"SIN"; #"TXO;201506;9200P";
 timeoffset=0	
 iLocalTimeOff=480 #TW
 iGZip=1
 iRemoveQfile=1
+begDT = '2016-1-1'
+endDT = '2016-2-1'
+
 mapQS={}
-def loopReadFromStdin():
-	global mapQS
-	tmpFile="/tmp/q1min.%d.%d"%(os.getpid(),time.mktime(datetime.datetime.now().timetuple()))
-	begDT = '2000-1-1'
-	endDT = '2037-1-1'
-	if ('BEG' in mapQS):
-		begDT=mapQS['BEG']
-	if ('END' in mapQS):
-		endDT=mapQS['END']
+def downloadFromTQDB(tmpFile):
 	subprocess.call("./q1minall.sh '%s' '%s' '%s' '%s' '%d'" % (szSymbol,begDT,endDT,tmpFile,iGZip), shell=True, cwd=szBinDir)
 
+def doCustomSymbol(tmpFile): 
+	profile = 'profile.ml.%s' % (szSymbol[2:])
+	subprocess.call("python ./q1min_multilag.py '%s' '%s' '%s' '%s' '%d'" % (profile,begDT,endDT,tmpFile,iGZip), 
+			shell=True, cwd="%s/../../tqdbPlus/" % szBinDir)
+	
+def loopReadFromStdin(tmpFile):
 	if (iGZip==1):
 		tmpFile = tmpFile+".gz"
 		filesize=os.path.getsize(tmpFile)
@@ -51,4 +52,16 @@ if 'symbol' in mapQS:
 	szSymbol = mapQS['symbol']
 if 'timeoffset' in mapQS:
 	timeoffset = int(mapQS['timeoffset'])
-loopReadFromStdin();
+if ('BEG' in mapQS):
+	begDT=mapQS['BEG']
+if ('END' in mapQS):
+	endDT=mapQS['END']
+tmpFile="/tmp/q1min.%d.%d"%(os.getpid(),time.mktime(datetime.datetime.now().timetuple()))
+
+
+if szSymbol.find('^^') == 0: # if symbol is begin of ^^, it is a customer symbol !
+	doCustomSymbol(tmpFile)
+else:
+	downloadFromTQDB(tmpFile)
+
+loopReadFromStdin(tmpFile)
