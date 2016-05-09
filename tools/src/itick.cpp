@@ -155,7 +155,11 @@ int main(int argc, char *argv[]) {
                 {
 			char szSymbol[32], szClose[32], szVol[32], szTC[32], szEPID[32];
 			szGetValueByKey(szLine+3, "ID", szSymbol, "");
-		
+			//customer symbol is begin at  ^^, so if the first 2 char of the symbol is ^^, we have to skip it.
+			if (strstr(szSymbol, "^^") == szSymbol)
+			{
+				continue;
+			}
 			if (iGetSymbolIdx(&vecSymbolInfo, szSymbol)<0)
 			{
 				ST_SymbolInfo tmpSymbolInfo;
@@ -189,6 +193,11 @@ int main(int argc, char *argv[]) {
 			char *pKey;
 			int j, iFoundKeyCnt;
 			szGetValueByKey(szLine+3, "ID", szSymbol, "");
+			//customer symbol is begin at  ^^, so if the first 2 char of the symbol is ^^, we have to skip it.
+                        if (strstr(szSymbol, "^^") == szSymbol)
+                        {
+                                continue;
+                        }
 			if (iGetSymbolIdx(&vecSymbolInfo, szSymbol)<0)
                         {
                                 ST_SymbolInfo tmpSymbolInfo;
