@@ -23,7 +23,7 @@ def downloadFromTQDB(tmpFile):
 
 def doCustomSymbol(tmpFile): 
 	profile = 'profile.ml.%s' % (szSymbol[2:])
-	subprocess.call("python ./q1min_multilag.py '%s' '%s' '%s' '%s' '%d'" % (profile,begDT,endDT,tmpFile,iGZip), 
+	subprocess.call("python ./q1min_multileg.py '%s' '%s' '%s' '%s' '%d'" % (profile,begDT,endDT,tmpFile,iGZip), 
 			shell=True, cwd="%s/../../tqdbPlus/" % szBinDir)
 	
 def loopReadFromStdin(tmpFile):

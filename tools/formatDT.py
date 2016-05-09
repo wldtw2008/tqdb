@@ -1,3 +1,5 @@
+#this python file can read from stdin and normailize the datetime to YYYYMMDD, HHMMSS.sss, O, H, L, C, V ...
+
 import time
 import sys
 import time
