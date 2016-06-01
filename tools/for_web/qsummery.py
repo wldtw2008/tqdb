@@ -9,7 +9,7 @@ import subprocess
 import json
 szCassIP1="127.0.0.1"
 szCassDB="tqdb1"
-
+szBinDir='/home/tqdb/codes/tqdb/tools/'
 
 def runCql(szCql, objRet):
     p = subprocess.Popen(["/var/cassandra/bin/cqlsh", "-e", szCql], cwd="/var/cassandra/bin/",  
@@ -25,6 +25,20 @@ for qs in querystrings.split("&"):
 
 sym='WTX'
 if 'symbol' in mapQS: sym=mapQS['symbol']
+qtype='ALL'
+if 'qtype' in mapQS: qtype=mapQS['qtype']
+
+if qtype == 'qLastPrc':
+    cmd="%s '%s'" % (os.path.join(szBinDir, 'qLastPrc.py'), sym) 
+    lastPrc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE).stdout.read()
+    sys.stdout.write("Content-Type: application/json\r\n")
+    sys.stdout.write("\r\n%s"%lastPrc)
+    #sys.stdout.write(cmd)
+    sys.stdout.write("\r\n")
+    sys.stdout.flush()
+    exit(0)
+
+
 summery={}
 if sym != '':
 	tmpFile="/tmp/qsummery.%d.%d.txt"%(os.getpid(),time.mktime(datetime.datetime.now().timetuple()))

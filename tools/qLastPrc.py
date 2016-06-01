@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-   
 
-import sys
+import sys,json
 from datetime import datetime
 from dateutil import tz
 from cassandra.cluster import Cluster
@@ -52,7 +52,8 @@ def _main(keyspace, symbol):
         if lastInfo[key][1] != None and (lastInfo['last'][1]==None or lastInfo[key][1]>lastInfo['last'][1]):
             lastInfo['last'] = (lastInfo[key][0], lastInfo[key][1], lastInfo[key][2])
 _main('tqdb1', sys.argv[1])
-#print lastInfo
+print json.dumps(lastInfo)
+exit(0)
 for key in ('last', 'tick', 'minbar'):
     if lastInfo[key][0] == None:
         print("%s,-1,-1,-1"%(key))
