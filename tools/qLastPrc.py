@@ -32,17 +32,17 @@ def _utcDTtoEOPCH(utcDT):
     return int(float(localDT.strftime("%s.%f"))*1000)
 
  
-def _main(keyspace, symbol):
+def _main(keyspace, symbol, lastDTStr):
     global lastInfo
     cluster = Cluster()
     session = cluster.connect(keyspace)
-    result = session.execute("select * from %s.minbar where symbol='%s' order by datetime desc limit 1;"%(keyspace,symbol))
+    result = session.execute("select * from %s.minbar where symbol='%s' and datetime<'%s' order by datetime desc limit 1;"%(keyspace,symbol, lastDTStr))
     if result != None and len(result.current_rows)>0:
         utcDT = result[0].datetime
         last = result[0].close
         lastInfo['minbar'] = (_utcDTtoLocalHuman(utcDT), _utcDTtoEOPCH(utcDT), last)
 
-    result = session.execute("select * from %s.tick where symbol='%s' order by datetime desc limit 1;"%(keyspace,symbol))
+    result = session.execute("select * from %s.tick where symbol='%s' and datetime<'%s' order by datetime desc limit 1;"%(keyspace, symbol, lastDTStr))
     if result != None and len(result.current_rows)>0:
         utcDT = result[0].datetime
         last = result[0].keyval['C'] 
@@ -51,7 +51,7 @@ def _main(keyspace, symbol):
     for key in lastInfo.keys():
         if lastInfo[key][1] != None and (lastInfo['last'][1]==None or lastInfo[key][1]>lastInfo['last'][1]):
             lastInfo['last'] = (lastInfo[key][0], lastInfo[key][1], lastInfo[key][2])
-_main('tqdb1', sys.argv[1])
+_main('tqdb1', sys.argv[1], sys.argv[2])
 print json.dumps(lastInfo)
 exit(0)
 for key in ('last', 'tick', 'minbar'):

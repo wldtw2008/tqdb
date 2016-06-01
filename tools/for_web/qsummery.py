@@ -29,7 +29,9 @@ qtype='ALL'
 if 'qtype' in mapQS: qtype=mapQS['qtype']
 
 if qtype == 'qLastPrc':
-    cmd="%s '%s'" % (os.path.join(szBinDir, 'qLastPrc.py'), sym) 
+    lastDTStr = '2037-1-1'
+    if 'lastDT' in mapQS: lastDTStr=mapQS['lastDT'] 
+    cmd="%s '%s' '%s'" % (os.path.join(szBinDir, 'qLastPrc.py'), sym, lastDTStr) 
     lastPrc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE).stdout.read()
     sys.stdout.write("Content-Type: application/json\r\n")
     sys.stdout.write("\r\n%s"%lastPrc)
