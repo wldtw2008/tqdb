@@ -7,6 +7,9 @@ from socket import socket
 import os
 import subprocess
 import json
+from webcommon import *
+
+
 szCassIP1="127.0.0.1"
 szCassDB="tqdb1"
 szBinDir='/home/tqdb/codes/tqdb/tools/'
@@ -17,11 +20,8 @@ def runCql(szCql, objRet):
     objRet['output'], objRet['err'] = p.communicate()
     objRet['retcode'] = p.returncode
 
-querystrings=os.environ.get("QUERY_STRING", "NA=NA")
 #querystrings="sym=WTX&desc=Taifex&bpv=200&mko=84500&mkc=134500"
-mapQS={}
-for qs in querystrings.split("&"):
-        mapQS[qs.split("=")[0]] = qs.split("=")[1]
+mapQS=getQueryStringDict(os.environ.get("QUERY_STRING", "NA=NA"))
 
 sym='WTX'
 if 'symbol' in mapQS: sym=mapQS['symbol']
@@ -31,7 +31,7 @@ if 'qtype' in mapQS: qtype=mapQS['qtype']
 if qtype == 'qLastPrc':
     lastDTStr = '2037-1-1'
     if 'lastDT' in mapQS: lastDTStr=mapQS['lastDT'] 
-    cmd="%s '%s' '%s'" % (os.path.join(szBinDir, 'qLastPrc.py'), sym, lastDTStr) 
+    cmd="%s '%s' '%s'" % (os.path.join(szBinDir, 'qLastPrc.py'), sym, lastDTStr)
     lastPrc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE).stdout.read()
     sys.stdout.write("Content-Type: application/json\r\n")
     sys.stdout.write("\r\n%s"%lastPrc)
