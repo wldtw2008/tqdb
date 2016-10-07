@@ -1,0 +1,424 @@
+    1  cd /tmp
+    2  wget 127.0.0.1/lighttpd
+    3  wget 127.0.0.1/lighttpd/index.html
+    4  cd /var/lo
+    5  cd /var/log
+    6  ls
+    7  cd lighttpd/
+    8  ls
+    9  sudo /bin/bash
+   10  sudo ls -lrt
+   11  pwd
+   12  mkdir codes
+   13  cd codes
+   14  ls
+   15  git clone https://github.com/wldtw2008/tqdb.git
+   16  ls
+   17  cd tqdb
+   18  ls
+   19  cd date
+   20  date
+   21  nc 192.9.102.101 2000
+   22  ifconfig
+   23  ping 192.9.102.101
+   24  nc 192.9.102.101 2000
+   25  ifconfig
+   26  java
+   27  rpm -ivh  jdk-8u45-linux-64.rpm
+   28  yum search jdk
+   29  yum install openjdk
+   30  sudo yum install openjdk
+   31  sudo yum install java-1.8.0-openjdk
+   32  java version
+   33  java -version
+   34  yum search lighttpd
+   35  python
+   36  vi /etc/yum.repos.d/datastax.repo
+   37  sudo vi /etc/yum.repos.d/datastax.repo
+   38  sudo yum install datastax-ddc
+   39  sudo vi /etc/yum.repos.d/datastax.repo
+   40  sudo yum install datastax-ddc
+   41  sudo systemctl enable cassandra
+   42  sudo systemctl start cassandra
+   43  nodetool status
+   44  wget http://dl.fedoraproject.orb/pub/epel/beta/7/x86_64/epel-release-7-1.noarch.rpm
+   45  wget http://dl.fedoraproject.org/pub/epel/beta/7/x86_64/epel-release-7-1.noarch.rpm
+   46  sudo yum install epel-release
+   47  rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-7
+   48  sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-7
+   49  sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+   50  yum update
+   51  sudo yum update
+   52  sudo yum install lighttpd
+   53  sudo systemctl enable lighttpd.service
+   54  sudo systemctl start lighttpd.service
+   55  ps -ef | grep fire
+   56  ifconfig
+   57  netstat -an | grep 80
+   58  netstat -an | grep 80 | grep LISTEN
+   59  sudo vi /etc/lighttpd/lighttpd.conf 
+   60  ls
+   61  cd /etc/li
+   62  cd /etc/lighttpd/
+   63  ls
+   64  cd conf.d/
+   65  ls
+   66  ls -lrt
+   67  vi cgi.conf 
+   68  grep error.log *
+   69  vi debug.conf 
+   70  sudo systemctl start lighttpd.service
+   71  sudo systemctl restart lighttpd.service
+   72  netstat -an | grep 80 | grep LISTEN
+   73  cd /tmp
+   74  wget 127.0.0.1
+   75  cd /var/www
+   76  ls
+   77  cd lighttpd/
+   78  ls
+   79  yum install screen
+   80  sudo yum install screen
+   81  screen
+   82  ls
+   83  grep www *
+   84  cd /etc/lighttpd/
+   85  grep -r www *
+   86  grep -r var *
+   87  grep -r htdocs *
+   88  ls
+   89  cd ..
+   90  ls
+   91  cd -
+   92  grep -r htdocs *
+   93  sudo vi lighttpd.conf 
+   94  sudo systemctl restart lighttpd
+   95  grep -r symlink *
+   96  cd /var/www
+   97  l
+   98  ls 
+   99  ls -Z
+  100  sudo vi /etc/sysconfig/selinux 
+  101  sudo setenforce 0
+  102  cd /etc
+  103  ls -lrt localtime 
+  104  cd init.d/
+  105  ls
+  106  cat cassandra 
+  107  sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/tqdbStartup.sh ./
+  108  cd ..
+  109  cd profile.d/
+  110  sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/profile_tqdb.sh ./
+  111  vi profile_tqdb.sh 
+  112  nc 127.0.0.1 9042
+  113  whereis cassandra
+  114  cd /usr
+  115  cd /var
+  116  ls
+  117  sudo mkdir ./cassandra-oldverlike
+  118  sudo ln -s cassandra-oldverlike/ ./cassandra
+  119  cd cassandra
+  120  ls
+  121  mkdir bin
+  122  sudo mkdir bin
+  123  cd bin/
+  124  ln -s /usr/bin/nodetool ./
+  125  sudo ln -s /usr/bin/nodetool ./
+  126  sudo ln -s /usr/bin/cqlsh ./
+  127  sudo ln -s /usr/bin/cqlsh.py ./
+  128  cd ..
+  129  sudo ln -s /var/lib/cassandra/ ./data
+  130  sudo ln -s /etc/cassandra/ ./conf
+  131  cd conf
+  132  ls
+  133  cd conf
+  134  vi cassandra.yaml
+  135  sudo vi /etc/profile.d/profile_tqdb.sh 
+  136  histor > ~/h1
+  137  history > ~/h1
+  138  sudo reboot
+  139  cd /var/www/
+  140  ls
+  141  mv lighttpd/ htdocs
+  142  sudo mv lighttpd/ htdocs
+  143  ls
+  144  echo "1" > 1.html
+  145  sudo echo "1" > 1.html
+  146  sudo vi 1.html
+  147  ls -lrt
+  148  ln -s /home/tqdb/codes/tqdb/tools/for_web/html/esymbol.html ./
+  149  sudo ln -s /home/tqdb/codes/tqdb/tools/for_web/html/esymbol.html ./
+  150  sudo ln -s /home/tqdb/codes/tqdb/tools/for_web/html/i1min.html ./
+  151  sudo vi index.html
+  152  sudo ln -s /home/tqdb/codes/tqdb/tools/for_web/html/index.html ./
+  153  ls
+  154  ls -lrt
+  155  mkdir cgi-bin
+  156  sudo mkdir cgi-bin
+  157  cd cgi-bin/
+  158  ls -lrt /home/tqdb/codes/tqdb/tools/for_web/
+  159  ls  /home/tqdb/codes/tqdb/tools/for_web/ >/tmp/1
+  160  vi /tmp/1
+  161  cat /tmp/1 | sudo xargs -i ln -s {} ./
+  162  ls -lrt
+  163  cd ..
+  164  ls
+  165  ls -lrt
+  166  cd /home/
+  167  ls -lrt
+  168  chmod -R +x ./tqdb/
+  169  chmod -R +r ./tqdb/
+  170  ls
+  171  ls lrt
+  172  ls -lrt
+  173  cd ..
+  174  ls
+  175  ls -lrt
+  176  cd home/
+  177  ls
+  178  ls -lrt
+  179  cd tqdb
+  180  ls -lrt
+  181  cd codes/
+  182  ls
+  183  cd tqdb
+  184  ls
+  185  ls -lrt
+  186  cd ~/codes/
+  187  ls
+  188  cd tqdb/
+  189  ls
+  190  git pull
+  191  export
+  192  screen 
+  193  cd codes/
+  194  ls
+  195  cd tqdb/
+  196  ls
+  197  cat InitialTQDB.readme 
+  198  cat /etc/init.d/tqdbStartup.sh 
+  199  ls -lrt /tmp
+  200  vi /etc/rc.d/rc.local 
+  201  sudo vi /etc/rc.d/rc.local 
+  202  ls -lrt /etc/rc.d/rc.local 
+  203  sudo chmod  +x /etc/rc.d/rc.local 
+  204  ls -lrt /etc/rc.d/rc.local 
+  205  sudo reboot
+  206  cd /tmp
+  207  ls
+  208  ls -lrt
+  209  cat d2tq.info 
+  210  cd /home/
+  211  ls
+  212  cd tqdb/
+  213  ls
+  214  cd codes/
+  215  ls
+  216  cd tqdb/
+  217  ls
+  218  histor | grep /local
+  219  history | grep local
+  220  ls
+  221  cat InitialTQDB.readme 
+  222  cqlsh
+  223  ls
+  224  cd tools/
+  225  ls
+  226  ./tick21min
+  227  itick
+  228  ./itick
+  229  cd /usr/lib64/
+  230  ls libcass*
+  231  cd /usr/local/lib64/
+  232  ls libcass*
+  233  yum search cassandra*
+  234  yum search cassandra
+  235  sudo yum install python-cassandra-driver.x86_64
+  236  cd ~/codes/tqdb/
+  237  ls
+  238  cd tools/
+  239  ls
+  240  ./itick 
+  241  whereis cassantra
+  242  whereis cassandra
+  243  cd src/
+  244  ls
+  245  cd ..
+  246  ./1t
+  247  ./itick 
+  248  cd /var/lib/cassandra/
+  249  ls
+  250  cd data
+  251  ls
+  252  cd ..
+  253  find . -name libcass*
+  254  wget downloads.datastax.com/cpp-driver/centos/7/cassandra/v2.4.3
+  255  cd ~
+  256  wget downloads.datastax.com/cpp-driver/centos/7/cassandra/v2.4.3
+  257  ls
+  258  cat v2.4.3 
+  259  wget downloads.datastax.com/cpp-driver/centos/7/cassandra/v2.4.3/cassandra-cpp-driver-2.4.3-1.el7.centos.x86_64.rpm
+  260  ls -lrt
+  261  sudo rpm -ivh cassandra-cpp-driver-2.4.3-1.el7.centos.x86_64.rpm 
+  262  sudo yum install libuv
+  263  sudo rpm -ivh cassandra-cpp-driver-2.4.3-1.el7.centos.x86_64.rpm 
+  264  cd codes/tqdb/
+  265  ls
+  266  cd tools/
+  267  ls
+  268  ./itick 
+  269  ps -ef | grep auto
+  270  cat autoIns2Cass.sh 
+  271  ps -ef | grep tqdb1
+  272  netcat
+  273  cd /usr/bin
+  274  ls
+  275  ls -lrt nc
+  276  sudo ln -s ncat netcat
+  277  cd -
+  278  netat
+  279  netcat
+  280  ls -lrt
+  281  cat autoIns2Cass.sh 
+  282  ps -ef | grep netcat
+  283  echo $TQDB_DIR
+  284  echo $D2TQ_IP
+  285  echo $D2TQ_PORT
+  286  grep 2000 *
+  287  grep -r  2000 *
+  288  cd ..
+  289  ls
+  290  cd script_for_sys/
+  291  ls
+  292  ps -ef | grep demo_d2tq_server.sh 
+  293  cat demo_d2tq_server.sh 
+  294  tcpserver
+  295  sudo yum install ucspi-tcp
+  296  sudo yum install ucspi
+  297  yum search ucspi
+  298  yum search ucspi | grep ucspi
+  299  cat demo_d2tq_server.sh 
+  300  cd ~
+  301  wget http://rpm.pbone.net/index.php3/stat/26/dist/79/size/75609/name/ucspi-tcp-0.88-2.2.src.rpm
+  302  sudo rpm -ivh ucspi-tcp-0.88-2.2.src.rpm 
+  303  ls -lrt
+  304  wget ftp://ftp.pbone.net/mirror/ftp5.gwdg.de/pub/opensuse/repositories/home:/weberho:/qmailtoaster/CentOS_CentOS-6/x86_64/ucspi-tcp-0.88-2.2.x86_64.rpm
+  305  cd ~
+  306  cd codes/
+  307  ls
+  308  cd tqdb/
+  309  git pull
+  310  cd 3rd/
+  311  yum -ivh ucspi-tcp-0.88-2.2.x86_64.rpm 
+  312  sudo rpm -ivh ucspi-tcp-0.88-2.2.x86_64.rpm 
+  313  yum search daemontools
+  314  git pull
+  315  sudo yum -ivh daemontools-0.76-1.el6.art.x86_64.rpm 
+  316  sudo rpm -ivh daemontools-0.76-1.el6.art.x86_64.rpm 
+  317  tcpserver
+  318  sudo rpm -ivh ucspi-tcp-0.88-2.2.x86_64.rpm 
+  319  tcpserver
+  320  cd ..
+  321  ls
+  322  cd script_for_sys/
+  323  ls
+  324  ps -ef | grep make_demo_d2tq.sh 
+  325  cat tqdbStartup.sh 
+  326  ls /tmp/demo_d2tq_server.log 
+  327  cat /tmp/demo_d2tq_server.log 
+  328  cat demo_d2tq_server.sh 
+  329  sudo reboot
+  330  netstat -an | grep 4567
+  331  netstat -an | grep 4568
+  332  ps -ef | grep server
+  333  ps -ef | grep tcps
+  334  netcat 127.0.0.1 4568
+  335  cd /var
+  336  cd www/
+  337  ls
+  338  cd ~/codes/
+  339  cd tqdb/
+  340  git pull
+  341  cd /var/www
+  342  ls -lrt
+  343  sudo ln -s /home/tqdb/codes/tqdb/tools/for_web/js ./
+  344  cd js
+  345  ls
+  346  cd ..
+  347  cd /etc/lighttpd/
+  348  ls
+  349  vi lighttpd.conf 
+  350  grep -r cgi-bin *
+  351  vi conf.d/cgi.conf
+  352  sudo vi conf.d/cgi.conf
+  353  sudo systemctl restart lighttpd
+  354  grep -r cgi-bin *
+  355  vi conf.d/cgi.conf
+  356  sudo vi conf.d/cgi.conf
+  357  sudo systemctl restart lighttpd
+  358  sudo vi conf.d/cgi.conf
+  359  ls
+  360  vi lighttpd.conf 
+  361  vi modules.conf 
+  362  sudo vi modules.conf 
+  363  sudo systemctl restart lighttpd
+  364  sudo vi modules.conf 
+  365  sudo systemctl restart lighttpd
+  366  cqlsh
+  367  cd ~/h1 
+  368  cd ~
+  369  ls
+  370  cd codes/
+  371  ls
+  372  cd tqdb/
+  373  ls
+  374  cd tools/
+  375  ls
+  376  cd ..
+  377  cd script_for_sys/
+  378  ls
+  379  cat demo_d2tq_server.sh 
+  380  ps -ef | grep demo_d2tq_server.sh 
+  381  netcat 127.0.0.1 4568
+  382  ps -ef | grep 4568
+  383  ls
+  384  cat tqdbStartup.sh 
+  385  cat /tmp/autoIns2Cass.log 
+  386  cat tqdbStartup.sh 
+  387  cd ..
+  388  cd tools/
+  389  cat autoIns2Cass.sh 
+  390  netcat
+  391  ps -ef | grep itick
+  392  stdbuf
+  393  . /etc/profile.d/profile_tqdb.sh
+  394  stdbuf -i0 -o0 -e0 netcat $D2TQ_IP $D2TQ_PORT | $TQDB_DIR/tools/itick $CASS_IP $CASS_PORT tqdb1 0 0
+  395  echo $CASS_IP $CASS_PORT
+  396  cd $TQDB_DIR
+  397  cd tools/
+  398  ./itick 
+  399  netcat $D2TQ_IP $D2TQ_PORT
+  400  netcat 127.0.0.1 4568
+  401  netcat $D2TQ_IP $D2TQ_PORT
+  402  echo $D2TQ_IP $D2TQ_PORT
+  403  ls
+  404  cd ..
+  405  ls
+  406  cd script_for_sys/
+  407  ls
+  408  vi profile_tqdb.sh 
+  409  sudo vi /etc/crontab 
+  410  cat /etc/crontab
+  411  cd /home/tqdb/codes/tqdb/tools && ./purgeTick.sh && shutdown -h 3
+  412  sudo reboot
+  413  ps -ef | grep itick
+  414  cd /tmp
+  415  ls
+  416  ls -lrt
+  417  cat autoIns2Cass.log 
+  418  ps -ef | grep itick
+  419  date
+  420  sudo vi /etc/crontab
+  421  cat /etc/crontab
+  422  sudo ntpdate clock.stdtime.gov.tw
+  423  date
+  424  history > ~/h2
