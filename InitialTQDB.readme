@@ -107,6 +107,10 @@
         #NTP Update
         30 3    * * *   root    ntpdate clock.stdtime.gov.tw
 
+***Python Related***
+    #sudo yum install python-pip
+    #sudo pip install --upgrade pip
+    #sudo pip install --upgrade cassandra-driver
     
 ***Check***
    1. Check Demo data is ok or not
