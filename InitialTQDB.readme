@@ -1,8 +1,13 @@
+========TQDB at CentOS 7 installation guide========
+
 ***CentOS security***
-    disable the SELinux
+    Disable the SELinux & Firewall
     #sudo setenforce 0
     #sudo vi /etc/sysconfig/selinux
-
+     Set disable
+    #sudo systemctl disable firewalld
+    #sudo systemctl stop firewalld
+    
 ***Java***
     Install Java
     #sudo yum install java-1.8.0-openjdk
@@ -11,7 +16,7 @@
     #java -version
    
 ***Cassandra***
-    Refering http://docs.datastax.com/en/cassandra/3.x/cassandra/install/installRHEL.html
+    Please refering http://docs.datastax.com/en/cassandra/3.x/cassandra/install/installRHEL.html
     
     #sudo vi /etc/yum.repos.d/datastax.repo
         [datastax-ddc] 
@@ -28,7 +33,7 @@
     Verify that DataStax Distribution of Apache Cassandra is running:
     #nodetool status
 
-    Make old style Cassandra dir
+    Make old style Cassandra dirs & files
     #sudo mkdir /var/cassandra-oldverlike
     #sudo ln -s /var/cassandra-oldverlike /var/cassandra
     #sudo mkdir /var/cassandra/bin
@@ -38,16 +43,17 @@
     #sudo ln -s /var/lib/cassandra/ /var/cassandra/data
     #sudo ln -s /etc/cassandra/ /var/cassandra/conf
 
-    run cqlsh and create KeySpace&Table from file: InitialTQDB.readme 
+    Please refresing the bottom part of this doc to create KeySpaces & Tables.
 
     Install the Cassandra-CPP-Driver
     #wget downloads.datastax.com/cpp-driver/centos/7/cassandra/v2.4.3/cassandra-cpp-driver-2.4.3-1.el7.centos.x86_64.rpm
     #sudo yum install libuv
     #sudo rpm -ivh cassandra-cpp-driver-2.4.3-1.el7.centos.x86_64.rpm
+    
     Then you can run ./itick to check the cpp-driver is ok or not.
     
 ***Lighttpd***
-    Refering https://www.howtoforge.com/tutorial/installing-lighttpd-with-php-5-fpm-and-mysql-on-centos-7/
+    Please efering https://www.howtoforge.com/tutorial/installing-lighttpd-with-php-5-fpm-and-mysql-on-centos-7/
     
     #sudo yum -y install epel-release
     #sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
@@ -55,12 +61,12 @@
     #sudo yum update
     #sudo yum install lighttpd
     
-    edit the conf file 
+    Edit the conf file 
     #vi /etc/lighttpd/lighttpd.conf
         a. disable ipv6
         b. change the rootdir from /htdoc to /
     
-    edit the module file to enable old stype cgi
+    Edit the module file to enable old stype cgi
     #vi /etc/lighttpd/module.conf
     
     #sudo systemctl enable lighttpd.service
@@ -87,7 +93,8 @@
     
     Run at booting
     #sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/tqdbStartup.sh /etc/init.d
-    #sudo vi /etc/rc.d/rc.local <=== put /etc/init.d/tqdbStartup.sh to the last line
+    #sudo vi /etc/rc.d/rc.local 
+     Put /etc/init.d/tqdbStartup.sh to the last line
     #sudo chmod  +x /etc/rc.d/rc.local
 
     #sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/profile_tqdb.sh /etc/profile.d/
@@ -107,6 +114,10 @@
         #NTP Update
         30 3    * * *   root    ntpdate clock.stdtime.gov.tw
 
+***Python Related***
+    #sudo yum install python-pip
+    #sudo pip install --upgrade pip
+    #sudo pip install --upgrade cassandra-driver
     
 ***Check***
    1. Check Demo data is ok or not
@@ -120,42 +131,43 @@
    or you can run to see insert tick is ok or not:
    #stdbuf -i0 -o0 -e0 netcat $D2TQ_IP $D2TQ_PORT | $TQDB_DIR/tools/itick $CASS_IP $CASS_PORT tqdb1 0 0
     
+***Cassandra KeySpace & Table***
+  1. Run clqsh
+  #/var/cassandra/cqlsh
+  
+  2. Copy and paste
+     CREATE KEYSPACE tqdb1 WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 3 };
+
+     CREATE TABLE tqdb1.tick (
+         symbol text,
+         datetime timestamp,
+         keyval map<text, double>,
+         type int,
+         PRIMARY KEY (symbol, datetime)
+     );
+
+     CREATE TABLE tqdb1.symbol (
+         symbol text PRIMARY KEY,
+         keyval map<text, text>
+     );
+
+     CREATE TABLE tqdb1.minbar (
+         symbol text,
+         datetime timestamp,
+         close double,
+         high double,
+         low double,
+         open double,
+         vol double,
+         PRIMARY KEY (symbol, datetime)
+     );
 
 
-
-
-
-
-
-CREATE KEYSPACE tqdb1 WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 3 };
-
-CREATE TABLE tqdb1.tick (
-    symbol text,
-    datetime timestamp,
-    keyval map<text, double>,
-    type int,
-    PRIMARY KEY (symbol, datetime)
-);
-
-CREATE TABLE tqdb1.symbol (
-    symbol text PRIMARY KEY,
-    keyval map<text, text>
-);
-
-CREATE TABLE tqdb1.minbar (
-    symbol text,
-    datetime timestamp,
-    close double,
-    high double,
-    low double,
-    open double,
-    vol double,
-    PRIMARY KEY (symbol, datetime)
-);
-
-sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/profile_tqdb.sh /etc/profile.d/profile_tqdb.sh
-sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/tqdbStartup.sh /etc/init.d/tqdbStartup.sh
-cd /etc/init.d && sudo update-rc.d tqdbStartup.sh defaults
+***Other***
+    For not RedHat/CentOS
+    sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/profile_tqdb.sh /etc/profile.d/profile_tqdb.sh
+    sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/tqdbStartup.sh /etc/init.d/tqdbStartup.sh
+    cd /etc/init.d && sudo update-rc.d tqdbStartup.sh defaults
 
 
 
