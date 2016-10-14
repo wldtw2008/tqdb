@@ -9,6 +9,7 @@ import os
 import subprocess
 import json
 szCassIP1="127.0.0.1"
+szCassPort1="9042"
 szCassDB="tqdb1"
 
 querystrings=os.environ.get("QUERY_STRING", "NA=NA")
@@ -27,14 +28,8 @@ if 'mkc' in mapQS: param['MKC']=mapQS['mkc']
 if 'ssec' in mapQS: param['SSEC']=mapQS['ssec']
 
 if sym != '':
-	tmpFile="/tmp/isym.%d.%d.cql"%(os.getpid(),time.mktime(datetime.datetime.now().timetuple()))
-	sql="insert into %s.symbol (symbol,keyval) VALUES ('%s', %s);" % (szCassDB, sym, str(param))
-	#print "sql--->%s"%sql
-	szCMD="echo \"%s\" > %s" % (sql, tmpFile)
-	subprocess.call(szCMD, shell=True, cwd='/tmp')
-
-	szCMD="./cqlsh < %s >/dev/null"%(tmpFile)
-	subprocess.call(szCMD, shell=True, cwd='/var/cassandra/bin/')
+	szCMD="python Sym2Cass.py %s %s '%s' '%s' '%s' > /dev/null" % (szCassIP1, szCassPort1, szCassDB, sym, json.dumps(param))
+	subprocess.call(szCMD, shell=True, cwd='/home/tqdb/codes/tqdb/tools/')
 
 sys.stdout.write("Content-Type: text/html\r\n")
 sys.stdout.write("\r\n")
