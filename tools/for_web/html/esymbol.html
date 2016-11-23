@@ -3,12 +3,52 @@
 <style type="text/css">
 <!--
 body { background: #FFF }
-table{border:1px solid gray; font-size:14pt;}
-tr td {padding: 5px;  border:0px; border-bottom: thin solid gray; text-align:center;}
+table, tr, td { border-collapse: collapse; padding:5px; border: 1px solid #000000;}
+.header {background-color: #999999;}
+
 .yellowThing {background: #FE7;}
 .whiteThing {background: #FFF;}
 .grayThing {background: #DDD;}
 .smallfont {font-size:12pt;}
+
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
 //-->
 </style>
 <script src="/js/jquery-2.1.4.min.js"></script>
@@ -39,12 +79,7 @@ function qSymInfo()
 		makeMainTable(data);
         }); 
 }
-function doupdate(idx, sym){
- desc=document.getElementById('desc'+idx).value
- bpv=1*document.getElementById('bpv'+idx).value
- mko=1*document.getElementById('mko'+idx).value
- mkc=1*document.getElementById('mkc'+idx).value
- ssec=(document.getElementById('ssec'+idx).checked==true?1:0)
+function doupdate(idx, sym, desc, bpv, mko, mkc, ssec){
  //alert('ready to update: '+sym+', desc:'+desc+', bpv:'+bpv)
  location.href='/cgi-bin/usymbol.py?sym='+encodeURI(sym)+'&desc='+desc+'&bpv='+bpv+'&mko='+mko+'&mkc='+mkc+
                '&ssec='+ssec;
@@ -79,14 +114,38 @@ function doq1sec(idx, sym){
 function dosummery(idx, sym){
     location.href='/cgi-bin/qsummery.py?symbol='+encodeURI(sym)
 }
-function makeMainTable(allSymInfo)
+function showDlg(idx){
+    var sym = allSymInfo[idx]
+    $('#dlgSym').html(sym['symbol'])
+    $('#dlgSymIdx').html(idx)
+    desc=sym['keyval']['DESC']
+    try{
+        if (desc.length !=0)
+            desc=decodeURI(desc)
+    }catch(e){}
+    $('#editDesc').val(desc)
+    $('#editBPV').val(sym['keyval']['BPV'])
+    $('#editMKO').val(sym['keyval']['MKO'])
+    $('#editMKC').val(sym['keyval']['MKC'])
+    $('#chkSSec').prop("checked", (1 == sym['keyval']['SSEC']?true:false))
+
+    var modal = document.getElementById('myModal');
+    modal.style.display = "block";
+}
+function closeDlg(){
+    var modal = document.getElementById('myModal');
+    modal.style.display = "none";
+}
+allSymInfo=[]
+function makeMainTable(jsonObj)
 {
+    allSymInfo = jsonObj;
     //ex:
     //allsymbol = [{"symbol": "WTX", "keyval": {"MKO": "84500", "DESC": "Taifex", "MKC": "134500", "BPV": "200"}}]
     len = allSymInfo.length
     strTable="<table>"
-    strTable+="<tr class='grayThing smallfont'><td rowspan=2>Symbol</td><td colspan=6>Symbol Settings</td><td rowspan=2>Query</td><td rowspan=2>Import</td></tr>"
-    strTable+="<tr class='grayThing smallfont'><td>Desc.</td><td>BigPoint<br>Value</td><td>MarketOpen<br>(HHmmSS)</td><td>MarketClose<br>(HHmmSS)</td><td>Store<br>Sec</td><td>Action</td></tr>"
+    strTable+="<tr class='grayThing smallfont'><td rowspan=2>#</td><td rowspan=2>Symbol</td><td colspan=6>Symbol Settings</td></tr>"
+    strTable+="<tr class='grayThing smallfont'><td>Desc.</td><td>BigPoint<br>Value</td><td>MarketOpen<br>(HHmmSS)</td><td>MarketClose<br>(HHmmSS)</td><td>Store<br>Sec</td></tr>"
     
     for (i=0;i<len;++i)
     {
@@ -103,23 +162,17 @@ function makeMainTable(allSymInfo)
             if ('MKO' in allSymInfo[i]['keyval']) mko = allSymInfo[i]['keyval']['MKO'];
             if ('MKC' in allSymInfo[i]['keyval']) mkc = allSymInfo[i]['keyval']['MKC'];
             if ('SSEC' in allSymInfo[i]['keyval'] && 1 == allSymInfo[i]['keyval']['SSEC'])
-                storesec_checked = 'checked';
+                storesec_checked = 'Yes';
             try{desc=decodeURI(desc)}catch(e){}
         }
-        strTable+="<tr onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\">"
-        strTable+="<td>"+symbol+"</td><td><input type='text' id='desc"+i+"' value='"+desc+"'></td>"
-        strTable+="<td><input type='text' id='bpv"+i+"' value='"+bpv+"' size='5'></td>"
-        strTable+="<td><input type='text' id='mko"+i+"' value='"+mko+"' size='10'></td>"
-        strTable+="<td><input type='text' id='mkc"+i+"' value='"+mkc+"' size='10'></td>"
-        strTable+="<td><input type='checkbox' id='ssec"+i+"' "+storesec_checked+"/></td>"
-        strTable+="<td>"
-        strTable+="<button type='button' value='' onclick=\"doupdate("+i+", '"+symbol+"')\">Update</button>&nbsp;"
-        strTable+="</td><td>"
-        strTable+="<button type='button' value='' onclick=\"dosummery("+i+", '"+symbol+"')\">Summery</button>&nbsp;"
-        strTable+="<button type='button' value='' onclick=\"doq1min("+i+", '"+symbol+"')\">1Min</button>&nbsp;"
-        strTable+="<button type='button' value='' onclick=\"doq1sec("+i+", '"+symbol+"')\">1Sec</button>&nbsp;"
-        strTable+="</td><td>"
-        strTable+="<button type='button' value='' onclick=\"doimport1min("+i+", '"+symbol+"')\">1Min</button></td>"
+        strTable+="<tr onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\" onclick=\"showDlg("+i+");\" >"
+        strTable+="<td>"+(i+1)+"</td>"
+        strTable+="<td>"+symbol+"</td>"
+        strTable+="<td>"+desc+"</td>"
+        strTable+="<td>"+bpv+"</td>"
+        strTable+="<td>"+mko+"</td>"
+        strTable+="<td>"+mkc+"</td>"
+        strTable+="<td>"+storesec_checked+"</td>"
         strTable+="</tr>"
     }
     strTable+="</table>"
@@ -127,5 +180,35 @@ function makeMainTable(allSymInfo)
 }
 </script>
 <body onload='qSymInfo()'>
-<div id='mainDiv'></div>
+<!-- The Modal -->
+<div id='mainDiv' ></div>
+<div id="myModal" class='modal' style="display: none;">
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close" onclick="closeDlg();">x</span>
+    <p>
+		<table>
+		<tr class='grayThing smallfont'><td colspan=2>Symbol Setting</td></tr>
+		<tr><td>Symbol</td><td><div id='dlgSym'></div><div id='dlgSymIdx' style="display: none;"></div></td></tr>
+		<tr><td>Description</td><td><input type='text' id='editDesc'></td></tr>
+		<tr><td>Big Point Value</td><td><input type='text' id='editBPV'></td></tr>
+		<tr><td>Market Open/Close<br>(HHmmSS)</td><td><input type='text' id='editMKO'>&nbsp;~&nbsp;<input type='text' id='editMKC'></td></tr>
+		<tr><td>Store Second</td><td><input type='checkbox' id='chkSSec'"/></td></tr>
+		<tr><td>Actions</td><td><button type='button' value='' onclick="doupdate($('#dlgSymIdx').text()*1, $('#dlgSym').text(), $('#editDesc').val(), $('#editBPV').val(), $('#editMKO').val(), $('#editMKC').val(), $('#chkSSec').prop('checked')?1:0)">Update</button></td>
+		<table><br>
+
+		<table>
+                <tr class='grayThing smallfont'><td colspan=2>Actions</td></tr>
+		<tr><td>Qurey</td><td>
+			<button type='button' value='' onclick="dosummery($('#dlgSymIdx').text()*1, $('#dlgSym').text())">Summery</button>&nbsp;
+			<button type='button' value='' onclick="doq1min($('#dlgSymIdx').text()*1, $('#dlgSym').text())">Query 1Min</button>&nbsp;
+			<button type='button' value='' onclick="doq1sec($('#dlgSymIdx').text()*1, $('#dlgSym').text())">Query 1Sec</button>&nbsp;
+		</td>
+		<tr><td>Modify</td><td>
+			<button type='button' value='' onclick="doimport1min($('#dlgSymIdx').text()*1, $('#dlgSym').text())">Import 1Min</button>&nbsp;<br>
+		</td></tr>
+		</table>
+    </p>
+  </div>
+</div>
 </body></html>
