@@ -1,56 +1,6 @@
 <html>
 <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
-<style type="text/css">
-<!--
-body { background: #FFF }
-table, tr, td { border-collapse: collapse; padding:5px; border: 1px solid #000000;}
-.header {background-color: #999999;}
-
-.yellowThing {background: #FE7;}
-.whiteThing {background: #FFF;}
-.grayThing {background: #DDD;}
-.smallfont {font-size:12pt;}
-
-
-/* The Modal (background) */
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgb(0,0,0); /* Fallback color */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-}
-
-/* Modal Content/Box */
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto; /* 15% from the top and centered */
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
-}
-
-/* The Close Button */
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
-//-->
-</style>
+<link rel='stylesheet' type='text/css' href='/style.css'>
 <script src="/js/jquery-2.1.4.min.js"></script>
 <!--<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>-->
 <script language='javascript'>
@@ -87,6 +37,10 @@ function doupdate(idx, sym, desc, bpv, mko, mkc, ssec){
 function doimport1min(idx, sym){
  location.href='/i1min.html?sym='+encodeURI(sym);
 }
+function doModify(idx, sym){
+ location.href='/edata.html?sym='+encodeURI(sym);
+}
+
 function strQDay(datetime){
     var dd = datetime.getDate();
     var mm = datetime.getMonth()+1; //January is 0!
@@ -205,7 +159,8 @@ function makeMainTable(jsonObj)
 			<button type='button' value='' onclick="doq1sec($('#dlgSymIdx').text()*1, $('#dlgSym').text())">Query 1Sec</button>&nbsp;
 		</td>
 		<tr><td>Modify</td><td>
-			<button type='button' value='' onclick="doimport1min($('#dlgSymIdx').text()*1, $('#dlgSym').text())">Import 1Min</button>&nbsp;<br>
+			<button type='button' value='' onclick="doimport1min($('#dlgSymIdx').text()*1, $('#dlgSym').text())">Import 1Min</button>&nbsp;
+                        <button type='button' value='' onclick="doModify($('#dlgSymIdx').text()*1, $('#dlgSym').text())">Modify Data</button>&nbsp;<br>
 		</td></tr>
 		</table>
     </p>
