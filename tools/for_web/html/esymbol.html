@@ -38,7 +38,7 @@ function doimport1min(idx, sym){
  location.href='/i1min.html?sym='+encodeURI(sym);
 }
 function doModify(idx, sym){
- location.href='/edata.html?sym='+encodeURI(sym);
+ window.open('/edata.html?sym='+escape(sym)+'&_T=0', "_blank", "");
 }
 
 function strQDay(datetime){

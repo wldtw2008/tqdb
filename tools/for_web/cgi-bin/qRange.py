@@ -6,6 +6,9 @@ from datetime import datetime
 from dateutil import tz, parser
 from cassandra.cluster import Cluster
 
+def _LocalDT2EOPCHFloat(localDT):
+    return float(localDT.strftime('%s.%f'))
+
 def _utcDTtoEOPCHFloat(utcDT):
     from_zone = tz.tzutc()
     to_zone = tz.tzlocal()
@@ -20,7 +23,8 @@ def _utcDTtoEOPCHFloat(utcDT):
     return float(localDT.strftime('%s.%f'))
 
 def _main(keyspace, table, symbol, begDTStr, endDTStr):
-    retObj = {'range':[_utcDTtoEOPCHFloat(parser.parse(begDTStr)), _utcDTtoEOPCHFloat(parser.parse(endDTStr))], 'data':[], 'symbol':symbol, 'type':table, 'qcmd':''}
+    retObj = {'range':[_LocalDT2EOPCHFloat(parser.parse(begDTStr)), _LocalDT2EOPCHFloat(parser.parse(endDTStr))], 'data':[], 'symbol':symbol, 'type':table, 'qcmd':''}
+
     if table == 'secbar' and retObj['range'][1] - retObj['range'][0] > 86400*3:
         retObj['range'][0] = retObj['range'][1] - 86400*3
     elif table == 'tick' and retObj['range'][1] - retObj['range'][0] > 86400:

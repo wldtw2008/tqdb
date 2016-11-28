@@ -40,45 +40,50 @@ function qRange()
 		makeMainTable(data);
         }); 
 }
-function doupdate(idx, sym, desc, bpv, mko, mkc, ssec){
- //alert('ready to update: '+sym+', desc:'+desc+', bpv:'+bpv)
- location.href='/cgi-bin/usymbol.py?sym='+encodeURI(sym)+'&desc='+desc+'&bpv='+bpv+'&mko='+mko+'&mkc='+mkc+
-               '&ssec='+ssec;
+function doModify(method){
+    $('#modifyResult').html('Procssing...');
+    floatDT = parseFloat($('#modifyFloatDT').text())
+    symbol = $('#barSym').html();
+    barType = $('#barType').html()
+    o=$('#barOpen').val();
+    h=$('#barHigh').val();
+    l=$('#barLow').val();
+    c=$('#barClose').val();
+    v=$('#barVol').val();
+    var jsonObj = {}
+    if (method == "UPDATE") 
+    {
+        if (barType == "tick")
+        {
+		jsonObj={'C':c,'V':v}
+        }
+	else
+	{
+		jsonObj={'open':o,'high':h,'low':l,'close':c,'vol':v}		
+	}
+    }
+    else
+    {
+	    jsonObj = {}
+    }
+    url='/cgi-bin/eData.py?symbol='+symbol+'&type='+barType+'&cmd='+method+'&epochFloat='+floatDT+'&jsonObj='+JSON.stringify(jsonObj)
+    DoAjax(url, {},
+            function(data, textStatus, jqXHR){
+	       html = "<font color='#000'>"+data['Result']+"</font>";
+	       if (data['Result'] != 'OK')
+		   html = "<font color='#F00'>"+data['Result']+"</font>";
+               $('#modifyResult').html(html);
+	       if (data['Result'] == 'OK'){
+		       setTimeout("closeModifyBarDlg();qRange();",1000);
+  	       }
+            });
+
 }
-function doimport1min(idx, sym){
- location.href='/i1min.html?sym='+encodeURI(sym);
-}
-function strQDay(datetime){
-    var dd = datetime.getDate();
-    var mm = datetime.getMonth()+1; //January is 0!
-    var yyyy = datetime.getFullYear();
-    return yyyy+"-"+mm+"-"+dd
-}
-function doq1min(idx, sym){
-    var begday = new Date();
-    begday.setDate(begday.getDate() - 3);
-    var endday = new Date(); 
-    endday.setDate(endday.getDate() + 3);
-    beg = strQDay(begday) 
-    end = strQDay(endday)
-    window.open('/cgi-bin/q1min.py?symbol='+encodeURI(sym)+'&BEG='+beg+"&END="+end, "_blank", "");
-}
-function doq1sec(idx, sym){
-    var begday = new Date();
-    begday.setDate(begday.getDate() - 3);
-    var endday = new Date();
-    endday.setDate(endday.getDate() + 3);
-    beg = strQDay(begday)
-    end = strQDay(endday)
-    window.open('/cgi-bin/q1sec.py?symbol='+encodeURI(sym)+'&BEG='+beg+"&END="+end, "_blank", "");
-}
-function dosummery(idx, sym){
-    window.open('/cgi-bin/qsummery.py?symbol='+encodeURI(sym), "_blank", "");
-}
-function showDlg(floatDT){
+function showModifyBarDlg(floatDT){
     floatDT = parseFloat(floatDT);
     $('#barSym').html(barData['symbol'])
     $('#barType').html(barData['type'])
+    $('#modifyFloatDT').text(floatDT)
     barIdx = barData['dataDict'][floatDT]
     bar = barData['data'][barIdx]
     var d = new Date(0);
@@ -112,7 +117,7 @@ function showDlg(floatDT){
     var modal = document.getElementById('modifyBar');
     modal.style.display = "block";
 }
-function closeDlg(){
+function closeModifyBarDlg(){
     var modal = document.getElementById('modifyBar');
     modal.style.display = "none";
 }
@@ -151,7 +156,7 @@ function makeMainTable(jsonObj)
         {
             o=bar['o'];h=bar['h'];l=bar['l'];
         }
-        strTable+="<tr onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\" onclick=\"showDlg("+floatDT+");\" >"
+        strTable+="<tr onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\" onclick=\"showModifyBarDlg("+floatDT+");\" >"
         strTable+="<td>"+floatDT.toFixed(3)+"</td>"
         strTable+="<td>"+dtstr+"</td>"
         strTable+="<td>"+o+"</td>"
@@ -164,17 +169,22 @@ function makeMainTable(jsonObj)
     strTable+="</table>"
     document.getElementById('mainDiv').innerHTML = strTable;
 }
-function getFormattedDate(date) {
-    var day = date.getDate();
-    var month = date.getMonth() + 1;
-    var year = date.getFullYear().toString().slice(2);
-    return day + '-' + month + '-' + year;
+function getParameterByName(name, url) {
+	    if (!url) {
+		          url = window.location.href;
+			      }
+	        name = name.replace(/[\[\]]/g, "\\$&");
+		    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+		        results = regex.exec(url);
+		        if (!results) return null;
+			    if (!results[2]) return '';
+			        return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 function bodyonload()
 {
+    $('#editSym').val(unescape(getParameterByName('sym')));
     $('#editBeg').datetimepicker({dateFormat: 'yy-mm-dd',format:'HH:mm:ss', value: new Date()});
     $('#editEnd').datetimepicker({dateFormat: 'yy-mm-dd',format:'HH:mm:ss', value: new Date()});
-    //alert(1)
 }
 </script>
 <body onload='bodyonload();'>
@@ -190,9 +200,10 @@ Range:<input type='text' id='editBeg' size=14>&nbsp;~&nbsp;<input type='text' id
 <div id="modifyBar" class='modal'>
   <!-- Modal content -->
   <div class="modal-content">
-    <span class="close" onclick="closeDlg();">x</span>
+    <span class="close" onclick="closeModifyBarDlg();">x</span>
     <p>
     <span>Symbol:&nbsp;<span id='barSym'></span>&nbsp;&nbsp;&nbsp;Type:&nbsp;<span id='barType'></span></span>
+                <input type='text' id='modifyFloatDT' style="display: none;">
 		<table>
 		<tr class='grayThing smallfont'><td>Datetime</td><td>Open</td><td>High</td><td>Low</td><td>Close</td><td>Volume</td></tr>
                 <tr><td><div id='barDT'></div></td>
@@ -203,11 +214,12 @@ Range:<input type='text' id='editBeg' size=14>&nbsp;~&nbsp;<input type='text' id
                     <td><input type='text' id='barVol' size='6'></td>
 		</tr>
                 <tr><td colspan='6'>
-			<button type='button' value='' onclick="dosummery($('#dlgSymIdx').text()*1, $('#dlgSym').text())">Update</button>&nbsp;
-			<button type='button' value='' onclick="doq1min($('#dlgSymIdx').text()*1, $('#dlgSym').text())">Delete</button>&nbsp;
+			<button type='button' value='' onclick="doModify('UPDATE')">Update</button>&nbsp;
+			<button type='button' value='' onclick="doModify('DELETE')">Delete</button>&nbsp;
 		</td>
 		</table>
     </p>
+    <div id='modifyResult' >Result: </div>
   </div>
 </div>
 </body></html>
