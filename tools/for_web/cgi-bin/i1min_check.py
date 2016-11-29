@@ -43,12 +43,14 @@ def _prepareImport():
     with open(cmdfile, 'w') as cmd:
         cmd.write('. /etc/profile.d/profile_tqdb.sh\n')
         cmd.write('TQDB="tqdb1"\n')
-        cmd.write('SYMBOL="%s"\n'% param['Sym'])
+        sym = param['Sym']
+        sym = sym.replace('$', '\\$')
+        cmd.write('SYMBOL="%s"\n'% sym)
         cmd.write('NDAYAGO=0\n')
-        cmd.write('CMD="cat /tmp/%s.csv | python $TQDB_DIR/tools/Min2Cass.py $CASS_IP $CASS_PORT $TQDB \'$SYMBOL\'"\n' % importTicket)
+        cmd.write('CMD="cat /tmp/%s.csv | python -u $TQDB_DIR/tools/Min2Cass.py $CASS_IP $CASS_PORT $TQDB \'$SYMBOL\'"\n' % importTicket)
         cmd.write('echo "Ready to run: "$CMD > /tmp/%s.log\n' % importTicket)
         cmd.write('eval $CMD >> /tmp/%s.log\n' % importTicket)
-        cmd.write('cat /tmp/%s.log\n' % importTicket)
+        cmd.write('echo "Importing finish!" >> /tmp/%s.log\n' % importTicket)
     os.chmod(cmdfile, os.stat(cmdfile).st_mode | stat.S_IEXEC)
     with open(csvfile, 'w') as csv:
         for onedata in param['Lines']:
@@ -62,17 +64,18 @@ if param['Sym'] == '':
 else:
     #sys.stdout.write('<html><body>No Sym!</body></html>')
     sys.stdout.write('<html><body>')
-    sys.stdout.write('Sym:%s, TotalLines:%d<br>\n'%(param['Sym'], len(param['Lines'])))
-    sys.stdout.write('<table border=1>\n')
-    sys.stdout.write('<tr><td>No</td><td>Date</td><td>Time</td><td>Open</td><td>High</td><td>Low</td><td>Close</td><td>Vol</td></tr>\n')
+    sys.stdout.write("<link rel='stylesheet' type='text/css' href='/style.css'>")
+    sys.stdout.write('Sym:%s, TotalLines:%d, ImportTicket:%s<br>\n'%(param['Sym'], len(param['Lines']), importTicket))
+    sys.stdout.write('<table>\n')
+    sys.stdout.write('<tr class="grayThing smallfont"><td>No</td><td>Date</td><td>Time</td><td>Open</td><td>High</td><td>Low</td><td>Close</td><td>Vol</td></tr>\n')
     cnt = 0
     for onedata in param['Lines']:
        cnt += 1
        if cnt>100 and cnt<len(param['Lines'])-100:
           if cnt == 101:
-              sys.stdout.write('<tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\n')
+              sys.stdout.write('<tr onmouseover="this.className=\'yellowThing\';" onmouseout=\"this.className=\'whiteThing\';"><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\n')
           continue
-       sys.stdout.write('<tr><td>#%d</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n'%
+       sys.stdout.write('<tr onmouseover="this.className=\'yellowThing\';" onmouseout=\"this.className=\'whiteThing\';"><td>#%d</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n'%
                         (cnt, onedata[0], onedata[1], onedata[2], onedata[3], onedata[4], onedata[5], onedata[6]))
     sys.stdout.write('</table>\n')
     sys.stdout.write('<input type="button" onclick="location.href=\'/cgi-bin/i1min_do.py?importTicket=%s\'" value=\'Confirm importing!\'></input>\n'%importTicket)
