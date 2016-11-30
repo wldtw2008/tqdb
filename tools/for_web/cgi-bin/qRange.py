@@ -32,6 +32,7 @@ def _main(keyspace, table, symbol, begDTStr, endDTStr):
     elif table == 'minbar' and retObj['range'][1] - retObj['range'][0] > 86400*30:
         retObj['range'][0] = retObj['range'][1] - 86400*30
     begDTStr = datetime.fromtimestamp(retObj['range'][0])
+    ednDTStr = datetime.fromtimestamp(retObj['range'][1])
 
     cluster = Cluster()
     session = cluster.connect(keyspace)
