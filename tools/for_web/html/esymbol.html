@@ -4,6 +4,10 @@
 <script src="/js/jquery-2.1.4.min.js"></script>
 <!--<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>-->
 <script language='javascript'>
+function myUrlEncode(str)
+{
+	return encodeURI(str).replace(/&/i, '%26')
+}
 function DoAjax(requestUrl, sentData, sHandler, eHandler, pageNotFoundHandler){
         $.ajax({
             type: 'GET',    
@@ -40,11 +44,11 @@ function qSystemInfo()
 }
 function doupdate(idx, sym, desc, bpv, mko, mkc, ssec){
  //alert('ready to update: '+sym+', desc:'+desc+', bpv:'+bpv)
- location.href='/cgi-bin/usymbol.py?sym='+encodeURI(sym)+'&desc='+desc+'&bpv='+bpv+'&mko='+mko+'&mkc='+mkc+
+ location.href='/cgi-bin/usymbol.py?sym='+myUrlEncode(sym)+'&desc='+desc+'&bpv='+bpv+'&mko='+mko+'&mkc='+mkc+
                '&ssec='+ssec;
 }
 function doimport1min(idx, sym){
- location.href='/i1min.html?sym='+encodeURI(sym);
+ location.href='/i1min.html?sym='+myUrlEncode(sym);
 }
 function doModify(idx, sym){
  window.open('/edata.html?sym='+escape(sym)+'&_T=0', "_blank", "");
@@ -63,7 +67,7 @@ function doq1min(idx, sym){
     endday.setDate(endday.getDate() + 3);
     beg = strQDay(begday) 
     end = strQDay(endday)
-    window.open('/cgi-bin/q1min.py?symbol='+encodeURI(sym)+'&BEG='+beg+"&END="+end, "_blank", "");
+    window.open('/cgi-bin/q1min.py?symbol='+myUrlEncode(sym)+'&BEG='+beg+"&END="+end, "_blank", "");
 }
 function doq1sec(idx, sym){
     var begday = new Date();
@@ -72,10 +76,10 @@ function doq1sec(idx, sym){
     endday.setDate(endday.getDate() + 3);
     beg = strQDay(begday)
     end = strQDay(endday)
-    window.open('/cgi-bin/q1sec.py?symbol='+encodeURI(sym)+'&BEG='+beg+"&END="+end, "_blank", "");
+    window.open('/cgi-bin/q1sec.py?symbol='+myUrlEncode(sym)+'&BEG='+beg+"&END="+end, "_blank", "");
 }
 function dosummery(idx, sym){
-    window.open('/cgi-bin/qsummery.py?symbol='+encodeURI(sym), "_blank", "");
+    window.open('/cgi-bin/qsummery.py?symbol='+myUrlEncode(sym), "_blank", "");
 }
 function showDlg(idx){
     var sym = allSymInfo[idx]

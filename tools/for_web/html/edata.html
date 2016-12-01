@@ -12,6 +12,11 @@
 
 <!--<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>-->
 <script language='javascript'>
+function myUrlEncode(str)
+{
+	 return encodeURI(str).replace(/&/i, '%26')
+}
+
 function DoAjax(requestUrl, sentData, sHandler, eHandler, pageNotFoundHandler){
         $.ajax({
             type: 'GET',    
@@ -34,7 +39,7 @@ function qRange()
     editBeg = $('#editBeg').val()
     editEnd = $('#editEnd').val() 
 
-    url='/cgi-bin/qRange.py?symbol='+editSym+'&type='+selectType+'&BEG='+editBeg+'&END='+editEnd
+    url='/cgi-bin/qRange.py?symbol='+myUrlEncode(editSym)+'&type='+selectType+'&BEG='+editBeg+'&END='+editEnd
     DoAjax(url, {},
         function(data, textStatus, jqXHR){
 		makeMainTable(data);
@@ -43,7 +48,9 @@ function qRange()
 function doModify(method){
     $('#modifyResult').html('Procssing...');
     floatDT = parseFloat($('#modifyFloatDT').text())
-    symbol = $('#barSym').html();
+    var elem = document.createElement('textarea')
+    elem.innerHTML = $('#barSym').html()
+    symbol = elem.value;
     barType = $('#barType').html()
     o=$('#barOpen').val();
     h=$('#barHigh').val();
@@ -66,7 +73,7 @@ function doModify(method){
     {
 	    jsonObj = {}
     }
-    url='/cgi-bin/eData.py?symbol='+symbol+'&type='+barType+'&cmd='+method+'&epochFloat='+floatDT+'&jsonObj='+JSON.stringify(jsonObj)
+    url='/cgi-bin/eData.py?symbol='+myUrlEncode(symbol)+'&type='+barType+'&cmd='+method+'&epochFloat='+floatDT+'&jsonObj='+JSON.stringify(jsonObj)
     DoAjax(url, {},
             function(data, textStatus, jqXHR){
 	       html = "<font color='#000'>"+data['Result']+"</font>";
