@@ -29,6 +29,15 @@ function qSymInfo()
 		makeMainTable(data);
         }); 
 }
+function qSystemInfo()
+{
+    url='/cgi-bin/qSystemInfo.py'
+    DoAjax(url, {},
+	function(data, textStatus, jqXHR){
+		$('#systemInfoDiv').html(data);
+		});
+
+}
 function doupdate(idx, sym, desc, bpv, mko, mkc, ssec){
  //alert('ready to update: '+sym+', desc:'+desc+', bpv:'+bpv)
  location.href='/cgi-bin/usymbol.py?sym='+encodeURI(sym)+'&desc='+desc+'&bpv='+bpv+'&mko='+mko+'&mkc='+mkc+
@@ -83,12 +92,10 @@ function showDlg(idx){
     $('#editMKC').val(sym['keyval']['MKC'])
     $('#chkSSec').prop("checked", (1 == sym['keyval']['SSEC']?true:false))
 
-    var modal = document.getElementById('myModal');
-    modal.style.display = "block";
+    $('#myModal').show();
 }
 function closeDlg(){
-    var modal = document.getElementById('myModal');
-    modal.style.display = "none";
+    $('#myModal').hide();
 }
 allSymInfo=[]
 function makeMainTable(jsonObj)
@@ -130,12 +137,22 @@ function makeMainTable(jsonObj)
         strTable+="</tr>"
     }
     strTable+="</table>"
-    document.getElementById('mainDiv').innerHTML = strTable;
+    document.getElementById('symbolTableDiv').innerHTML = strTable;
+}
+function divChange(divId)
+{
+    $('#symbolTableDiv').hide();
+    $('#systemInfoDiv').hide();
+    $('#'+divId).show();
 }
 </script>
-<body onload='qSymInfo()'>
+<body onload='qSymInfo();qSystemInfo();'>
+<button type='button' value='' onclick='divChange("systemInfoDiv")'>System Info</button>
+<button type='button' value='' onclick='divChange("symbolTableDiv")'>All Symbols</button>
+<hr>
+<div id='systemInfoDiv'>Loading...</div>
+<div id='symbolTableDiv' style="display: none;"></div>
 <!-- The Modal -->
-<div id='mainDiv' ></div>
 <div id="myModal" class='modal' style="display: none;">
   <!-- Modal content -->
   <div class="modal-content">
