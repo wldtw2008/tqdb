@@ -32,6 +32,7 @@ function DoAjax(requestUrl, sentData, sHandler, eHandler, pageNotFoundHandler){
     };
 function qRange()
 {
+    cleanBarData();
     $('#mainDiv').html("Querying...")
 
     editSym = $('#editSym').val()
@@ -45,13 +46,44 @@ function qRange()
 		makeMainTable(data);
         }); 
 }
+function getSymbol(symbol)
+{
+    var elem = document.createElement('textarea')
+    elem.innerHTML = symbol
+    return elem.value;
+}
+function getLocalDatetimeStr(epochFloat)
+{
+    var d = new Date(0);
+    d.setUTCMilliseconds(epochFloat*1000)
+    dtstr = d.getFullYear() + "-" + ("00" + (d.getMonth() + 1)).slice(-2) + "-" + ("00" + d.getDate()).slice(-2) + " " +
+            ("00" + d.getHours()).slice(-2) + ":" + ("00" + d.getMinutes()).slice(-2) + ":" + ("00" + d.getSeconds()).slice(-2) + "." + (d.getMilliseconds()+"000").substr(0,3)
+    return dtstr
+}
+function doDelRange(){
+    symbol = getSymbol(barData['symbol']);
+    barType = barData['type']
+    strMsg = "Are you sure delete " + barData.data.length + " record(s) '" + barType + "' of '" + symbol + "' between\n"
+    strMsg += getLocalDatetimeStr(barData['range'][0]) + " ~ " +getLocalDatetimeStr(barData['range'][1]) + "?\n"
+    r = confirm(strMsg)
+    if (r == true)
+    {
+        epochFloatBeg = barData['range'][0]
+	epochFloatEnd = barData['range'][1]
+	$('#modifyResult').html('Procssing...');
+	url='/cgi-bin/eData.py?symbol='+myUrlEncode(symbol)+'&type='+barType+'&cmd=DELETERANGE&epochFloatBeg='+epochFloatBeg+'&epochFloatEnd='+epochFloatEnd+'&jsonObj={}'
+	DoAjax(url, {},
+	       function(data, textStatus, jqXHR){
+		     $('#mainDiv').html(data['Result'])
+		     setTimeout("closeModifyBarDlg();qRange();",1000);
+	       })
+    }
+}
 function doModify(method){
     $('#modifyResult').html('Procssing...');
     floatDT = parseFloat($('#modifyFloatDT').text())
-    var elem = document.createElement('textarea')
-    elem.innerHTML = $('#barSym').html()
-    symbol = elem.value;
-    barType = $('#barType').html()
+    symbol = getSymbol(barData['symbol']);
+    barType = barData['type'] 
     o=$('#barOpen').val();
     h=$('#barHigh').val();
     l=$('#barLow').val();
@@ -73,7 +105,7 @@ function doModify(method){
     {
 	    jsonObj = {}
     }
-    url='/cgi-bin/eData.py?symbol='+myUrlEncode(symbol)+'&type='+barType+'&cmd='+method+'&epochFloat='+floatDT+'&jsonObj='+JSON.stringify(jsonObj)
+    url='/cgi-bin/eData.py?symbol='+myUrlEncode(symbol)+'&type='+barType+'&cmd='+method+'&epochFloatBeg='+floatDT+'&jsonObj='+JSON.stringify(jsonObj)
     DoAjax(url, {},
             function(data, textStatus, jqXHR){
 	       html = "<font color='#000'>"+data['Result']+"</font>";
@@ -93,11 +125,8 @@ function showModifyBarDlg(floatDT){
     $('#modifyFloatDT').text(floatDT)
     barIdx = barData['dataDict'][floatDT]
     bar = barData['data'][barIdx]
-    var d = new Date(0);
-    d.setUTCMilliseconds(floatDT*1000)
-    dtstr = d.getFullYear() + "-" + ("00" + (d.getMonth() + 1)).slice(-2) + "-" + ("00" + d.getDate()).slice(-2) + " " +
-            ("00" + d.getHours()).slice(-2) + ":" + ("00" + d.getMinutes()).slice(-2) + ":" + ("00" + d.getSeconds()).slice(-2) + "." + (d.getMilliseconds()+"000").substr(0,3)
 
+    dtstr = getLocalDatetimeStr(floatDT)
     $('#barDT').html(dtstr)
     barOHL_disable=false
     if (barData['type'] == 'minbar' || barData['type'] == 'secbar')
@@ -129,6 +158,10 @@ function closeModifyBarDlg(){
     modal.style.display = "none";
 }
 barData = {'range':null, 'symbol':'', 'type':'', 'data':[], 'dataDict':{}}
+function cleanBarData()
+{
+    barData = {'range':null, 'symbol':'', 'type':'', 'data':[], 'dataDict':{}}
+}
 function makeMainTable(jsonObj)
 {
     barData = jsonObj;
@@ -142,6 +175,7 @@ function makeMainTable(jsonObj)
         $('#mainDiv').html("===No Data===")
         return;
     }
+    strDeleteRange = "<input type='button' value='Delete below' onclick='doDelRange()'><br>"
     strTable="<table>"
     strTable+="<tr class='grayThing smallfont'><td>Timestamp</td><td>Datetime(LocalTime)</td><td>Open</td><td>High</td><td>Low</td><td>Close</td><td>Vol</td></tr>"
     
@@ -174,7 +208,7 @@ function makeMainTable(jsonObj)
         strTable+="</tr>"
     }
     strTable+="</table>"
-    document.getElementById('mainDiv').innerHTML = strTable;
+    document.getElementById('mainDiv').innerHTML = strDeleteRange+strTable;
 }
 function getParameterByName(name, url) {
 	    if (!url) {

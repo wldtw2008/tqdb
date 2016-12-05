@@ -6,28 +6,41 @@ from datetime import datetime
 from dateutil import tz, parser
 from cassandra.cluster import Cluster
 
-def _main(keyspace, table, symbol, EPOCHFloat, cmd, dataObj):
+def _main(keyspace, table, symbol, EPOCHFloatBeg, EPOCHFloatEnd, cmd, dataObj):
     cluster = Cluster()
     session = cluster.connect(keyspace)
     queryStr = ""
     qResult = None
     #return {'Result': str(dataObj)}
-    if table in ['minbar','secbar']:
-        queryStr = "select * from %s.%s where symbol='%s' and datetime=%d" %(keyspace, table, symbol, EPOCHFloat*1000)
-    elif table == 'tick':
-        queryStr = "select * from %s.%s where symbol='%s' and datetime=%d" %(keyspace, table, symbol, EPOCHFloat*1000)
-    try:
-        qResult = session.execute(queryStr)
-    except:
-        return {'Result': 'Error! Failed to excute [%s]!'%queryStr}
-    if qResult is None or len(qResult.current_rows)!=1:
-        return {'Result': 'Error! No Such Data'}
-    if table == 'tick' and qResult[0].type != 1:
-        return {'Result': 'Error! No Such Tick Data'}
+    if cmd in ('DELETE', 'UPDATE'):
+        if table in ['minbar', 'secbar', 'tick']:
+            queryStr = "select * from %s.%s where symbol='%s' and datetime=%d" %(keyspace, table, symbol, EPOCHFloatBeg*1000)
+        try:
+            qResult = session.execute(queryStr)
+        except:
+            return {'Result': 'Error! Failed to excute [%s]!'%queryStr}
+        if qResult is None or len(qResult.current_rows)!=1:
+            return {'Result': 'Error! No Such Data'}
+        if table == 'tick' and qResult[0].type != 1:
+            return {'Result': 'Error! No Such Tick Data'}
+    elif cmd in ('DELETERANGE'):
+        if table in ['minbar', 'secbar', 'tick']:
+            queryStr = "select * from %s.%s where symbol='%s' and datetime>=%d and datetime<%d" %(keyspace, table, symbol, EPOCHFloatBeg*1000, EPOCHFloatEnd*1000)
+        try:
+            qResult = session.execute(queryStr)
+        except:
+            return {'Result': 'Error! Failed to excute [%s]!'%queryStr}
+        if qResult is None or len(qResult.current_rows)<=0:
+            return {'Result': 'Error! No Such Data'}
+        if table == 'tick' and qResult[0].type <= 0:
+            return {'Result': 'Error! No Such Tick Data'}
+
  
     cqlCmd = ""
     if cmd == "DELETE":
-        cqlCmd = "delete from %s.%s where symbol='%s' and datetime=%d"%(keyspace, table, symbol, EPOCHFloat*1000)
+        cqlCmd = "delete from %s.%s where symbol='%s' and datetime=%d"%(keyspace, table, symbol, EPOCHFloatBeg*1000)
+    elif cmd == "DELETERANGE":
+        cqlCmd = "delete from %s.%s where symbol='%s' and datetime>=%d and datetime<%d" %(keyspace, table, symbol, EPOCHFloatBeg*1000, EPOCHFloatEnd*1000)
     elif cmd == "UPDATE":
         updatePart = ""
         if table in ['minbar','secbar']:
@@ -44,7 +57,7 @@ def _main(keyspace, table, symbol, EPOCHFloat, cmd, dataObj):
                     keyvalList.append("'%s':%s" % (key, str(qResult[0].keyval[key])))
 
             updatePart = "keyval={%s}" % ",".join(keyvalList)
-        cqlCmd = "update %s.%s set %s where symbol='%s' and datetime=%d"%(keyspace, table, updatePart, symbol, EPOCHFloat*1000)
+        cqlCmd = "update %s.%s set %s where symbol='%s' and datetime=%d"%(keyspace, table, updatePart, symbol, EPOCHFloatBeg*1000)
     try:
         eResult = session.execute(cqlCmd)
     except:
@@ -60,14 +73,16 @@ if 'symbol' not in mapQS:
         mapQS['symbol'] = 'XX??'
 if 'type' not in mapQS:
         mapQS['type'] = 'minbar'
-if 'epochFloat' not in mapQS:
-        mapQS['epochFloat'] = '0'
+if 'epochFloatBeg' not in mapQS:
+        mapQS['epochFloatBeg'] = '0'
+if 'epochFloatEnd' not in mapQS:
+        mapQS['epochFloatEnd'] = mapQS['epochFloatBeg']
 if 'cmd' not in mapQS:
         mapQS['cmd'] = 'UPDATE'
 if 'jsonObj' not in mapQS:
         mapQS['jsonObj'] = '{"open":0,"high":0,"low":0,"close":0,"vol":"0"}'
 
-retObj = _main('tqdb1', mapQS['type'], mapQS['symbol'], float(mapQS['epochFloat']), mapQS['cmd'], json.loads(mapQS['jsonObj']))
+retObj = _main('tqdb1', mapQS['type'], mapQS['symbol'], float(mapQS['epochFloatBeg']), float(mapQS['epochFloatEnd']), mapQS['cmd'], json.loads(mapQS['jsonObj']))
 
 
 sys.stdout.write("Content-Type: application/json; charset=UTF-8\r\n")
