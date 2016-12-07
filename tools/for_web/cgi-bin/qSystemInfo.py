@@ -64,7 +64,7 @@ if True:
 
 if True:
     lines = []
-    lines += ['Arch=%s' % ''.join(runCmd('arch'))]
+    lines += ['ARCH="%s"' % ''.join(runCmd('arch'))]
     lines += runCmd('cat /etc/os-release | head -6')
     allInfo.append(['Linux Info', '<br>'.join(lines)])
 

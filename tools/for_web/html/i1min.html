@@ -1,8 +1,22 @@
 <html>
 <link rel='stylesheet' type='text/css' href='/style.css'>
-
+<script src="/js/jquery-2.1.4.min.js"></script>
 <body onload='init();'>
 <script language='javascript'>
+function DoAjax(requestUrl, sentData, sHandler, eHandler, pageNotFoundHandler){
+        $.ajax({
+            type: 'GET',
+            url: requestUrl,
+            cache: false,
+            data: sentData,
+            success: sHandler,
+            error: eHandler,
+            statusCode: {
+              404: pageNotFoundHandler
+            }
+        });
+    };
+
 function getQueryParams(qs) {
     qs = qs.split('+').join(' ');
 
@@ -21,13 +35,20 @@ function init(){
     if ('sym' in params){
         document.getElementById('sym').value=params['sym']
     }
+    DoAjax('/cgi-bin/qSupportTZ.py', {}, 
+                function(data, textStatus, jqXHR){
+                    for (i=0;i<data.all.length;++i)
+                        $('#tzSelect').append($('<option>', {value: data.all[i], text: data.all[i]}));
+                });
+
 }
 </script>
 <form enctype="multipart/form-data" action="cgi-bin/i1min_check.py" method="post">
-<table width='400px' >
+<table >
 <tr class='grayThing smallfont'><td colspan='2'>===Import 1Min from CSV File===</td></tr>
 <tr><td width='100px'>Symbol</td><td><input type="text" name="sym" value="" id='sym'></td></tr>
-<tr><td>CsvFile</td><td><input type="file" name="file"></td></tr>
+<tr><td>Csv File</td><td><input type="file" name="file"></td></tr>
+<tr><td>Csv TimeZone</td><td><input type="checkbox" name="tzConv">Convert Timezone</input><br><select name='tzSelect' id='tzSelect'></select></td></tr>
 <tr><td>Action</td><td><input type="submit" value="Upload"></td></tr>
 </table>
 Note: Only support [YYYYmmDD,HHMMSS,Open,High,Low,Close,Vol] format currently.

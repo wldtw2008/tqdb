@@ -22,6 +22,18 @@ def _procPostData():
     global param
     form = cgi.FieldStorage()
     #param['Log'] = str(form)
+
+    sym = form.getvalue('sym')
+    if sym:
+        param['Sym'] = sym
+    tzConv = form.getvalue('tzConv')
+    tzSelect = form.getvalue('tzSelect')
+
+    if (tzConv == 'on' and tzSelect is not None and tzSelect != ''):
+        param['tzFromTo'] = [tzSelect, 'local']
+    else:
+        param['tzFromTo'] = None 
+
     if 'file' in form:
         fileitem = form['file']
         while True:
@@ -32,9 +44,17 @@ def _procPostData():
                 if len(onedata) == 6: onedata.append('0') #for vol
                 param['Lines'].append(onedata)
 
-    sym = form.getvalue('sym')
-    if sym:
-        param['Sym'] = sym
+    if param['tzFromTo'] is not None:
+        with open('/tmp/%s.tzFrom'%importTicket, 'w') as csv:
+            for onedata in param['Lines']:
+                csv.write('%s\n' % ','.join(onedata))
+
+        runCmd = "/home/tqdb/codes/tqdb/tools/csvtzconv.py '%s' '%s' '/tmp/%s.tzFrom' > /tmp/%s.tzTo" % (param['tzFromTo'][0], param['tzFromTo'][1], importTicket, importTicket)
+        subprocess.call(runCmd, shell=True)
+        param['Lines'] = []
+        with open('/tmp/%s.tzTo'%importTicket, 'r') as csv:
+            for line in csv.readlines():
+                param['Lines'].append(line.strip('\n').strip('\r').split(','))
 
 def _prepareImport():
     global param
@@ -66,6 +86,8 @@ else:
     sys.stdout.write('<html><body>')
     sys.stdout.write("<link rel='stylesheet' type='text/css' href='/style.css'>")
     sys.stdout.write('Sym:%s, TotalLines:%d, ImportTicket:%s<br>\n'%(param['Sym'], len(param['Lines']), importTicket))
+    if (param['tzFromTo'] is not None):
+        sys.stdout.write('<font color="#f00">Convert Timezone: %s ---> %s</font><br>' % (param['tzFromTo'][0], param['tzFromTo'][1]))
     sys.stdout.write('<table>\n')
     sys.stdout.write('<tr class="grayThing smallfont"><td>No</td><td>Date</td><td>Time</td><td>Open</td><td>High</td><td>Low</td><td>Close</td><td>Vol</td></tr>\n')
     cnt = 0
