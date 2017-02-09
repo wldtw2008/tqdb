@@ -1,5 +1,7 @@
 body { background: #FFF }
 table, tr, td { border-collapse: collapse; padding:5px; border: 1px solid #000000;}
+table.tblnoborder, tr.tblnoborder, td.tblnoborder { padding:5px; border: 0px;}
+
 .header {background-color: #999999;}
 
 .yellowThing {background: #FE7;}

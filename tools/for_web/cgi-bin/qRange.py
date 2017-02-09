@@ -25,18 +25,12 @@ def _utcDTtoEOPCHFloat(utcDT):
 def _main(keyspace, table, symbol, begDTStr, endDTStr):
     retObj = {'range':[_LocalDT2EOPCHFloat(parser.parse(begDTStr)), _LocalDT2EOPCHFloat(parser.parse(endDTStr))], 'data':[], 'symbol':symbol, 'type':table, 'qcmd':''}
 
-    if table == 'secbar' and retObj['range'][1] - retObj['range'][0] > 86400*3:
-        retObj['range'][0] = retObj['range'][1] - 86400*3
-    elif table == 'tick' and retObj['range'][1] - retObj['range'][0] > 86400:
-        retObj['range'][0] = retObj['range'][1] - 86400
-    elif table == 'minbar' and retObj['range'][1] - retObj['range'][0] > 86400*30:
-        retObj['range'][0] = retObj['range'][1] - 86400*30
     begDTStr = datetime.fromtimestamp(retObj['range'][0])
     ednDTStr = datetime.fromtimestamp(retObj['range'][1])
 
     cluster = Cluster()
     session = cluster.connect(keyspace)
-    queryStr = "select * from %s.%s where symbol='%s' and datetime>='%s' and datetime<'%s' order by datetime;"%(keyspace, table, symbol, begDTStr, endDTStr)
+    queryStr = "select * from %s.%s where symbol='%s' and datetime>='%s' and datetime<'%s' order by datetime limit 20000;"%(keyspace, table, symbol, begDTStr, endDTStr)
     retObj['qcmd'] = queryStr
     #print queryStr
     result = session.execute(queryStr)
