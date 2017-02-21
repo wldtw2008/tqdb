@@ -41,7 +41,7 @@ def _main(keyspace, table, symbol, EPOCHFloatBeg, EPOCHFloatEnd, cmd, dataObj):
         cqlCmd = "delete from %s.%s where symbol='%s' and datetime=%d"%(keyspace, table, symbol, EPOCHFloatBeg*1000)
     elif cmd == "DELETERANGE":
         cqlCmd = "delete from %s.%s where symbol='%s' and datetime>=%d and datetime<%d" %(keyspace, table, symbol, EPOCHFloatBeg*1000, EPOCHFloatEnd*1000)
-    elif cmd == "UPDATE":
+    elif cmd == "UPDATE" or "FUPDATE":
         updatePart = ""
         if table in ['minbar','secbar']:
             allKeyVal = []

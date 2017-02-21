@@ -31,6 +31,11 @@ def _procPostData():
 
     if (tzConv == 'on' and tzSelect is not None and tzSelect != ''):
         param['tzFromTo'] = [tzSelect, 'local']
+        try:
+            with open('/etc/timezone', 'r') as f:
+                param['tzFromTo'][1] = f.readline().strip()
+        except:
+            pass
     else:
         param['tzFromTo'] = None 
 
@@ -87,7 +92,7 @@ else:
     sys.stdout.write("<link rel='stylesheet' type='text/css' href='/style.css'>")
     sys.stdout.write('Sym:%s, TotalLines:%d, ImportTicket:%s<br>\n'%(param['Sym'], len(param['Lines']), importTicket))
     if (param['tzFromTo'] is not None):
-        sys.stdout.write('<font color="#f00">Convert Timezone: %s ---> %s</font><br>' % (param['tzFromTo'][0], param['tzFromTo'][1]))
+        sys.stdout.write('<font color="#f00">Convert Timezone: %s ---> %s' % (param['tzFromTo'][0], param['tzFromTo'][1]))
     sys.stdout.write('<table>\n')
     sys.stdout.write('<tr class="grayThing smallfont"><td>No</td><td>Date</td><td>Time</td><td>Open</td><td>High</td><td>Low</td><td>Close</td><td>Vol</td></tr>\n')
     cnt = 0
