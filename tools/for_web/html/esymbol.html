@@ -42,6 +42,14 @@ function qSystemInfo()
 		});
 
 }
+function doAddNewSym(sym){
+ if (sym.length==0)
+  return;
+ if (true==confirm('Are you sure add symbol: \''+sym+'\'?'))
+ {
+   location.href='/cgi-bin/usymbol.py?sym='+myUrlEncode(sym)+'&desc=&bpv=&mko=&mkc=&ssec=';
+ }
+}
 function doupdate(idx, sym, desc, bpv, mko, mkc, ssec){
  //alert('ready to update: '+sym+', desc:'+desc+', bpv:'+bpv)
  location.href='/cgi-bin/usymbol.py?sym='+myUrlEncode(sym)+'&desc='+desc+'&bpv='+bpv+'&mko='+mko+'&mkc='+mkc+
@@ -98,8 +106,11 @@ function showDlg(idx){
 
     $('#myModal').show();
 }
-function closeDlg(){
+function close_myModal(){
     $('#myModal').hide();
+}
+function close_newSymModal(){
+    $('#newSymModal').hide();
 }
 allSymInfo=[]
 function makeMainTable(jsonObj)
@@ -109,7 +120,7 @@ function makeMainTable(jsonObj)
     //allsymbol = [{"symbol": "WTX", "keyval": {"MKO": "84500", "DESC": "Taifex", "MKC": "134500", "BPV": "200"}}]
     len = allSymInfo.length
     strTable="<table>"
-    strTable+="<tr class='grayThing smallfont'><td rowspan=2>#</td><td rowspan=2>Symbol</td><td colspan=6>Symbol Settings</td></tr>"
+    strTable+="<tr class='grayThing smallfont'><td rowspan=2>#</td><td rowspan=2>Symbol&nbsp;<input type='button' value='New' onclick='$(\"#newSymModal\").show();'/></td><td colspan=6>Symbol Settings</td></tr>"
     strTable+="<tr class='grayThing smallfont'><td>Desc.</td><td>BigPoint<br>Value</td><td>MarketOpen<br>(HHmmSS)</td><td>MarketClose<br>(HHmmSS)</td><td>Store<br>Sec</td></tr>"
     
     for (i=0;i<len;++i)
@@ -156,11 +167,23 @@ function divChange(divId)
 <hr>
 <div id='systemInfoDiv'>Loading...</div>
 <div id='symbolTableDiv' style="display: none;"></div>
+<div id="newSymModal" class='modal' style="display: none;">
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close" onclick="close_newSymModal();">x</span>
+    <p>
+                <table>
+                <tr class='grayThing smallfont'><td colspan=2>Add a new symbol</td></tr>
+                <tr><td>Symbol</td><td><input type='text' id='editNewSymbol'></td></tr>
+                <tr><td>Actions</td><td><button type='button' onclick="doAddNewSym($('#editNewSymbol').val())">Add</button></td></tr>
+		</table>
+  </div>
+</div>
 <!-- The Modal -->
 <div id="myModal" class='modal' style="display: none;">
   <!-- Modal content -->
   <div class="modal-content">
-    <span class="close" onclick="closeDlg();">x</span>
+    <span class="close" onclick="close_myModal();">x</span>
     <p>
 		<table>
 		<tr class='grayThing smallfont'><td colspan=2>Symbol Setting</td></tr>
