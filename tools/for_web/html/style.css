@@ -1,4 +1,4 @@
-body { background: #FFF }
+body { background: #FFF; font-family: Consolas, monaco, monospace; }
 table, tr, td { border-collapse: collapse; padding:5px; border: 1px solid #000000;}
 table.tblnoborder, tr.tblnoborder, td.tblnoborder { padding:5px; border: 0px;}
 
