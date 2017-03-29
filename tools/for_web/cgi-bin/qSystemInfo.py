@@ -52,7 +52,8 @@ if True: #get system time zone
         if posi > 0:
             zones[i] = zones[i][posi+9:]
     currTime = ''.join(runCmd('date'))
-    allInfo.append(['Server Time', '%s<br>TimeZone=%s' % (currTime, ', '.join(zones))])
+    tzdbVer = runCmd('dpkg -s tzdata  | grep Version')[0].replace('Version: ','')
+    allInfo.append(['Server Time', '%s<br>TimeZone=%s<br>TimeZone DB Version=%s' % (currTime, ', '.join(zones), tzdbVer)])
 
 if True:
     lines = runCmd('cat /etc/crontab | grep purgeTick.sh | sed "s/^ *//" | grep -v "^#"')
