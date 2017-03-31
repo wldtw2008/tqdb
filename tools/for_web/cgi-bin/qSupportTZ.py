@@ -19,7 +19,8 @@ def runCmd(cmd):
             break
     return ret
 
-allTZ = {'all': runCmd("/home/tqdb/codes/tqdb/tools/tzconv -tz"), 'server': 'xx'}
+#allTZ = {'all': runCmd("/home/tqdb/codes/tqdb/tools/tzconv -tz"), 'server': 'xx'}
+allTZ = {'all': runCmd("timedatectl list-timezones"), 'server': 'xx'}
 sys.stdout.write("Content-Type: application/json\r\n")
 sys.stdout.write("\r\n")
 sys.stdout.write(json.dumps(allTZ))

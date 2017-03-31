@@ -40,6 +40,12 @@ if False:
         summery['tick.first'] = objRet['output']
 
 if True: #get system time zone
+    linuxFamily = '?'
+    if True:
+        tempId = runCmd('cat /etc/os-release | grep "^ID="')[0]
+        if tempId.find("rhel")>=0: linuxFamily="RedHat"
+        elif tempId.find("debian")>=0: linuxFamily="Debian"
+
     zones = []
     lines = runCmd('readlink -s /etc/localtime')
     for line in lines:
@@ -51,9 +57,17 @@ if True: #get system time zone
         posi = zones[i].find("zoneinfo/")
         if posi > 0:
             zones[i] = zones[i][posi+9:]
-    currTime = ''.join(runCmd('date'))
-    tzdbVer = runCmd('dpkg -s tzdata  | grep Version')[0].replace('Version: ','')
-    allInfo.append(['Server Time', '%s<br>TimeZone=%s<br>TimeZone DB Version=%s' % (currTime, ', '.join(zones), tzdbVer)])
+    tzdbVer = "?"
+    if linuxFamily == "Debian":
+        tzdbVer = runCmd('dpkg -s tzdata  | grep Version')[0].replace('Version: ','')
+    else if linuxFamily == "RedHat"
+        tzdbVer = runCmd('yum list installed | grep tzdata | awk "{print \\$2}"')
+    lines = []
+    lines.append('Now=%s' % ', '.join(runCmd("date +'%Y-%m-%d %H:%M:%S (%Z)'")))
+    lines.append('TimeZone=%s (/etc/localtime)' % ', '.join(zones))
+    lines.append('TimeZone=%s (/etc/timezone)' % ', '.join(runCmd('cat /etc/timezone')))
+    lines.append('tzdata Version=%s' % tzdbVer)
+    allInfo.append(['Server Time', '<br>'.join(lines)])
 
 if True:
     lines = runCmd('cat /etc/crontab | grep purgeTick.sh | sed "s/^ *//" | grep -v "^#"')
@@ -62,25 +76,28 @@ if True:
     allInfo.append(['Build 1Min Schedule', '<br>'.join(lines)])
     lines = runCmd('cat /etc/crontab | grep build1SecFromTick.sh | sed "s/^ *//" | grep -v "^#"')
     allInfo.append(['Build 1Sec Schedule', '<br>'.join(lines)])
+    lines = runCmd('cat /etc/crontab | grep -E "reboot|shutdown|halt" | sed "s/^ *//" | grep -v "^#"')
+    allInfo.append(['Reboot Schedule', '<br>'.join(lines)])
+
 
 if True:
     lines = []
-    lines += ['ARCH="%s"' % ''.join(runCmd('arch'))]
-    lines += runCmd('cat /etc/os-release | head -6')
+    #lines += ["----%s %s----" % (linuxFamily, ''.join(runCmd('arch')))]
+    lines += runCmd('grep -E "^PRETTY_NAME=" /etc/os-release | sed "s/\\"//g" | cut -f 2 -d "="')
+    lines += [''.join(runCmd('arch'))] 
     allInfo.append(['Linux Info', '<br>'.join(lines)])
 
 if True:
     lines = []
-    lines += runCmd('cat /proc/cpuinfo | grep "cores" | uniq ')
-    lines += runCmd('cat /proc/cpuinfo | grep "model name" | uniq ')
+    lines += runCmd('cat /proc/cpuinfo | grep -E "cores|model name" |sort | uniq ')
     allInfo.append(['CPUs Info', '<br>'.join(lines)])
 
 if True:
-    lines = runCmd('top -bn1 | head -5')
+    lines = runCmd('top -bn1 | head -10 | sed "s/ /\&nbsp;/g"')
     allInfo.append(['Top Info', '<br>'.join(lines)])
 
 if True:
-    lines = runCmd('df -h')
+    lines = runCmd('df -h| sed "s/ /\&nbsp;/g"')
     allInfo.append(['Disk Info', '<br>'.join(lines)])
 sys.stdout.write("Content-Type: text/html\r\n")
 sys.stdout.write("\r\n")
