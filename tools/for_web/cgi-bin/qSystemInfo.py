@@ -60,7 +60,7 @@ if True: #get system time zone
     tzdbVer = "?"
     if linuxFamily == "Debian":
         tzdbVer = runCmd('dpkg -s tzdata  | grep Version')[0].replace('Version: ','')
-    else if linuxFamily == "RedHat"
+    elif linuxFamily == "RedHat":
         tzdbVer = runCmd('yum list installed | grep tzdata | awk "{print \\$2}"')
     lines = []
     lines.append('Now=%s' % ', '.join(runCmd("date +'%Y-%m-%d %H:%M:%S (%Z)'")))
