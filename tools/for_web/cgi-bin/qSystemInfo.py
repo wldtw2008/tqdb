@@ -44,6 +44,7 @@ if True: #get system time zone
     if True:
         tempId = runCmd('cat /etc/os-release | grep "^ID="')[0]
         if tempId.find("rhel")>=0: linuxFamily="RedHat"
+        elif tempId.find("centos")>=0: linuxFamily="RedHat"
         elif tempId.find("debian")>=0: linuxFamily="Debian"
 
     zones = []
@@ -61,7 +62,7 @@ if True: #get system time zone
     if linuxFamily == "Debian":
         tzdbVer = runCmd('dpkg -s tzdata  | grep Version')[0].replace('Version: ','')
     elif linuxFamily == "RedHat":
-        tzdbVer = runCmd('yum list installed | grep tzdata | awk "{print \\$2}"')
+        tzdbVer = runCmd('yum list installed | grep tzdata.noarch | awk "{print \\$2}"')
     lines = []
     lines.append('Now=%s' % ', '.join(runCmd("date +'%Y-%m-%d %H:%M:%S (%Z)'")))
     lines.append('TimeZone=%s (/etc/localtime)' % ', '.join(zones))
