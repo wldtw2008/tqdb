@@ -2,115 +2,118 @@
 
 ***CentOS security***
     Disable the SELinux & Firewall
-    #sudo setenforce 0
-    #sudo vi /etc/sysconfig/selinux
+    $ sudo setenforce 0
+    $ sudo vi /etc/sysconfig/selinux
        ==> Set disabled
-    #sudo systemctl disable firewalld
-    #sudo systemctl stop firewalld
-    #sudo vi /etc/ssh/sshd_config
+    $ sudo systemctl disable firewalld
+    $ sudo systemctl stop firewalld
+    $ sudo vi /etc/ssh/sshd_config
        ==> PermitRootLogin no  
 
 ***CentOS releated package and envirunment***
-    #sudo yum install -y epel-release wget git nc python-pip
-    #sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
-    #sudo yum update
-    #sudo ln -s /usr/bin/nc /usr/bin/netcat
-    #sudo pip install --upgrade pip
-    #sudo pip install --upgrade cassandra-driver
+    Set network by nmtui:
+    $ sudo nmtui
+
+    $ sudo yum install -y epel-release wget git nc python-pip
+    $ sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+    $ sudo yum update
+    $ sudo ln -s /usr/bin/nc /usr/bin/netcat
+    $ sudo pip install --upgrade pip
+    $ sudo pip install --upgrade cassandra-driver
 
 
 ***Clone TQDB from GitHub***
     Login as user 'tqdb' and git clone:
-    #mkdir /home/tqdb/code && cd /home/tqdb/code
-    #mkdir /home/tqdb/oldtick
+    $ mkdir /home/tqdb/code && cd /home/tqdb/code
+    $ mkdir /home/tqdb/oldtick
     
 ***Java***
     Install Java
-    #sudo yum install java-1.8.0-openjdk
+    $ sudo yum install java-1.8.0-openjdk
     
     Check Java 
-    #java -version
+    $ java -version
    
 ***Cassandra***
     Please refering http://docs.datastax.com/en/cassandra/3.x/cassandra/install/installRHEL.html
     
-    #sudo vi /etc/yum.repos.d/datastax.repo
+    $ sudo vi /etc/yum.repos.d/datastax.repo
         [datastax-ddc] 
         name = DataStax Repo for Apache Cassandra
         baseurl = http://rpm.datastax.com/datastax-ddc/3.2 <== or put other version here
         enabled = 1
         gpgcheck = 0
        
-    #sudo yum install datastax-ddc
+    $ sudo yum install datastax-ddc
 
-    #sudo service cassandra start
-    #sudo /etc/init.d/cassandra start
+    $ sudo service cassandra start
+    $ sudo /etc/init.d/cassandra start
 
     Verify that DataStax Distribution of Apache Cassandra is running:
-    #nodetool status
+    $ nodetool status
 
     Make old style Cassandra dirs & files
-    #sudo mkdir /var/cassandra-oldverlike
-    #sudo ln -s /var/cassandra-oldverlike /var/cassandra
-    #sudo mkdir /var/cassandra/bin
-    #sudo ln -s /usr/bin/nodetool /var/cassandra/bin/
-    #sudo ln -s /usr/bin/cqlsh /var/cassandra/bin/
-    #sudo ln -s /usr/bin/cqlsh.py /var/cassandra/bin/
-    #sudo ln -s /var/lib/cassandra/ /var/cassandra/data
-    #sudo ln -s /etc/cassandra/ /var/cassandra/conf
+    $ sudo mkdir /var/cassandra-oldverlike
+    $ sudo ln -s /var/cassandra-oldverlike /var/cassandra
+    $ sudo mkdir /var/cassandra/bin
+    $ sudo ln -s /usr/bin/nodetool /var/cassandra/bin/
+    $ sudo ln -s /usr/bin/cqlsh /var/cassandra/bin/
+    $ sudo ln -s /usr/bin/cqlsh.py /var/cassandra/bin/
+    $ sudo ln -s /var/lib/cassandra/ /var/cassandra/data
+    $ sudo ln -s /etc/cassandra/ /var/cassandra/conf
 
     Please refresing the bottom part of this doc to create KeySpaces & Tables.
 
     Install the Cassandra-CPP-Driver
-    #wget downloads.datastax.com/cpp-driver/centos/7/cassandra/v2.4.3/cassandra-cpp-driver-2.4.3-1.el7.centos.x86_64.rpm
-    #sudo yum install libuv
-    #sudo rpm -ivh cassandra-cpp-driver-2.4.3-1.el7.centos.x86_64.rpm
+    $ wget downloads.datastax.com/cpp-driver/centos/7/cassandra/v2.4.3/cassandra-cpp-driver-2.4.3-1.el7.centos.x86_64.rpm
+    $ sudo yum install libuv
+    $ sudo rpm -ivh cassandra-cpp-driver-2.4.3-1.el7.centos.x86_64.rpm
     
     Then you can run ./itick to check the cpp-driver is ok or not.
     
 ***Lighttpd***
     Please refering https://www.howtoforge.com/tutorial/installing-lighttpd-with-php-5-fpm-and-mysql-on-centos-7/
 
-    #sudo yum install lighttpd
+    $ sudo yum install lighttpd
     
     Edit the conf file 
-    #sudo vi /etc/lighttpd/lighttpd.conf
+    $ sudo vi /etc/lighttpd/lighttpd.conf
         a. server.use-ipv6="disable"
         b. server.document-root=server_root+"/"
     
     Edit the module file to enable old stype cgi
-    #sudo vi /etc/lighttpd/modules.conf
+    $ sudo vi /etc/lighttpd/modules.conf
        ==> open include "conf.d/cgi.conf"
     
-    #sudo systemctl enable lighttpd.service
-    #sudo systemctl start lighttpd.service
+    $ sudo systemctl enable lighttpd.service
+    $ sudo systemctl start lighttpd.service
     
-    #sudo mv /var/www/lighttpd /var/www/htdocs
+    $ sudo mv /var/www/lighttpd /var/www/htdocs
     
-    #chmod -R +x /home/tqdb/
-    #chmod -R +r /home/tqdb/
-    #cd /home/tqdb/codes/tqdb/tools/for_web && sudo ./buildWeb.sh
+    $chmod -R +x /home/tqdb/
+    $chmod -R +r /home/tqdb/
+    $cd /home/tqdb/codes/tqdb/tools/for_web && sudo ./buildWeb.sh
     
 ***CentOS System setting***
     TimeZone
-    #ls -lrt /etc/localtime  
+    $ls -lrt /etc/localtime  
        <== to see current timezone setting
-    #sudo rm /etc/localtime && ln -s /usr/share/zoneinfo/UTC /etc/localtime && echo "UTC" | sudo tee /etc/timezone
+    $ sudo rm /etc/localtime && ln -s /usr/share/zoneinfo/UTC /etc/localtime && echo "UTC" | sudo tee /etc/timezone
+       <== set UTC
     
     Run at booting
-    #sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/tqdbStartup.sh /etc/init.d
-    #sudo vi /etc/rc.d/rc.local 
-     Put /etc/init.d/tqdbStartup.sh to the last line
-    #sudo chmod  +x /etc/rc.d/rc.local
-
-    #sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/profile_tqdb.sh /etc/profile.d/
+    $ sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/tqdbStartup.sh /etc/init.d
+    $ sudo vi /etc/rc.d/rc.local 
+       ==> Put /etc/init.d/tqdbStartup.sh to the last line
+    $ sudo chmod  +x /etc/rc.d/rc.local
+    $ sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/profile_tqdb.sh /etc/profile.d/
     
     Change the ip&port
-    #sudo vi /etc/profile.d/profile_tqdb.sh
+    $ sudo vi /etc/profile.d/profile_tqdb.sh
 
     Install ucspi-tcp (from 3rd dir)
-    #sudo rpm -ivh daemontools-0.76-1.el6.art.x86_64.rpm
-    #sudo rpm -ivh ucspi-tcp-0.88-2.2.x86_64.rpm
+    $ sudo rpm -ivh daemontools-0.76-1.el6.art.x86_64.rpm
+    $ sudo rpm -ivh ucspi-tcp-0.88-2.2.x86_64.rpm
     
     vi the /etc/crontab
         #Build yestarday 1Min from Tick at every 2:15
@@ -124,19 +127,19 @@
 
 ***Check***
    1. Check Demo data is ok or not
-   #ps -ef | grep demo_d2tq_server.sh
-   #netcat 127.0.0.1 4568
+   $ ps -ef | grep demo_d2tq_server.sh
+   $ netcat 127.0.0.1 4568
    
    2. Check insert tick to Cassandra:
-   #ps -ef | grep autoIns2Cass.sh
-   #cat /tmp/autoIns2Cass.log
+   $ ps -ef | grep autoIns2Cass.sh
+   $ cat /tmp/autoIns2Cass.log
    
    or you can run to see insert tick is ok or not:
-   #stdbuf -i0 -o0 -e0 netcat $D2TQ_IP $D2TQ_PORT | $TQDB_DIR/tools/itick $CASS_IP $CASS_PORT tqdb1 0 0
+   $ stdbuf -i0 -o0 -e0 netcat $D2TQ_IP $D2TQ_PORT | $TQDB_DIR/tools/itick $CASS_IP $CASS_PORT tqdb1 0 0
     
 ***Cassandra KeySpace & Table***
   1. Run clqsh
-  #/var/cassandra/bin/cqlsh
+  $ /var/cassandra/bin/cqlsh
   
   2. Copy and paste
      CREATE KEYSPACE tqdb1 WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 3 };
@@ -168,9 +171,9 @@
 
 ***Other***
     For not RedHat/CentOS
-    sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/profile_tqdb.sh /etc/profile.d/profile_tqdb.sh
-    sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/tqdbStartup.sh /etc/init.d/tqdbStartup.sh
-    cd /etc/init.d && sudo update-rc.d tqdbStartup.sh defaults
+    $ sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/profile_tqdb.sh /etc/profile.d/profile_tqdb.sh
+    $ sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/tqdbStartup.sh /etc/init.d/tqdbStartup.sh
+    $ cd /etc/init.d && sudo update-rc.d tqdbStartup.sh defaults
 
 
 
