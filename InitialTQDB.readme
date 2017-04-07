@@ -4,9 +4,11 @@
     Disable the SELinux & Firewall
     #sudo setenforce 0
     #sudo vi /etc/sysconfig/selinux
-     Set disable
+       ==> Set disabled
     #sudo systemctl disable firewalld
     #sudo systemctl stop firewalld
+    #sudo vi /etc/ssh/sshd_config
+       ==> PermitRootLogin no  
 
 ***CentOS releated package and envirunment***
     #sudo yum install -y epel-release wget git nc python-pip
@@ -77,7 +79,8 @@
         b. server.document-root=server_root+"/"
     
     Edit the module file to enable old stype cgi
-    #sudo vi /etc/lighttpd/modules.conf  ==> open include "conf.d/cgi.conf"
+    #sudo vi /etc/lighttpd/modules.conf
+       ==> open include "conf.d/cgi.conf"
     
     #sudo systemctl enable lighttpd.service
     #sudo systemctl start lighttpd.service
@@ -90,7 +93,8 @@
     
 ***CentOS System setting***
     TimeZone
-    #ls -lrt /etc/localtime  <== to see current timezone setting
+    #ls -lrt /etc/localtime  
+       <== to see current timezone setting
     #sudo rm /etc/localtime && ln -s /usr/share/zoneinfo/UTC /etc/localtime && echo "UTC" | sudo tee /etc/timezone
     
     Run at booting
