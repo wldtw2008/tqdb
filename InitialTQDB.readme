@@ -8,14 +8,19 @@
     #sudo systemctl disable firewalld
     #sudo systemctl stop firewalld
 
-***CentOS releated package***
-    #sudo yum install -y epel-release wget git nc
+***CentOS releated package and envirunment***
+    #sudo yum install -y epel-release wget git nc python-pip
     #sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
     #sudo yum update
+    #sudo ln -s /usr/bin/nc /usr/bin/netcat
+    #sudo pip install --upgrade pip
+    #sudo pip install --upgrade cassandra-driver
+
 
 ***Clone TQDB from GitHub***
     Login as user 'tqdb' and git clone:
     #mkdir /home/tqdb/code && cd /home/tqdb/code
+    #mkdir /home/tqdb/oldtick
     
 ***Java***
     Install Java
@@ -113,12 +118,6 @@
         #TimeZone database update
         0 12    1 * *   root    yum update -y tzdata
 
-
-***Python Related***
-    #sudo yum install python-pip
-    #sudo pip install --upgrade pip
-    #sudo pip install --upgrade cassandra-driver
-    
 ***Check***
    1. Check Demo data is ok or not
    #ps -ef | grep demo_d2tq_server.sh
@@ -133,7 +132,7 @@
     
 ***Cassandra KeySpace & Table***
   1. Run clqsh
-  #/var/cassandra/cqlsh
+  #/var/cassandra/bin/cqlsh
   
   2. Copy and paste
      CREATE KEYSPACE tqdb1 WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 3 };
