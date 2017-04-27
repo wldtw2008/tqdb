@@ -76,15 +76,18 @@ if ('BEG' in mapQS):
 	begDT=mapQS['BEG']
 if ('END' in mapQS):
 	endDT=mapQS['END']
-#typo !!
-if ('MOSTHAVEBEG' in mapQS and mapQS['MOSTHAVEBEG'] != '0'):
-	begDT = getFirstValidDateTime(szSymbol, begDT, endDT)
-if ('MUSTHAVEBEG' in mapQS and mapQS['MUSTHAVEBEG'] != '0'):
+
+# if symbol is begin of ^^, it is a customer symbol !
+isCustomerSymbol = True if szSymbol.find('^^') == 0 else False
+if not isCustomerSymbol:
+    #typo !!
+    if ('MOSTHAVEBEG' in mapQS and mapQS['MOSTHAVEBEG'] != '0'):
         begDT = getFirstValidDateTime(szSymbol, begDT, endDT)
+    if ('MUSTHAVEBEG' in mapQS and mapQS['MUSTHAVEBEG'] != '0'):
+        begDT = getFirstValidDateTime(szSymbol, begDT, endDT)
+
 tmpFile="/tmp/q1min.%d.%d"%(os.getpid(),time.mktime(datetime.datetime.now().timetuple()))
-
-
-if szSymbol.find('^^') == 0: # if symbol is begin of ^^, it is a customer symbol !
+if isCustomerSymbol:
 	doCustomSymbol(tmpFile)
 else:
 	downloadFromTQDB(tmpFile)
