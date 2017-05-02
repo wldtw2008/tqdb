@@ -54,7 +54,11 @@ fi
 
 mv $FILE ${FILE}.1
 
-cat ${FILE}.1 | python $TQDB_DIR/tools/Min2Day.py $MKOPEN $MKCLOSE > ${FILE}
+CMD="cat "${FILE}".1 | python $TQDB_DIR/tools/Min2Day.py "$MKOPEN" "$MKCLOSE
+if [ $DBG -eq 1 ] ; then
+	echo $CMD
+fi
+eval $CMD > ${FILE}
 rm ${FILE}.1
 if [ "$GZIP" == "1" ] ; then
 	gzip $FILE

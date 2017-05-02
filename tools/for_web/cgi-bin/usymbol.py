@@ -8,6 +8,7 @@ from cassandra.cluster import Cluster
 import os
 import subprocess
 import json
+import urllib
 szCassIP1="127.0.0.1"
 szCassPort1="9042"
 szCassDB="tqdb1"
@@ -16,8 +17,8 @@ querystrings=os.environ.get("QUERY_STRING", "NA=NA")
 #querystrings="sym=WTX&desc=Taifex&bpv=200&mko=84500&mkc=134500"
 mapQS={}
 for qs in querystrings.split("&"):
-        mapQS[qs.split("=")[0]] = qs.split("=")[1]
-
+	if qs.find("=") <= 0: continue
+	mapQS[qs.split("=")[0]] = urllib.unquote(qs.split("=")[1])
 sym=''
 if 'sym' in mapQS: sym=mapQS['sym']
 param = {'DESC':"", 'BPV':'0.0', 'MKO':'0', 'MKC':'0', 'SSEC':'0'}
