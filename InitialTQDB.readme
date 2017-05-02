@@ -14,16 +14,22 @@
     Set network by nmtui:
     $ sudo nmtui
 
-    $ sudo yum install -y epel-release wget git nc python-pip python-dateutil
+    $ sudo yum install -y epel-release wget git nc python-pip python-dateutil net-tools
     $ sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
     $ sudo yum update
     $ sudo ln -s /usr/bin/nc /usr/bin/netcat
     $ sudo pip install --upgrade pip
     $ sudo pip install --upgrade cassandra-driver
 
+    Change Hostname if needed:
+    $ hostnamectl  
+       <== to show current hostname
+    $ sudo hostnamectl set-hostname TQDBXXXX
+       <== set host TQDBXXXX or whatever you want
+
 ***Clone TQDB from GitHub***
     Login as user 'tqdb' and git clone:
-    $ mkdir /home/tqdb/code && cd /home/tqdb/code
+    $ mkdir /home/tqdb/codes && cd /home/tqdb/codes
     $ mkdir /home/tqdb/oldtick
     
 ***Java***
@@ -45,8 +51,8 @@
        
     $ sudo yum install datastax-ddc
 
-    $ sudo service cassandra start
-    $ sudo /etc/init.d/cassandra start
+    $ sudo systemctl enable cassandra
+    $ sudo systemctl start cassandra
 
     Verify that DataStax Distribution of Apache Cassandra is running:
     $ nodetool status
@@ -101,7 +107,7 @@
     $ls -lrt /etc/localtime  
        <== to see current timezone setting
     $ sudo rm /etc/localtime && ln -s /usr/share/zoneinfo/UTC /etc/localtime && echo "UTC" | sudo tee /etc/timezone
-       <== set UTC
+       <== set UTC or whatever you want
     
     Run at booting:
     $ sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/tqdbStartup.sh /etc/init.d
@@ -122,7 +128,7 @@
         #Build yestarday 1Min from Tick at every 2:15
         15 2    * * 1,2,3,4,5,6,7   root   cd /home/tqdb/codes/tqdb/tools && ./build1MinFromTick.sh ALL 0
         30 2    * * 1,2,3,4,5,6,7   root   cd /home/tqdb/codes/tqdb/tools && ./build1SecFromTick.sh @ALL_SSEC@ 0
-        02 5    * * 7   root    cd /home/tqdb/codes/tqdb/tools && ./purgeTick.sh && shutdown -h 3
+        02 5    * * 7   root    cd /home/tqdb/codes/tqdb/tools && ./purgeTick.sh && reboot
         #NTP Update
         30 3    * * *   root    ntpdate clock.stdtime.gov.tw
         #TimeZone database update
