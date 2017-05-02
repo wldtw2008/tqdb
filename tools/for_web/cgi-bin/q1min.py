@@ -16,7 +16,7 @@ iGZip=1
 iRemoveQfile=1
 begDT = '2016-5-23 11:45:00'
 endDT = '2016-5-23 21:46:00'
-
+fileType = 0 #0=gz 1=csv
 mapQS={}
 def getFirstValidDateTime(symbol, begDTstr, endDTstr):
     begEOPCH, endEOPCH = (-1, -1) 
@@ -54,8 +54,16 @@ def loopReadFromStdin(tmpFile):
 		sys.stdout.write("Content-Encoding: gzip\r\n")
 	else:
 		pass
-	sys.stdout.write("Content-Type: text/plain\r\n")
+	if (fileType==0):
+		sys.stdout.write("Content-Type: text/plain\r\n")
+	else:
+		sys.stdout.write("Content-Type: text/csv\r\n")
+                sys.stdout.write("Content-Disposition: attachment; filename=\"%s.1min.csv\"\r\n"%szSymbol);
 	sys.stdout.write("\r\n")
+        if (fileType==0):
+		pass
+	else:
+		sys.stdout.write("YYYYMMDD,HHMMSS,Open,High,Low,Close,Vol\r\n")
 	fp = file(tmpFile, 'rb')
 	sys.stdout.write(fp.read())
 	sys.stdout.flush()
@@ -76,6 +84,10 @@ if ('BEG' in mapQS):
 	begDT=mapQS['BEG']
 if ('END' in mapQS):
 	endDT=mapQS['END']
+if ('csv' in mapQS):
+    if mapQS['csv']=='1':
+        fileType = 1 
+        iGZip = 0
 
 # if symbol is begin of ^^, it is a customer symbol !
 isCustomerSymbol = True if szSymbol.find('^^') == 0 else False
