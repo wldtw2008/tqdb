@@ -213,14 +213,17 @@ int main(int argc, char *argv[]) {
                 {
 			char szSymbol[32], szClose[32], szVol[32], szTC[32], szEPID[32];
 			szGetValueByKey(szLine+3, "ID", szSymbol, "");
+			if (1)//for Last Tick/Quote
+			{
+				std::string szSymFile = szSymbol;
+				strGetSymFilename(szSymFile);
+				mapSymHaveTick[szSymFile]=1;
+			}
 			//customer symbol is begin at  ^^, so if the first 2 char of the symbol is ^^, we have to skip it.
 			if (strstr(szSymbol, "^^") == szSymbol)
 			{
 				continue;
 			}
-			std::string szSymFile = szSymbol;
-			strGetSymFilename(szSymFile);
-			mapSymHaveTick[szSymFile]=1;
 			if (iGetSymbolIdx(&vecSymbolInfo, szSymbol)<0)
 			{
 				ST_SymbolInfo tmpSymbolInfo;
@@ -247,21 +250,26 @@ int main(int argc, char *argv[]) {
 			iInsertCnt++;
                         iQuoteOrTick = 1;
                 }
-		if (isQuote==1 && strncmp(szLine, "00_ID=", 6) == 0)//quote
+		else if (strncmp(szLine, "00_ID=", 6) == 0)//quote
 		{
 			char szSymbol[32], szTmp[32];
 			char *szAllowKey[] = {"BID", "ASK", "V", "EPID", NULL};
 			char *pKey;
 			int j, iFoundKeyCnt;
 			szGetValueByKey(szLine+3, "ID", szSymbol, "");
+			if (1)//for Last Tick/Quote
+			{
+				std::string szSymFile = szSymbol;
+				strGetSymFilename(szSymFile);
+				mapSymHaveQuote[szSymFile]=1;
+			}
+			if (isQuote!=1)
+				continue;
 			//customer symbol is begin at  ^^, so if the first 2 char of the symbol is ^^, we have to skip it.
                         if (strstr(szSymbol, "^^") == szSymbol)
                         {
                                 continue;
                         }
-			std::string szSymFile = szSymbol;
-                        strGetSymFilename(szSymFile);
-			mapSymHaveQuote[szSymFile]=1;
 			if (iGetSymbolIdx(&vecSymbolInfo, szSymbol)<0)
                         {
                                 ST_SymbolInfo tmpSymbolInfo;

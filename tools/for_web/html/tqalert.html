@@ -28,35 +28,29 @@ function qTQConf()
     url='/cgi-bin/eConf.py?cmd=QUERY&confKey=tqconf'
     DoAjax('GET', url, {},
         function(data, textStatus, jqXHR){
+		confVal = {}
 		if (data['Result'] != 'OK')
 		{
 			alert(data['Result']);
-                        makeTQTable({'TimeRule': {}, 'AlertCMD': ['', '', '']});
 		}
 		else
 		{
 			confVal=JSON.parse(data['confVal'])
 			for (i=0;i<3;++i)
 				confVal["AlertCMD"][i] = confVal["AlertCMD"][i].replace(/"/g, "&quot;").replace(/'/g, "&apos;").replace(/\\/g,"&bsol;")
-			makeTQTable(confVal);
 		}
+		if (!('TimeRule' in confVal)) confVal['TimeRule'] = [];
+		if (!('AlertCMD' in confVal)) confVal['AlertCMD'] = ['', '', ''];
+		if (!('GroupSyms' in confVal)) confVal['GroupSyms'] = ['', '', '', '', '', '', '', '', '', ''];
+		makeTQTable(confVal);
         });
     return;
 	makeTQTable({"TimeRule":{
-	"WTX":[[1110100,83000,84500,0,60],[1111010,84500,133000,30,0],[1011100,133000,134500,150,0]],
-	"STW":[[1111100,83000,84500,0,60],[1111100,84500,134500,0,30]],
-	"TWSE":[[1111100,90000,132500,30,0]],
-	"STWIDX":[[1111100,90000,132500,60,0]],
-/*
-	"SIN":[[1111100,90000,114400,0,450],[1111100,114400,180000,0,45]],
-	"NIFTY50":[[1111100,114500,180000,30,0]],
-
-	"N225M":[[1111100,74500,103000,0,30],[1111100,103000,113000,0,120],[1111100,113000,140000,0,30],[1111100,140000,141500,0,300]],
-	"NK225IDX":[[1111100,80000,103000,0,60],[1111100,113000,140000,0,60]],
-	"TOPX":[[1111100,74500,103000,0,30],[1111100,103000,113000,0,120],[1111100,113000,140000,0,30],[1111100,140000,141500,0,300]],
-	"TOPXIDX":[[1111100,80000,103000,0,30],[1111100,113000,140000,0,30]]*/
-	},
-	"AlertCMD":["echo \"HDR:{HEADER} BODY:{BODY}\" > /tmp/alert.txt", "", ""]
+		"WTX":[[1110100,83000,84500,0,60],[1111010,84500,133000,30,0],[1011100,133000,134500,150,0]],
+		"STW":[[1111100,83000,84500,0,60],[1111100,84500,134500,0,30]]
+		}
+        , "AlertCMD":["echo \"HDR:{HEADER} BODY:{BODY}\" > /tmp/alert.txt", "", ""]
+	, "GroupSyms":['WTX STW', '', '', '', '', '', '', '', '', '']
 	});
 
 }
@@ -81,6 +75,11 @@ function doSubmit(){
         allTQConf["AlertCMD"][i] = AltCmd;
         //alert(allTQConf["AlertCMD"][i])
    }
+   for (i=0;i<10;++i)
+   {
+        symbols = $('#editModifyRuleGrpSyms'+i).val();
+        allTQConf["GroupSyms"][i]=symbols;
+   }
    confVal=JSON.stringify(allTQConf);
    //alert(confVal)
     DoAjax('POST', '/cgi-bin/eConf.py', {'cmd':'UPDATE', 'confKey':'tqconf', 'confVal':confVal},
@@ -101,6 +100,7 @@ function makeTQTable(jsonObj)
 	if (jsonObj != null)
 		allTQConf = jsonObj;
     strTable="<div><table>"
+    strTable+="<tr class='grayThing smallfont' align='center' ><td colspan=6>Monitoring symbols setting</td></tr>"
     strTable+="<tr class='grayThing smallfont' align='center' ><td>#&nbsp;<button id='btnAddNewSym' type='button' onclick='showModifyTimeRule(null,-1);'>New</button>&nbsp;</td><td>Symbol</td><td>Days period<br>Mon&nbsp;~&nbsp;Sun</td><td>Time period</td><td>No Tick/Quote alert<br>(Seconds/Seconds)</td><td>Actions</td></tr>"
     //strTable+="<tr class='grayThing smallfont'><td>Mon</td><td>Tue</td><td>Wed</td><td>Thu</td><td>Fri</td><td>Sat</td><td>Sun</td></tr>"
 	allSym = Object.keys(allTQConf["TimeRule"]);
@@ -133,14 +133,22 @@ function makeTQTable(jsonObj)
 		}
     }
     strTable+="</table>"
-	strTable+="<p><table>"
-    strTable+="<tr class='whiteThing smallfont' align='left' ><td class='grayThing'>Alert Command</td><td>"
-	strTable+="    #1&nbsp;<input type='text' id='editModifyRuleAltCmd0' maxlength='256' size='80' value='"+allTQConf["AlertCMD"][0]+"'><br>"
-	strTable+="    #2&nbsp;<input type='text' id='editModifyRuleAltCmd1' maxlength='256' size='80' value='"+allTQConf["AlertCMD"][1]+"'><br>"
-	strTable+="    #3&nbsp;<input type='text' id='editModifyRuleAltCmd2' maxlength='256' size='80' value='"+allTQConf["AlertCMD"][2]+"'><br>"
-	strTable+="Example: echo \"'{HEADER}' '{BODY}'\" > /tmp/alert.txt </td></tr>"
-    strTable+="<tr class='whiteThing smallfont' align='left' ><td class='grayThing'>Actions</td><td><button id='btnTestAltCmd' type='button' onclick='uiTestAltCmd();'>Test</button></td></tr>"
-	strTable+="</table>"
+    strTable+="<p><br><p><table>"
+    strTable+="<tr class='grayThing smallfont' align='center'><td colspan=3>No tick/quote alerting command setting</td></tr>"
+    strTable+="<tr class='grayThing smallfont' align='left'><td>#</td><td>Command</td><td>Actions</td></tr>"
+    for (i=0;i<3;++i)
+        strTable+="<tr class='whiteThing smallfont' onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\"><td>#"+(i+1)+"</td><td><input type='text' id='editModifyRuleAltCmd"+i+"' maxlength='256' size='60' value='"+allTQConf["AlertCMD"][i]+"'></td><td><button id='btnTestAltCmd' type='button' onclick='uiTestAltCmd("+i+");'>Test</button></td></tr>"
+    strTable+="<tr class='whiteThing'><td colspan=3>Example: echo \"'{HEADER}' '{BODY}'\" > /tmp/alert.txt </td></tr>"
+//    strTable+="</table>"
+
+//    strTable+="<p><br><p><table>"
+    strTable+="<tr class='grayThing smallfont' align='center' ><td colspan=3>Muting setting (mutex alert if  market not open)</td></tr>"
+    strTable+="<tr class='grayThing smallfont' align='left' ><td>#</td><td>Symbols</td><td>Actions</td>"
+    for (i=0;i<10;++i)
+        strTable+="<tr class='whiteThing smallfont' onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\"><td>#"+(i+1)+"</td><td>"+"<input type='text' id='editModifyRuleGrpSyms"+i+"' maxlength='256' size='60' value='"+allTQConf["GroupSyms"][i].replace('/ /g','&nbsp')+"'></td><td><button id='btnMuteGrpSyms' type='button' onclick='uiMuteGrpSym("+i+", true);'>Mute 1Day</button>&nbsp;<button id='btnMuteGrpSyms' type='button' onclick='uiMuteGrpSym("+i+", false);'>Reset</button></td></tr>"
+    strTable+="</table>"
+
+
 	strTable+="<p><button id='btuSubmit' type='button' onclick='doSubmit();'>Submit</button></div>";
     document.getElementById('TQAlertDiv').innerHTML = strTable;
 
@@ -258,36 +266,36 @@ function uiUpdateRule(symbol, index, action)
 	$('#RuleModifyModal').hide();
 	makeTQTable(null);
 }
-function uiTestAltCmd()
+function uiTestAltCmd(i)
 {
 	allSym = Object.keys(allTQConf["TimeRule"]);
-	for (i=0;i<3;++i)
+	header = "No Tick Alert";
+	body = "TEST_SYM no tick for 60 Secs!"
+	if (allSym.length>i)
 	{
-		header = "No Tick Alert";
-		body = "TEST_SYM no tick for 60 Secs!"
-		if (allSym.length>i)
+		symbol = allSym[i]
+		currTimeRules = allTQConf["TimeRule"][symbol];
+		if (currTimeRules[0][3]*1 > 0)
 		{
-			symbol = allSym[i]
-			currTimeRules = allTQConf["TimeRule"][symbol];
-			if (currTimeRules[0][3]*1 > 0)
-			{
-				header = "No Tick Alert";
-				body = symbol + " no tick for "+currTimeRules[0][3]+" Secs!"
-			}
-			else if (currTimeRules[0][4]*1 > 0)
-			{
-				header = "No Quote Alert";
-				body = symbol + " no quote for "+currTimeRules[0][4]+" Secs!"
-			}
+			header = "No Tick Alert";
+			body = symbol + " no tick for "+currTimeRules[0][3]+" Secs!"
 		}
-
-		cmd = $("#editModifyRuleAltCmd"+i).val();
-		if (cmd.length<5)
-			continue;
-		cmd = cmd.replace(/\{HEADER\}/g, header);
-		cmd = cmd.replace(/\{BODY\}/g, body);
-		alert(cmd);
+		else if (currTimeRules[0][4]*1 > 0)
+		{
+			header = "No Quote Alert";
+			body = symbol + " no quote for "+currTimeRules[0][4]+" Secs!"
+		}
 	}
+
+	cmd = $("#editModifyRuleAltCmd"+i).val();
+	cmd = cmd.replace(/\{HEADER\}/g, header);
+	cmd = cmd.replace(/\{BODY\}/g, body);
+	alert(cmd);
+}
+function uiMuteGrpSym(idx, bMute)
+{
+    symbols = $('#editModifyRuleGrpSyms'+idx).val()
+    alert(symbols);
 }
 function divChange(divId)
 {
