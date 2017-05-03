@@ -294,8 +294,14 @@ function uiTestAltCmd(i)
 }
 function uiMuteGrpSym(idx, bMute)
 {
-    symbols = $('#editModifyRuleGrpSyms'+idx).val()
-    alert(symbols);
+    cmd=bMute?'TQALERT_MUTE':'TQALERT_UNMUTE'
+    allSyms=$('#editModifyRuleGrpSyms'+idx).val()+' ';
+    url='/cgi-bin/doAction.py?cmd='+cmd+'&params='+myUrlEncode(allSyms)
+    alert(url);
+    DoAjax('GET', url, {},
+        function(data, textStatus, jqXHR){
+           alert(data);
+        });
 }
 function divChange(divId)
 {
