@@ -20,7 +20,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include <sys/stat.h>
 #include "common.h"
 void vCheckSystex(int argc, char *argv[]) {
 	if (argc >= 6)
@@ -86,6 +86,23 @@ int iGetSymbolIdx(std::vector<ST_SymbolInfo>* pvecSymbolInfo, const char* szSymb
 	}
 	return -1;
 }
+std::string& string_replace(std::string & strBig, const char* pszA, const char* pszB)
+{
+    int pos=0;
+    int srclen=strlen(pszA);
+    int dstlen=strlen(pszB);
+    while( (pos=strBig.find(pszA, pos)) != std::string::npos)
+    {
+        strBig.replace(pos, srclen, pszB);
+        pos += dstlen;
+    }
+}
+std::string& strGetSymFilename(std::string& strSym)
+{
+	string_replace(strSym, "&", "\\&");
+	return strSym;
+}
+#define LAST_TQ_LOG_DIR "/tmp/lastTQ"
 int main(int argc, char *argv[]) {
 	char *pszIP, *pszPort, *pszDBName;
 	char szTQDBKeyVal[2048], szInsStr[4096];
@@ -95,6 +112,15 @@ int main(int argc, char *argv[]) {
 	/* Setup and connect to cluster */
 	CassCluster* cluster = cass_cluster_new();
 	CassSession* session = cass_session_new();
+
+	if (1)
+	{
+		struct stat sb;
+    		if (stat(LAST_TQ_LOG_DIR, &sb) == -1)
+		{
+			mkdir(LAST_TQ_LOG_DIR, S_IRWXU|(S_IRGRP|S_IXGRP)|(S_IROTH|S_IXOTH));
+		}
+	}
 
 	vCheckSystex(argc, argv);
         i = 1;
@@ -131,8 +157,40 @@ int main(int argc, char *argv[]) {
 	int iInsertCnt = 0;
 	vMyLog(stdout, 1, "Getting data from stdin.");
 	fflush(stdout);
+	std::map<std::string, int> mapSymHaveTick;
+	std::map<std::string, int> mapSymHaveQuote;
+	time_t tLastCheck = time(NULL);
 	while(fgets(szLine, sizeof(szLine), stdin))
 	{
+		if (time(NULL)-tLastCheck>5)
+		{
+			tLastCheck = time(NULL);
+			FILE* fp;
+			char szFile[512];
+			for (int j=0;j<2;++j)
+			{
+				std::map<std::string, int>* pmap = (j==0?&mapSymHaveTick:&mapSymHaveQuote);
+                                std::map<std::string, int>::iterator it;
+				for(it = pmap->begin(); it != pmap->end(); ++it)
+				{
+					sprintf(szFile, "%s/%s.%s", LAST_TQ_LOG_DIR, it->first.c_str(), (j==0?"LastT":"LastQ"));
+					fp = fopen(szFile, "w");
+					if (fp != NULL)
+					{
+						fprintf(fp, "%d", tLastCheck);
+						fclose(fp);
+						if (iDBGFlag)
+							printf("Last tick/quote Write to %s\n", szFile);
+					}
+					else
+					{
+						printf("Error to write %s\n", szFile);
+					}
+				}
+			}
+			mapSymHaveTick.clear();
+			mapSymHaveQuote.clear();
+		}
 		szLine[sizeof(szLine)] = '\0';
 		iLen = strlen(szLine);
 		while(1)
@@ -160,6 +218,9 @@ int main(int argc, char *argv[]) {
 			{
 				continue;
 			}
+			std::string szSymFile = szSymbol;
+			strGetSymFilename(szSymFile);
+			mapSymHaveTick[szSymFile]=1;
 			if (iGetSymbolIdx(&vecSymbolInfo, szSymbol)<0)
 			{
 				ST_SymbolInfo tmpSymbolInfo;
@@ -198,6 +259,9 @@ int main(int argc, char *argv[]) {
                         {
                                 continue;
                         }
+			std::string szSymFile = szSymbol;
+                        strGetSymFilename(szSymFile);
+			mapSymHaveQuote[szSymFile]=1;
 			if (iGetSymbolIdx(&vecSymbolInfo, szSymbol)<0)
                         {
                                 ST_SymbolInfo tmpSymbolInfo;
