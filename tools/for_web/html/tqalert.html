@@ -1,0 +1,328 @@
+<html>
+<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+<link rel='stylesheet' type='text/css' href='style.css'>
+<script src="/js/jquery-2.1.4.min.js"></script>
+<!--<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>-->
+<script language='javascript'>
+ICON_CHECK="&#9745;"
+ICON_UNCHECK="&#9744;"
+function myUrlEncode(str)
+{
+	return encodeURI(str).replace(/&/i, '%26')
+}
+function DoAjax(requestType, requestUrl, sentData, sHandler, eHandler, pageNotFoundHandler){
+        $.ajax({
+            type: requestType,    
+            url: requestUrl,
+            cache: false,       
+            data: sentData, 
+            success: sHandler,   
+            error: eHandler,      
+            statusCode: {    
+              404: pageNotFoundHandler
+            }
+        });
+    };
+function qTQConf()
+{
+    url='/cgi-bin/eConf.py?cmd=QUERY&confKey=tqconf'
+    DoAjax('GET', url, {},
+        function(data, textStatus, jqXHR){
+		if (data['Result'] != 'OK')
+		{
+			alert(data['Result']);
+                        makeTQTable({'TimeRule': {}, 'AlertCMD': ['', '', '']});
+		}
+		else
+		{
+			confVal=JSON.parse(data['confVal'])
+			for (i=0;i<3;++i)
+				confVal["AlertCMD"][i] = confVal["AlertCMD"][i].replace(/"/g, "&quot;").replace(/'/g, "&apos;").replace(/\\/g,"&bsol;")
+			makeTQTable(confVal);
+		}
+        });
+    return;
+	makeTQTable({"TimeRule":{
+	"WTX":[[1110100,83000,84500,0,60],[1111010,84500,133000,30,0],[1011100,133000,134500,150,0]],
+	"STW":[[1111100,83000,84500,0,60],[1111100,84500,134500,0,30]],
+	"TWSE":[[1111100,90000,132500,30,0]],
+	"STWIDX":[[1111100,90000,132500,60,0]],
+/*
+	"SIN":[[1111100,90000,114400,0,450],[1111100,114400,180000,0,45]],
+	"NIFTY50":[[1111100,114500,180000,30,0]],
+
+	"N225M":[[1111100,74500,103000,0,30],[1111100,103000,113000,0,120],[1111100,113000,140000,0,30],[1111100,140000,141500,0,300]],
+	"NK225IDX":[[1111100,80000,103000,0,60],[1111100,113000,140000,0,60]],
+	"TOPX":[[1111100,74500,103000,0,30],[1111100,103000,113000,0,120],[1111100,113000,140000,0,30],[1111100,140000,141500,0,300]],
+	"TOPXIDX":[[1111100,80000,103000,0,30],[1111100,113000,140000,0,30]]*/
+	},
+	"AlertCMD":["echo \"HDR:{HEADER} BODY:{BODY}\" > /tmp/alert.txt", "", ""]
+	});
+
+}
+function qSymInfo()
+{
+return;
+    /*
+    makeMainTable([{"symbol":"A50","keyval":{"BPV":"1.000000","DESC":"A50%20Index"}},{"symbol":"CIF","keyval":{}},{"symbol":"ES","keyval":{}}])
+    return;
+    */
+    url='/cgi-bin/qsyminfo.py'
+    DoAjax(url, {symbol : "ALL"},
+        function(data, textStatus, jqXHR){
+		alert(data);
+        }); 
+}
+
+function doSubmit(){
+   for (i=0;i<3;++i)
+   {
+        AltCmd = $('#editModifyRuleAltCmd'+i).val()
+        allTQConf["AlertCMD"][i] = AltCmd;
+        //alert(allTQConf["AlertCMD"][i])
+   }
+   confVal=JSON.stringify(allTQConf);
+   //alert(confVal)
+    DoAjax('POST', '/cgi-bin/eConf.py', {'cmd':'UPDATE', 'confKey':'tqconf', 'confVal':confVal},
+        function(data, textStatus, jqXHR){
+                alert(JSON.stringify(data));
+		location.reload();
+        });
+
+   //location.href=cmd
+}
+
+function close_RuleModifyModal(){
+    $('#RuleModifyModal').hide();
+}
+allTQConf=[]
+function makeTQTable(jsonObj)
+{
+	if (jsonObj != null)
+		allTQConf = jsonObj;
+    strTable="<div><table>"
+    strTable+="<tr class='grayThing smallfont' align='center' ><td>#&nbsp;<button id='btnAddNewSym' type='button' onclick='showModifyTimeRule(null,-1);'>New</button>&nbsp;</td><td>Symbol</td><td>Days period<br>Mon&nbsp;~&nbsp;Sun</td><td>Time period</td><td>No Tick/Quote alert<br>(Seconds/Seconds)</td><td>Actions</td></tr>"
+    //strTable+="<tr class='grayThing smallfont'><td>Mon</td><td>Tue</td><td>Wed</td><td>Thu</td><td>Fri</td><td>Sat</td><td>Sun</td></tr>"
+	allSym = Object.keys(allTQConf["TimeRule"]);
+    for (i=0;i<allSym.length;++i)
+    {
+		symbol = allSym[i];
+		currTimeRules = allTQConf["TimeRule"][symbol];
+		if (currTimeRules.length<=0)
+			continue;
+        strTable+="<tr class='grayThing smallfont' onclick=\"showModifyTimeRule('"+symbol+"',-1);\" >"
+        strTable+="<td class='whiteThing smallfont' align='center' rowspan="+(currTimeRules.length+1)+">"+(i+1)+"</td>"
+        strTable+="<td class='whiteThing smallfont' align='left' rowspan="+(currTimeRules.length+1)+">"+symbol+"</td></tr>"
+		for (j=0;j<currTimeRules.length;++j)
+		{
+			strTable+="<tr align='center' onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\" onclick=\"showModifyTimeRule('"+symbol+"',"+j+");\" >"
+			strTable+="<td>"+(Math.trunc(currTimeRules[j][0]/1000000)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
+			strTable+=(Math.trunc(currTimeRules[j][0]/100000)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
+			strTable+=(Math.trunc(currTimeRules[j][0]/10000)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
+			strTable+=(Math.trunc(currTimeRules[j][0]/1000)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
+			strTable+=(Math.trunc(currTimeRules[j][0]/100)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
+			strTable+=(Math.trunc(currTimeRules[j][0]/10)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
+			strTable+=(Math.trunc(currTimeRules[j][0]/1)%10==1?ICON_CHECK:ICON_UNCHECK)+"</td>"
+			strTable+="<td>"+currTimeRules[j][1]+"&nbsp;~&nbsp;"+currTimeRules[j][2]+"</td>"
+			strTable+="<td>"+currTimeRules[j][3]+"&nbsp;/&nbsp;"+currTimeRules[j][4]+"</td>"
+			strTable+="<td onclick=\"var e = window.event;e.cancelBubble = true;if (e.stopPropagation) {e.stopPropagation();}\"><button type='button' onclick=\"uiUpdateRule('"+symbol+"', "+j+", 'Del');\">Del</button></td>"
+			
+			
+			
+			strTable+="</tr>"
+		}
+    }
+    strTable+="</table>"
+	strTable+="<p><table>"
+    strTable+="<tr class='whiteThing smallfont' align='left' ><td class='grayThing'>Alert Command</td><td>"
+	strTable+="    #1&nbsp;<input type='text' id='editModifyRuleAltCmd0' maxlength='256' size='80' value='"+allTQConf["AlertCMD"][0]+"'><br>"
+	strTable+="    #2&nbsp;<input type='text' id='editModifyRuleAltCmd1' maxlength='256' size='80' value='"+allTQConf["AlertCMD"][1]+"'><br>"
+	strTable+="    #3&nbsp;<input type='text' id='editModifyRuleAltCmd2' maxlength='256' size='80' value='"+allTQConf["AlertCMD"][2]+"'><br>"
+	strTable+="Example: echo \"'{HEADER}' '{BODY}'\" > /tmp/alert.txt </td></tr>"
+    strTable+="<tr class='whiteThing smallfont' align='left' ><td class='grayThing'>Actions</td><td><button id='btnTestAltCmd' type='button' onclick='uiTestAltCmd();'>Test</button></td></tr>"
+	strTable+="</table>"
+	strTable+="<p><button id='btuSubmit' type='button' onclick='doSubmit();'>Submit</button></div>";
+    document.getElementById('TQAlertDiv').innerHTML = strTable;
+
+}
+function showModifyTimeRule(symbol, index)
+{
+	//symbol=null means add new
+	if (symbol == null)
+	{
+		$('#editModifyRuleSymbol').prop('disabled', false);
+		symbol="";
+		index = -1;
+	}
+	else
+	{
+		$('#editModifyRuleSymbol').prop('disabled', true);
+	}
+		
+	//index>=0 is modify, index<0 is new rule
+	$('#editModifyRuleSymbol').val(symbol)
+	$('#divModifyRuleId').html(""+index)
+	
+	if (index >=0)
+	{
+		$('#btnModifyRuleUpdate').html('Update');
+		$('#btnDelRuleUpdate').show();
+		timeRules = allTQConf["TimeRule"][symbol][index];		
+		$('#editModifyRuleBegin').val(timeRules[1]);
+		$('#editModifyRuleEnd').val(timeRules[2]);
+		$('#editModifyRuleTick').val(timeRules[3]);
+		$('#editModifyRuleQuote').val(timeRules[4]);
+		$('#checkModifyRuleWeekday1').prop('checked', (Math.trunc(timeRules[0]/1000000)%10==1))
+		$('#checkModifyRuleWeekday2').prop('checked', (Math.trunc(timeRules[0]/100000)%10==1))
+		$('#checkModifyRuleWeekday3').prop('checked', (Math.trunc(timeRules[0]/10000)%10==1))
+		$('#checkModifyRuleWeekday4').prop('checked', (Math.trunc(timeRules[0]/1000)%10==1))
+		$('#checkModifyRuleWeekday5').prop('checked', (Math.trunc(timeRules[0]/100)%10==1))
+		$('#checkModifyRuleWeekday6').prop('checked', (Math.trunc(timeRules[0]/10)%10==1))
+		$('#checkModifyRuleWeekday7').prop('checked', (Math.trunc(timeRules[0]/1)%10==1))
+	}
+	else
+	{
+		$('#btnModifyRuleUpdate').html('Add');
+		$('#btnDelRuleUpdate').hide();
+		$('#editModifyRuleBegin').val("");
+		$('#editModifyRuleEnd').val("");
+		$('#editModifyRuleTick').val("");
+		$('#editModifyRuleQuote').val("");
+		$('#checkModifyRuleWeekday1').prop('checked', true);
+		$('#checkModifyRuleWeekday2').prop('checked', true);
+		$('#checkModifyRuleWeekday3').prop('checked', true);
+		$('#checkModifyRuleWeekday4').prop('checked', true);
+		$('#checkModifyRuleWeekday5').prop('checked', true);
+		$('#checkModifyRuleWeekday6').prop('checked', false);
+		$('#checkModifyRuleWeekday7').prop('checked', false);
+	}	
+
+    $('#RuleModifyModal').show();
+}
+
+function uiUpdateRule(symbol, index, action)
+{
+	symbol = symbol.toUpperCase();
+	console.log("uiUpdateRule('"+symbol+"',"+index+",'"+action+"') called!")
+	if (symbol=="")
+	{
+		alert('Please input symbol!');
+		return;
+	}
+	if (action=='Delete'||action=='Del')
+	{
+		allTQConf["TimeRule"][symbol].splice(index, 1);//remove from list
+		if (allTQConf["TimeRule"][symbol].length == 0)
+			delete allTQConf["TimeRule"][symbol];
+	}
+	else
+	{
+		iWeek =0;
+		iWeek += $('#checkModifyRuleWeekday1').prop('checked')?1000000:0;
+		iWeek += $('#checkModifyRuleWeekday2').prop('checked')?100000:0;
+		iWeek += $('#checkModifyRuleWeekday3').prop('checked')?10000:0;
+		iWeek += $('#checkModifyRuleWeekday4').prop('checked')?1000:0;
+		iWeek += $('#checkModifyRuleWeekday5').prop('checked')?100:0;
+		iWeek += $('#checkModifyRuleWeekday6').prop('checked')?10:0;
+		iWeek += $('#checkModifyRuleWeekday7').prop('checked')?1:0;
+		iBeg = 1*$('#editModifyRuleBegin').val();
+		iEnd = 1*$('#editModifyRuleEnd').val();
+		iTick = 1*$('#editModifyRuleTick').val();
+		iQuote = 1*$('#editModifyRuleQuote').val();
+		if (iBeg>240000 || iEnd>240000 || iBeg>iEnd)
+		{
+			alert('Time period value error!');
+			return;
+		}
+		if (iTick<0 || iQuote<0 || iTick+iQuote<=0)
+		{
+			alert('Tick/Quote value error!');
+			return;
+		}
+		if (index == -1)
+		{
+			if (!(symbol in allTQConf["TimeRule"]))
+			{
+				allTQConf["TimeRule"][symbol] = [];
+			}
+			allTQConf["TimeRule"][symbol].push([1111100,0,0,0,0]);
+			index = allTQConf["TimeRule"][symbol].length-1;
+		}
+		timeRules = allTQConf["TimeRule"][symbol][index];
+		timeRules[0] = iWeek;
+		timeRules[1] = iBeg;
+		timeRules[2] = iEnd;
+		timeRules[3] = iTick;
+		timeRules[4] = iQuote;
+	}
+	$('#RuleModifyModal').hide();
+	makeTQTable(null);
+}
+function uiTestAltCmd()
+{
+	allSym = Object.keys(allTQConf["TimeRule"]);
+	for (i=0;i<3;++i)
+	{
+		header = "No Tick Alert";
+		body = "TEST_SYM no tick for 60 Secs!"
+		if (allSym.length>i)
+		{
+			symbol = allSym[i]
+			currTimeRules = allTQConf["TimeRule"][symbol];
+			if (currTimeRules[0][3]*1 > 0)
+			{
+				header = "No Tick Alert";
+				body = symbol + " no tick for "+currTimeRules[0][3]+" Secs!"
+			}
+			else if (currTimeRules[0][4]*1 > 0)
+			{
+				header = "No Quote Alert";
+				body = symbol + " no quote for "+currTimeRules[0][4]+" Secs!"
+			}
+		}
+
+		cmd = $("#editModifyRuleAltCmd"+i).val();
+		if (cmd.length<5)
+			continue;
+		cmd = cmd.replace(/\{HEADER\}/g, header);
+		cmd = cmd.replace(/\{BODY\}/g, body);
+		alert(cmd);
+	}
+}
+function divChange(divId)
+{
+    $('#symbolTableDiv').hide();
+    $('#systemInfoDiv').hide();
+    $('#'+divId).show();
+}
+</script>
+<body onload='qSymInfo();qTQConf();'>
+<hr>
+<div id='TQAlertDiv'>Loading...</div>
+<div id="RuleModifyModal" class='modal' style="display: none;">
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close" onclick="close_RuleModifyModal();">x</span>
+    <p>
+                <table>
+                <tr class='grayThing smallfont'><td colspan=2>Modify rule</td></tr>
+                <tr><td>Symbol</td><td><input type='text' id='editModifyRuleSymbol'><div id='divModifyRuleId' style="display: none;"></td></tr>
+				<tr><td>Day period</td><td>
+					<input type="checkbox" id='checkModifyRuleWeekday1'>Mon&nbsp;
+					<input type="checkbox" id='checkModifyRuleWeekday2'>Tue&nbsp;
+					<input type="checkbox" id='checkModifyRuleWeekday3'>Wed&nbsp;
+					<input type="checkbox" id='checkModifyRuleWeekday4'>Thu&nbsp;
+					<input type="checkbox" id='checkModifyRuleWeekday5'>Fri&nbsp;
+					<input type="checkbox" id='checkModifyRuleWeekday6'>Sat&nbsp;
+					<input type="checkbox" id='checkModifyRuleWeekday7'>Sun&nbsp;
+				<tr><td>Time period</td><td><input type='text' id='editModifyRuleBegin' maxlength='6' size='8'>&nbsp;~&nbsp;<input type='text' id='editModifyRuleEnd' maxlength='6' size='8'></td></tr>
+				<tr><td>No Tick/Quote alert</td><td><input type='text' id='editModifyRuleTick' maxlength='4' size='4'>&nbsp;~&nbsp;<input type='text' id='editModifyRuleQuote' maxlength='4' size='4'></td></tr>
+                <tr><td>Actions</td><td>
+						<button id='btnModifyRuleUpdate' type='button' onclick="uiUpdateRule($('#editModifyRuleSymbol').val(), $('#divModifyRuleId').html(), $('#btnModifyRuleUpdate').html())">Update or Add</button>
+						<button id='btnDelRuleUpdate' type='button' onclick="uiUpdateRule($('#editModifyRuleSymbol').val(), $('#divModifyRuleId').html(), $('#btnDelRuleUpdate').html())">Delete</button>
+						</td></tr>
+		</table>
+  </div>
+</div>
+</body></html>
+

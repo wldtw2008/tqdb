@@ -177,6 +177,10 @@
          PRIMARY KEY (symbol, datetime)
      );
 
+     CREATE TABLE tqdb1.conf (
+         confKey text PRIMARY KEY,
+         confVal text
+     );
 
 ***Other***
     For not RedHat/CentOS
