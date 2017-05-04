@@ -145,7 +145,7 @@ function makeTQTable(jsonObj)
     strTable+="<tr class='grayThing smallfont' align='center' ><td colspan=3>Muting setting (mutex alert if  market not open)</td></tr>"
     strTable+="<tr class='grayThing smallfont' align='left' ><td>#</td><td>Symbols</td><td>Actions</td>"
     for (i=0;i<10;++i)
-        strTable+="<tr class='whiteThing smallfont' onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\"><td>#"+(i+1)+"</td><td>"+"<input type='text' id='editModifyRuleGrpSyms"+i+"' maxlength='256' size='60' value='"+allTQConf["GroupSyms"][i].replace('/ /g','&nbsp')+"'></td><td><button id='btnMuteGrpSyms' type='button' onclick='uiMuteGrpSym("+i+", true);'>Mute 1Day</button>&nbsp;<button id='btnMuteGrpSyms' type='button' onclick='uiMuteGrpSym("+i+", false);'>Reset</button></td></tr>"
+        strTable+="<tr class='whiteThing smallfont' onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\"><td>#"+(i+1)+"</td><td>"+"<input type='text' id='editModifyRuleGrpSyms"+i+"' maxlength='256' size='60' value='"+allTQConf["GroupSyms"][i].replace('/ /g','&nbsp')+"'></td><td><button id='btnMuteGrpSyms' type='button' onclick='uiMuteGrpSym("+i+", true);'>Mute 1 day</button>&nbsp;<button id='btnMuteGrpSyms' type='button' onclick='uiMuteGrpSym("+i+", false);'>Reset</button></td></tr>"
     strTable+="</table>"
 
 
@@ -175,7 +175,7 @@ function showModifyTimeRule(symbol, index)
 	{
 		$('#btnModifyRuleUpdate').html('Update');
 		$('#btnDelRuleUpdate').show();
-		timeRules = allTQConf["TimeRule"][symbol][index];		
+		timeRules = allTQConf["TimeRule"][symbol][index];
 		$('#editModifyRuleBegin').val(timeRules[1]);
 		$('#editModifyRuleEnd').val(timeRules[2]);
 		$('#editModifyRuleTick').val(timeRules[3]);
@@ -297,10 +297,10 @@ function uiMuteGrpSym(idx, bMute)
     cmd=bMute?'TQALERT_MUTE':'TQALERT_UNMUTE'
     allSyms=$('#editModifyRuleGrpSyms'+idx).val()+' ';
     url='/cgi-bin/doAction.py?cmd='+cmd+'&params='+myUrlEncode(allSyms)
-    alert(url);
+    //alert(url);
     DoAjax('GET', url, {},
         function(data, textStatus, jqXHR){
-           alert(data);
+           alert(JSON.stringify(data));
         });
 }
 function divChange(divId)

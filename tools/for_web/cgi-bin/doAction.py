@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-   
 
-import sys,json,os,urllib, urllib2,cgi,cgitb
+import sys,json,os,urllib, urllib2,cgi,cgitb,subprocess
 from datetime import datetime
 from dateutil import tz, parser
 from cassandra.cluster import Cluster
@@ -10,6 +10,7 @@ def _main(keyspace, cmd, params):
     retObj = {'Result': 'Error! Wrong cmd!', 'Detail':None}
     if cmd in ('TQALERT_MUTE', 'TQALERT_UNMUTE'):
         retObj['Detail'] = {'Succeed':[], 'Failed':[]}
+        params = params.replace('/', '_') #for security issue
         allSyms = params.split(',')
         for sym in allSyms:
             sym = sym.strip()
@@ -18,6 +19,7 @@ def _main(keyspace, cmd, params):
                 if cmd == 'TQALERT_MUTE': #MUTE!!
                     with open(filename, 'w') as f:
                         f.write('1\n')
+                    subprocess.call(['chmod', '0777', filename])
                 else: #UN-MUTE
                     os.remove(filename)
                 retObj['Detail']['Succeed'].append(sym)
