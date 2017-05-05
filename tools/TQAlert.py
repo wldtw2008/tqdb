@@ -56,22 +56,23 @@ def _runCmd(cmd, HEADER, BODY):
     if (finalCmd.strip().find('#') == 0):
         _log("    Skip run!")
     else:
-        subprocess.call(cmd, shell=True)
+        subprocess.call(finalCmd, shell=True)
         _log("    Ran!")
     
 
 def _main():
+    lastAlertTimeS = {} # last alert time
     allTimeRule = {}
     allAlertCmd = []
     _readConfig('tqdb1', allTimeRule, allAlertCmd)
     lastCheckWeekVal=0
     matchingWeekValRule = []
     sleepSec=5
+    minAlertIntervalSec = 30 #30 sec
     while(True):
         try:
             for cmdIdx in range(0,len(allAlertCmd)):
                 testCmdFile='/tmp/TQAlert/TQAlert.testcmd.%d' % cmdIdx
-                print testCmdFile
                 if (os.path.isfile(testCmdFile)):
                     _runCmd(allAlertCmd[cmdIdx], '!!TEST!!', 'Hello, this is test of TQAlert#%d.'%(cmdIdx+1))
                     os.remove(testCmdFile)
@@ -106,29 +107,34 @@ def _main():
             for rule in matchingWeekValRule:
                 _log("    %s" % rule)
 
-        print("Current WeekVal:%07d, HHMMSS:%d, TimeS:%d" %(curWeekVal, curHHMMSS, curTimeS))
+        _log("Current WeekVal:%07d, HHMMSS:%d, TimeS:%d" %(curWeekVal, curHHMMSS, curTimeS))
         for rule in matchingWeekValRule:
-            skipFile='/tmp/TQAlert/TQAlert.skip.%s' % rule['Symbol']
+            symbol = rule['Symbol']
+            skipFile='/tmp/TQAlert/TQAlert.skip.%s' % symbol
             if (os.path.isfile(skipFile)):
-                _log("File: %s exist, so skip %s" % (skipFile, rule['Symbol']))
+                _log("File: %s exist, so skip %s" % (skipFile, symbol))
+                continue
+            if symbol in lastAlertTimeS and curTimeS<lastAlertTimeS[symbol]+minAlertIntervalSec:
+                _log("Symbol: %s has alerted in past %d secs, so skip it." % (symbol, minAlertIntervalSec))
                 continue
             HEADER=""
             BODY=""
             (Beg, End, TickSec, QuoteSec)=(rule['Rule'][1], rule['Rule'][2], rule['Rule'][3], rule['Rule'][4])
             if curHHMMSS>=Beg and curHHMMSS<End:
                 if QuoteSec>0:
-                    lastTimeS = _readLastTQTime(rule['Symbol'], 'LastQ')
-                    print "Q-->",rule['Rule'],curTimeS,lastTimeS,QuoteSec
+                    lastTimeS = _readLastTQTime(symbol, 'LastQ')
+                    print "Q-->",symbol,rule['Rule'],curTimeS,lastTimeS,QuoteSec
                     if (curTimeS>lastTimeS+QuoteSec):
                         HEADER="No Quote Alert"
-                        BODY="%s is no quote for %d secs!" % (rule['Symbol'], QuoteSec)
+                        BODY="%s is no quote for %d secs!" % (symbol, QuoteSec)
                 if TickSec>0:
-                    lastTimeS = _readLastTQTime(rule['Symbol'], 'LastT')
-                    print "T-->",rule['Rule'],curTimeS,lastTimeS,TickSec
+                    lastTimeS = _readLastTQTime(symbol, 'LastT')
+                    print "T-->",symbol,rule['Rule'],curTimeS,lastTimeS,TickSec
                     if (curTimeS>lastTimeS+TickSec):
                         HEADER="No Tick Alert"
-                        BODY="%s is no tick for %d secs!" % (rule['Symbol'], TickSec)
+                        BODY="%s is no tick for %d secs!" % (symbol, TickSec)
             if (HEADER != ""):
+                lastAlertTimeS[symbol] = curTimeS 
                 _log("!!!%s!!! %s" % (HEADER, BODY))
                 for cmd in allAlertCmd:
                     _runCmd(cmd, HEADER, BODY)
