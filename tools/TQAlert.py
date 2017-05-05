@@ -50,6 +50,16 @@ def _readLastTQTime(sym, type):
             return int(line)
     except:
         return 0
+def _runCmd(cmd, HEADER, BODY):
+    finalCmd = cmd.replace('{HEADER}', HEADER).replace('{BODY}', BODY)
+    _log("Alert Cmd: [%s] --> [%s]" % (cmd, finalCmd))
+    if (finalCmd.strip().find('#') == 0):
+        _log("    Skip run!")
+    else:
+        subprocess.call(cmd, shell=True)
+        _log("    Ran!")
+    
+
 def _main():
     allTimeRule = {}
     allAlertCmd = []
@@ -63,9 +73,7 @@ def _main():
                 testCmdFile='/tmp/TQAlert/TQAlert.testcmd.%d' % cmdIdx
                 print testCmdFile
                 if (os.path.isfile(testCmdFile)):
-                    cmd = allAlertCmd[cmdIdx].replace('{HEADER}', '!!TEST!!').replace('{BODY}', 'Hello, this is test of TQAlert#%d.'%(cmdIdx+1))
-                    _log("Run test command: %s" % cmd)
-                    subprocess.call(cmd, shell=True)
+                    _runCmd(allAlertCmd[cmdIdx], '!!TEST!!', 'Hello, this is test of TQAlert#%d.'%(cmdIdx+1))
                     os.remove(testCmdFile)
         except:
             _log("Failed in run test command!")
@@ -79,7 +87,7 @@ def _main():
             with open('/tmp/TQAlert/TQAlert.confchange', 'r') as f:
                 lastChangeTimeS = int(f.readline().strip())
                 if curTimeS<lastChangeTimeS+sleepSec*1.5:
-                    _log("-------->Config change<--------")
+                    _log("%s>Config change<%s"%('='*20, '='*20))
                     _readConfig('tqdb1', allTimeRule, allAlertCmd)
                     lastCheckWeekVal=999
         except:
@@ -123,9 +131,7 @@ def _main():
             if (HEADER != ""):
                 _log("!!!%s!!! %s" % (HEADER, BODY))
                 for cmd in allAlertCmd:
-                    cmd = cmd.replace('{HEADER}', HEADER).replace('{BODY}', BODY)
-                    subprocess.call(cmd, shell=True)
-                    _log("Alert Cmd: [%s]" % cmd)
+                    _runCmd(cmd, HEADER, BODY)
         time.sleep(sleepSec)
 
 while(True):

@@ -14,7 +14,7 @@ def _main(keyspace, confKey, confVal, cmd):
         cqlCmd = "update %s.conf set confVal='%s' where confKey='%s'" % (keyspace, confVal.replace('"', '&quot;').replace('\'', '&apos;').replace('\\', '&bsol;'), confKey)
         try:
             eResult = session.execute(cqlCmd)
-            filename = '/tmp/TQAlert/TQAlert.confreload'
+            filename = '/tmp/TQAlert/TQAlert.confchange'
             try:
                 subprocess.call(['rm', '-f', filename])
                 with open(filename, 'w') as f:
