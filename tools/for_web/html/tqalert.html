@@ -291,7 +291,14 @@ function uiTestAltCmd(i)
 	cmd = $("#editModifyRuleAltCmd"+i).val();
 	cmd = cmd.replace(/\{HEADER\}/g, header);
 	cmd = cmd.replace(/\{BODY\}/g, body);
-	alert(cmd);
+	if (confirm("Simulate command is: "+cmd+"\n------------------------------------------------------------------------\nDo you want to run this command?"))
+	{
+		url='/cgi-bin/doAction.py?cmd=TQALERT_TESTCMD&params='+i
+		DoAjax('GET', url, {},
+			function(data, textStatus, jqXHR){
+		           alert(JSON.stringify(data));
+        	});
+	}
 }
 function uiMuteGrpSym(idx, bMute)
 {
@@ -304,6 +311,7 @@ function uiMuteGrpSym(idx, bMute)
            alert(JSON.stringify(data));
         });
 }
+
 function divChange(divId)
 {
     $('#symbolTableDiv').hide();

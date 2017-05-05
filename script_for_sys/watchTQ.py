@@ -58,13 +58,25 @@ def _main():
     matchingWeekValRule = []
     sleepSec=5
     while(True):
+        try:
+            for cmdIdx in range(0,len(allAlertCmd)):
+                testCmdFile='/tmp/watchTQ/watchTQ.testcmd.%d' % cmdIdx
+                print testCmdFile
+                if (os.path.isfile(testCmdFile)):
+                    cmd = allAlertCmd[cmdIdx].replace('{HEADER}', '!!TEST!!').replace('{BODY}', 'Hello, this is test of TQAlert#%d.'%(cmdIdx+1))
+                    _log("Run test command: %s" % cmd)
+                    subprocess.call(cmd, shell=True)
+                    os.remove(testCmdFile)
+        except:
+            _log("Failed in run test command!")
+            pass
         curHHMMSS = int(datetime.now().strftime('%H%M%S'))
         curTimeS =  int(datetime.now().strftime('%s'))
         curWeekday = int(datetime.today().isoweekday())
         curWeekVal = int(math.pow(10, 7-curWeekday)) #monday=1000000, tuesday=0100000 ... sunday=0000001
         # if config change!
         try:
-            with open('/tmp/watchTQ.confchange', 'r') as f:
+            with open('/tmp/watchTQ/watchTQ.confchange', 'r') as f:
                 lastChangeTimeS = int(f.readline().strip())
                 if curTimeS<lastChangeTimeS+sleepSec*1.5:
                     _log("-------->Config change<--------")
@@ -88,7 +100,7 @@ def _main():
 
         print("Current WeekVal:%07d, HHMMSS:%d, TimeS:%d" %(curWeekVal, curHHMMSS, curTimeS))
         for rule in matchingWeekValRule:
-            skipFile='/tmp/watchTQ.skip.%s' % rule['Symbol']
+            skipFile='/tmp/watchTQ/watchTQ.skip.%s' % rule['Symbol']
             if (os.path.isfile(skipFile)):
                 _log("File: %s exist, so skip %s" % (skipFile, rule['Symbol']))
                 continue
