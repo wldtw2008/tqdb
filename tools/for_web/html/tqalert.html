@@ -139,6 +139,7 @@ function makeTQTable(jsonObj)
     for (i=0;i<3;++i)
         strTable+="<tr class='whiteThing smallfont' onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\"><td>#"+(i+1)+"</td><td><input type='text' id='editModifyRuleAltCmd"+i+"' maxlength='256' size='60' value='"+allTQConf["AlertCMD"][i]+"'></td><td><button id='btnTestAltCmd' type='button' onclick='uiTestAltCmd("+i+");'>Test</button></td></tr>"
     strTable+="<tr class='whiteThing'><td colspan=3>Example: echo \"'{HEADER}' '{BODY}'\" > /tmp/alert.txt </td></tr>"
+    strTable+="<tr><td colspan=3></td></tr>"
 //    strTable+="</table>"
 
 //    strTable+="<p><br><p><table>"

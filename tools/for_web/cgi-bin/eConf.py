@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-   
 
-import sys,json,os,urllib, urllib2,cgi,cgitb
+import sys,json,os,urllib, urllib2,cgi,cgitb,subprocess
 from datetime import datetime
 from dateutil import tz, parser
 from cassandra.cluster import Cluster
@@ -14,6 +14,15 @@ def _main(keyspace, confKey, confVal, cmd):
         cqlCmd = "update %s.conf set confVal='%s' where confKey='%s'" % (keyspace, confVal.replace('"', '&quot;').replace('\'', '&apos;').replace('\\', '&bsol;'), confKey)
         try:
             eResult = session.execute(cqlCmd)
+            filename = '/tmp/watchTQ.confreload'
+            try:
+                filename='/tmp/watchTQ.confchange'
+                subprocess.call(['rm', '-f', filename])
+                with open(filename, 'w') as f:
+                    f.write('%s\n' % datetime.now().strftime('%s'))
+                subprocess.call(['chmod', '0777', filename])
+            except:
+                pass
         except:
             return {'Result': 'Error! Failed to excute [%s]!'%cqlCmd}
         return {'Result': 'OK'}

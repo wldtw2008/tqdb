@@ -5,6 +5,8 @@ echo $CASS_IP":"$CASS_PORT > /tmp/cass.info
 echo $D2TQ_IP":"$D2TQ_PORT > /tmp/d2tq.info
 
 cd $TQDB_DIR/script_for_sys && ./demo_d2tq_server.sh > /tmp/demo_d2tq_server.log &
+cd $TQDB_DIR/script_for_sys && python watchTQ.py > /tmp/watchTQ.py.log &
+
 
 sleep 10
 
