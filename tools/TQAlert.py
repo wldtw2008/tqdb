@@ -60,7 +60,7 @@ def _main():
     while(True):
         try:
             for cmdIdx in range(0,len(allAlertCmd)):
-                testCmdFile='/tmp/watchTQ/watchTQ.testcmd.%d' % cmdIdx
+                testCmdFile='/tmp/TQAlert/TQAlert.testcmd.%d' % cmdIdx
                 print testCmdFile
                 if (os.path.isfile(testCmdFile)):
                     cmd = allAlertCmd[cmdIdx].replace('{HEADER}', '!!TEST!!').replace('{BODY}', 'Hello, this is test of TQAlert#%d.'%(cmdIdx+1))
@@ -76,7 +76,7 @@ def _main():
         curWeekVal = int(math.pow(10, 7-curWeekday)) #monday=1000000, tuesday=0100000 ... sunday=0000001
         # if config change!
         try:
-            with open('/tmp/watchTQ/watchTQ.confchange', 'r') as f:
+            with open('/tmp/TQAlert/TQAlert.confchange', 'r') as f:
                 lastChangeTimeS = int(f.readline().strip())
                 if curTimeS<lastChangeTimeS+sleepSec*1.5:
                     _log("-------->Config change<--------")
@@ -100,7 +100,7 @@ def _main():
 
         print("Current WeekVal:%07d, HHMMSS:%d, TimeS:%d" %(curWeekVal, curHHMMSS, curTimeS))
         for rule in matchingWeekValRule:
-            skipFile='/tmp/watchTQ/watchTQ.skip.%s' % rule['Symbol']
+            skipFile='/tmp/TQAlert/TQAlert.skip.%s' % rule['Symbol']
             if (os.path.isfile(skipFile)):
                 _log("File: %s exist, so skip %s" % (skipFile, rule['Symbol']))
                 continue
