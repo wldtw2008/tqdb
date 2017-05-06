@@ -5,7 +5,7 @@
     Set network by nmtui:
     $ sudo nmtui
 
-    $ sudo yum install -y epel-release wget git nc python-pip python-dateutil net-tools
+    $ sudo yum install -y epel-release wget git nc python-pip python-dateutil net-tools httpd
     $ sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
     $ sudo yum update
     $ sudo ln -s /usr/bin/nc /usr/bin/netcat
@@ -79,28 +79,10 @@
     
     Then you can run ./itick to check the cpp-driver is ok or not.
     
-***Lighttpd***
-    Please refering https://www.howtoforge.com/tutorial/installing-lighttpd-with-php-5-fpm-and-mysql-on-centos-7/
+***httpd (Apache)***
+    Just run below command to set web related configs:
+    $ cd /home/tqdb/codes/tqdb/tools/for_web && sudo ./buildApache.sh
 
-    Install lighttpd:
-    $ sudo yum install lighttpd
-    
-    Edit the conf file:
-    $ sudo vi /etc/lighttpd/lighttpd.conf
-        a. server.use-ipv6="disable"
-        b. server.document-root=server_root+"/"
-    
-    Edit the module file to enable old stype cgi:
-    $ sudo vi /etc/lighttpd/modules.conf
-       ==> open include "conf.d/cgi.conf"
-    
-    HTML releated files:
-    $ sudo mv /var/www/lighttpd /var/www/htdocs
-    $ chmod -R +x /home/tqdb/
-    $ chmod -R +r /home/tqdb/
-    $ cd /home/tqdb/codes/tqdb/tools/for_web && sudo ./buildWeb.sh
-
-    Enable & Restart service:
     $ sudo systemctl enable lighttpd.service
     $ sudo systemctl start lighttpd.service
     
