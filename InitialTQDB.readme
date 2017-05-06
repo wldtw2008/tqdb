@@ -1,16 +1,7 @@
 ========TQDB at CentOS 7 installation guide========
 
-***CentOS security***
-    Disable the SELinux & Firewall
-    $ sudo setenforce 0
-    $ sudo vi /etc/sysconfig/selinux
-       ==> Set disabled
-    $ sudo systemctl disable firewalld
-    $ sudo systemctl stop firewalld
-    $ sudo vi /etc/ssh/sshd_config
-       ==> PermitRootLogin no  
-
 ***CentOS releated package and envirunment***
+    ***All below steps runs as user: 'tqdb', so you have to create and login as 'tqdb' first***
     Set network by nmtui:
     $ sudo nmtui
 
@@ -28,10 +19,22 @@
        <== set host TQDBXXXX or whatever you want
 
 ***Clone TQDB from GitHub***
-    Login as user 'tqdb' and git clone:
-    $ mkdir /home/tqdb/codes && cd /home/tqdb/codes
+    $ mkdir /home/tqdb/codes 
     $ mkdir /home/tqdb/oldtick
-    
+    $ git clone https://github.com/wldtw2008/tqdb.git /home/tqdb/codes/tqdb
+
+***CentOS security***
+    Disable the SELinux & Firewall
+    $ sudo setenforce 0
+    $ sudo vi /etc/sysconfig/selinux
+       ==> Set disabled
+    $ sudo systemctl disable firewalld
+    $ sudo systemctl stop firewalld
+    $ sudo vi /etc/ssh/sshd_config
+       ==> PermitRootLogin no
+
+
+ 
 ***Java***
     Install Java:
     $ sudo yum install java-1.8.0-openjdk
