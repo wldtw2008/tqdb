@@ -74,7 +74,7 @@ def _main():
         iLoopCnt+=1
 
         if (iLoopCnt%10) == 0: #delete mute file if file was modified 1day ago
-            subprocess.call('find /tmp/TQAlert/ -mmin +86400 -name "TQAlert.skip.*" -exec rm {} \\;', shell=True)
+            subprocess.call('find /tmp/TQAlert/ -mtime +1 -name "TQAlert.skip.*" -exec rm {} \\;', shell=True)
 
         try:
             for cmdIdx in range(0,len(allAlertCmd)):
@@ -119,7 +119,6 @@ def _main():
             (symbol, Beg, End, TickSec, QuoteSec)=(rule['Symbol'], rule['Rule'][1], rule['Rule'][2], rule['Rule'][3], rule['Rule'][4])
             if not (curHHMMSS>=Beg and curHHMMSS<End):
                 continue
-
             skipFile = '/tmp/TQAlert/TQAlert.skip.%s' % symbol
             if (os.path.isfile(skipFile)):
                 _log("File: %s exist, so skip %s" % (skipFile, symbol))
@@ -129,16 +128,15 @@ def _main():
                 continue
             HEADER = ""
             BODY = ""
-            print "-->"
             if QuoteSec>0:
                 lastTimeS = _readLastTQTime(symbol, 'LastQ')
-                print "Q-->",symbol,rule['Rule'],curTimeS,lastTimeS,QuoteSec
+                print "Q-->",symbol,rule['RuleIdx'],rule['Rule'],curTimeS,lastTimeS,QuoteSec
                 if (curTimeS>lastTimeS+QuoteSec):
                     HEADER="No Quote Alert"
                     BODY="%s is no quote for %d secs!" % (symbol, QuoteSec)
             if TickSec>0:
                 lastTimeS = _readLastTQTime(symbol, 'LastT')
-                print "T-->",symbol,rule['Rule'],curTimeS,lastTimeS,TickSec
+                print "T-->",symbol,rule['RuleIdx'],rule['Rule'],curTimeS,lastTimeS,TickSec
                 if (curTimeS>lastTimeS+TickSec):
                     HEADER="No Tick Alert"
                     BODY="%s is no tick for %d secs!" % (symbol, TickSec)
