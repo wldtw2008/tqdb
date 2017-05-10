@@ -35,6 +35,18 @@ def _readConfig(keyspace, allTimeRule, allAlertCmd):
         for key in allTimeRule.keys():
             _log("    Symbol: %s" % key)
             for i in range(0, len(allTimeRule[key])):
+                ruleParamList = allTimeRule[key][i]
+                #Change list to dict
+                allTimeRule[key][i] = {'WeekVal': ruleParamList[0], 'Beg':ruleParamList[1], 'End':ruleParamList[2], 'TickSec':ruleParamList[3], 'QuoteSec':ruleParamList[4], 'BegOffset':ruleParamList[1]}
+                ruleParamDict = allTimeRule[key][i]
+                if (True): # Let 'BegOffset' = Beg + min(TickSec, QuoteSec)
+                    FirstBegSecOffset = 86400 
+                    if (ruleParamDict['TickSec']>0 and ruleParamDict['TickSec']<FirstBegSecOffset): FirstBegSecOffset=ruleParamDict['TickSec']
+                    if (ruleParamDict['QuoteSec']>0 and ruleParamDict['QuoteSec']<FirstBegSecOffset): FirstBegSecOffset=ruleParamDict['QuoteSec']
+                    if FirstBegSecOffset == 86400: FirstBegSecOffset = 0
+                    totalSec = FirstBegSecOffset + int(ruleParamDict['Beg']/10000)*3600 + (int(ruleParamDict['Beg']/100)%100)*60 + int(ruleParamDict['Beg']%100)
+                    ruleParamDict['BegOffset'] = int("%02d%02d%02d" % (int(totalSec/3600), int(totalSec/60)%60, int(totalSec%60)))
+
                 _log("        Rule#%d: %s" %(i+1,allTimeRule[key][i]))
         _log("-"*80)
         _log("Alert Cmds:")
@@ -106,7 +118,7 @@ def _main():
             lastCheckWeekVal = curWeekVal
             for key in allTimeRule.keys():
                 for i in range(0, len(allTimeRule[key])):
-                    if (int((allTimeRule[key][i][0])/curWeekVal)%10) == 1:
+                    if (int((allTimeRule[key][i]['WeekVal'])/curWeekVal)%10) == 1:
                         matchingWeekValRule.append({'Symbol':key, 'RuleIdx':i, 'Rule': allTimeRule[key][i]})
             _log("-"*80)
             _log("Detected day change...")
@@ -114,9 +126,11 @@ def _main():
             for rule in matchingWeekValRule:
                 _log("    %s" % rule)
 
+        #only check the rule have the same week value
         _log("Current WeekVal:%07d, HHMMSS:%d, TimeS:%d" %(curWeekVal, curHHMMSS, curTimeS))
         for rule in matchingWeekValRule:
-            (symbol, Beg, End, TickSec, QuoteSec)=(rule['Symbol'], rule['Rule'][1], rule['Rule'][2], rule['Rule'][3], rule['Rule'][4])
+            (symbol, Beg, End, TickSec, QuoteSec)=(rule['Symbol'], rule['Rule']['BegOffset'], rule['Rule']['End'], rule['Rule']['TickSec'], rule['Rule']['QuoteSec'])
+
             if not (curHHMMSS>=Beg and curHHMMSS<End):
                 continue
             skipFile = '/tmp/TQAlert/TQAlert.skip.%s' % symbol
