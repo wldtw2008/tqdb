@@ -38,8 +38,18 @@ function qSystemInfo()
     url='/cgi-bin/qSystemInfo.py'
     DoAjax(url, {},
 	function(data, textStatus, jqXHR){
-		$('#systemInfoDiv').html(data);
-		});
+		html = ""
+		html += "<table><tr class='grayThing smallfont'><td>Item</td><td>Info</td></tr>"
+		for (i=0;i<data.length;++i)
+		{
+			k = data[i][0]
+			v = data[i][1].replace(/\t/g, '    ').replace(/ /g, '&nbsp;').replace(/\n/g, '<br>')
+			html+="<tr onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\">"
+			html+="<td><font size='-1'>" + k + "</font></td><td><font size='-1'>" + v + "</font></td></tr>"
+		}
+		html += "</table>"
+		$('#systemInfoDiv').html(html);
+	});
 
 }
 function doAddNewSym(sym){

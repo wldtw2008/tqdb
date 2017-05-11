@@ -68,17 +68,17 @@ if True: #get system time zone
     lines.append('TimeZone=%s (/etc/localtime)' % ', '.join(zones))
     lines.append('TimeZone=%s (/etc/timezone)' % ', '.join(runCmd('cat /etc/timezone')))
     lines.append('tzdata Version=%s' % tzdbVer)
-    allInfo.append(['Server Time', '<br>'.join(lines)])
+    allInfo.append(['Server Time', '\n'.join(lines)])
 
 if True:
     lines = runCmd('cat /etc/crontab | grep purgeTick.sh | sed "s/^ *//" | grep -v "^#"')
-    allInfo.append(['Purge Tick Schedule', '<br>'.join(lines)])
+    allInfo.append(['Purge Tick Schedule', '\n'.join(lines)])
     lines = runCmd('cat /etc/crontab | grep build1MinFromTick.sh | sed "s/^ *//" | grep -v "^#"')
-    allInfo.append(['Build 1Min Schedule', '<br>'.join(lines)])
+    allInfo.append(['Build 1Min Schedule', '\n'.join(lines)])
     lines = runCmd('cat /etc/crontab | grep build1SecFromTick.sh | sed "s/^ *//" | grep -v "^#"')
-    allInfo.append(['Build 1Sec Schedule', '<br>'.join(lines)])
+    allInfo.append(['Build 1Sec Schedule', '\n'.join(lines)])
     lines = runCmd('cat /etc/crontab | grep -E "reboot|shutdown|halt" | sed "s/^ *//" | grep -v "^#"')
-    allInfo.append(['Reboot Schedule', '<br>'.join(lines)])
+    allInfo.append(['Reboot Schedule', '\n'.join(lines)])
 
 
 if True:
@@ -86,30 +86,22 @@ if True:
     #lines += ["----%s %s----" % (linuxFamily, ''.join(runCmd('arch')))]
     lines += runCmd('grep -E "^PRETTY_NAME=" /etc/os-release | sed "s/\\"//g" | cut -f 2 -d "="')
     lines += [''.join(runCmd('arch'))] 
-    allInfo.append(['Linux Info', '<br>'.join(lines)])
+    allInfo.append(['Linux Info', '\n'.join(lines)])
 
 if True:
     lines = []
     lines += runCmd('cat /proc/cpuinfo | grep -E "cores|model name" |sort | uniq ')
-    allInfo.append(['CPUs Info', '<br>'.join(lines)])
+    allInfo.append(['CPUs Info', '\n'.join(lines)])
 
 if True:
-    lines = runCmd('top -bn1 | head -10 | sed "s/ /\&nbsp;/g"')
-    allInfo.append(['Top Info', '<br>'.join(lines)])
+    lines = runCmd('top -bn1 | head -10')
+    allInfo.append(['Top Info', '\n'.join(lines)])
 
 if True:
-    lines = runCmd('df -h| sed "s/ /\&nbsp;/g"')
-    allInfo.append(['Disk Info', '<br>'.join(lines)])
-sys.stdout.write("Content-Type: text/html\r\n")
+    lines = runCmd('df -h')
+    allInfo.append(['Disk Info', '\n'.join(lines)])
+
+sys.stdout.write("Content-Type: application/json; charset=UTF-8\r\n")
 sys.stdout.write("\r\n")
-sys.stdout.write("<html>")
-sys.stdout.write("<body><link rel='stylesheet' type='text/css' href='/style.css'>")
-sys.stdout.write("<table >")
-sys.stdout.write("<tr class='grayThing smallfont'><td>Item</td><td>Info</td></tr>")
-for info in allInfo:
-    sys.stdout.write("<tr onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\">")
-    sys.stdout.write("<td><font size='-1'>%s</font></td><td><font size='-1'>%s</font></td></tr>"%(info[0], info[1]))
-sys.stdout.write("</table>")
-sys.stdout.write("</body></html>")
-sys.stdout.write("\r\n")
+sys.stdout.write(json.dumps(allInfo))
 sys.stdout.flush()
