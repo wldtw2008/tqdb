@@ -39,7 +39,7 @@ function qTQConf()
 			for (i=0;i<3;++i)
 				confVal["AlertCMD"][i] = confVal["AlertCMD"][i].replace(/"/g, "&quot;").replace(/'/g, "&apos;").replace(/\\/g,"&bsol;")
 		}
-		if (!('TimeRule' in confVal)) confVal['TimeRule'] = [];
+		if (!('TimeRule' in confVal)) confVal['TimeRule'] = {};
 		if (!('AlertCMD' in confVal)) confVal['AlertCMD'] = ['', '', ''];
 		if (!('GroupSyms' in confVal)) confVal['GroupSyms'] = ['', '', '', '', '', '', '', '', '', ''];
 		makeTQTable(confVal);
