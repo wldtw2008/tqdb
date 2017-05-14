@@ -1,0 +1,126 @@
+<html>
+<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+<link rel='stylesheet' type='text/css' href='style.css'>
+<script src="/js/jquery-2.1.4.min.js"></script>
+<!--<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>-->
+<script language='javascript'>
+ICON_CHECK="&#9745;"
+ICON_UNCHECK="&#9744;"
+function myUrlEncode(str)
+{
+	return encodeURI(str).replace(/&/i, '%26')
+}
+function DoAjax(requestType, requestUrl, sentData, sHandler, eHandler, pageNotFoundHandler){
+        $.ajax({
+            type: requestType,    
+            url: requestUrl,
+            cache: false,       
+            data: sentData, 
+            success: sHandler,   
+            error: eHandler,      
+            statusCode: {    
+              404: pageNotFoundHandler
+            }
+        });
+    };
+function qSymSummery()
+{
+    symbol=''
+    if (true)
+    {
+        url = ""+window.location
+        queryStr = ''
+        if (url.indexOf('?')> 1)
+        {
+            queryStr = url.substring(url.indexOf('?')+1);
+        }
+        allKeyVal = queryStr.split('&')
+        for (i=0;i<allKeyVal.length;++i)
+        {
+            keyval = allKeyVal[i].split('=')
+            if (keyval[0] == 'symbol')
+                 symbol=keyval[1]
+        }
+    }
+    url='/cgi-bin/qSymSummery.py?symbol='+symbol
+    DoAjax('GET', url, {},
+        function(data, textStatus, jqXHR){
+		makeMainTable(data);
+        });
+    return;
+}
+function makeMainTable(jsonObj)
+{
+    strTable = ""
+    strTable+="<table>"
+    strTable+="<tr class='grayThing smallfont' align='center' ><td colspan=2>Symbol Info</td></tr>"
+    strTable+="<tr class='grayThing smallfont' align='center' ><td>Symbol</td><td class='whiteThing smallfont' align='left' onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\">"+jsonObj['SymbolInfo'][0]['symbol']+"</td></tr>"
+    strTable+="<tr class='grayThing smallfont' align='center' ><td>Config</td><td class='whiteThing smallfont' align='left' onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\">"+jsonObj['SymbolInfo'][0]['keyval']+"</td></tr>"
+    strTable+="</table><br>"
+
+    strTable+="<table>"
+    strTable+="<tr class='grayThing smallfont' align='center' ><td colspan=6>Tick Data Summery</td></tr>"
+    strTable+="<tr class='grayThing smallfont' align='center' ><td></td><td>#</td><td>DateTime(UTC)</td><td>Type</td><td>Data</td></tr>"
+    category = ["TickBeg", "TickEnd"]
+    for (c=0;c<category.length;++c)
+    {
+        oneObj = jsonObj[category[c]]
+        strTable+="<tr class='grayThing smallfont' align='center' ><td rowspan="+ (1+oneObj.length)+">" + category[c] + "</td></tr>"
+        for (i=0;i<oneObj.length;++i)
+        {
+            strTable+="<tr class='whiteThing smallfont' onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\"><td>#"+(i+1)+"</td>"
+            strTable+="  <td>"+oneObj[i]['datetime']+"</td><td>"+oneObj[i]['type']+"</td><td>"+oneObj[i]['keyval']+"</td></tr>"
+        }
+    }
+    strTable+="</table><br>"
+
+    strTable+="<table>"
+    strTable+="<tr class='grayThing smallfont' align='center' ><td colspan=8>Min Bar Summery</td></tr>"
+    strTable+="<tr class='grayThing smallfont' align='center' ><td></td><td>#</td><td>DateTime(UTC)</td><td>Open</td><td>High</td><td>Low</td><td>Close</td><td>Volume</td></tr>"
+    category = ["MinBeg", "MinEnd"]
+    for (c=0;c<category.length;++c)
+    {
+        oneObj = jsonObj[category[c]]
+        strTable+="<tr class='grayThing smallfont' align='center' ><td rowspan="+ (1+oneObj.length)+">" + category[c] + "</td></tr>"
+        for (i=0;i<oneObj.length;++i)
+        {
+            strTable+="<tr class='whiteThing smallfont' onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\"><td>#"+(i+1)+"</td>"
+            strTable+="  <td>"+oneObj[i]['datetime']+"</td><td>"+oneObj[i]['open']+"</td><td>"+oneObj[i]['high']+"</td><td>"+oneObj[i]['low']+"</td><td>"+oneObj[i]['close']+"</td><td>"+oneObj[i]['vol']+"</td></tr>"
+        }
+    }
+    strTable+="</table><br>"
+
+    strTable+="<table>"
+    strTable+="<tr class='grayThing smallfont' align='center' ><td colspan=8>Sec Bar Summery</td></tr>"
+    strTable+="<tr class='grayThing smallfont' align='center' ><td></td><td>#</td><td>DateTime(UTC)</td><td>Open</td><td>High</td><td>Low</td><td>Close</td><td>Volume</td></tr>"
+    category = ["SecBeg", "SecEnd"]
+    for (c=0;c<category.length;++c)
+    {
+        oneObj = jsonObj[category[c]]
+        strTable+="<tr class='grayThing smallfont' align='center' ><td rowspan="+ (1+oneObj.length)+">" + category[c] + "</td></tr>"
+        for (i=0;i<oneObj.length;++i)
+        {
+            strTable+="<tr class='whiteThing smallfont' onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\"><td>#"+(i+1)+"</td>"
+            strTable+="  <td>"+oneObj[i]['datetime']+"</td><td>"+oneObj[i]['open']+"</td><td>"+oneObj[i]['high']+"</td><td>"+oneObj[i]['low']+"</td><td>"+oneObj[i]['close']+"</td><td>"+oneObj[i]['vol']+"</td></tr>"
+        }
+
+    }
+    strTable+="</table><br>"
+
+
+    document.getElementById('SymSummeryDiv').innerHTML = strTable;
+
+}
+
+function divChange(divId)
+{
+    $('#symbolTableDiv').hide();
+    $('#systemInfoDiv').hide();
+    $('#'+divId).show();
+}
+</script>
+<body onload='qSymSummery();'>
+<hr>
+<div id='SymSummeryDiv'>Loading...</div>
+</body></html>
+
