@@ -55,6 +55,7 @@ def _procPostData():
                 csv.write('%s\n' % ','.join(onedata))
 
         runCmd = "/home/tqdb/codes/tqdb/tools/csvtzconv.py '%s' '%s' '/tmp/%s.tzFrom' > /tmp/%s.tzTo" % (param['tzFromTo'][0], param['tzFromTo'][1], importTicket, importTicket)
+        param['tzConvertCmd'] = runCmd
         subprocess.call(runCmd, shell=True)
         param['Lines'] = []
         with open('/tmp/%s.tzTo'%importTicket, 'r') as csv:
@@ -82,30 +83,63 @@ def _prepareImport():
             csv.write(','.join(onedata)+'\n')
 _procPostData()
 _prepareImport()
-sys.stdout.write("Content-Type: text/html\r\n")
-sys.stdout.write("\r\n")
-if param['Sym'] == '':
-    sys.stdout.write('<html><body>No Sym!</body></html>')
+
+retObj = {'symbol':param['Sym'], 'totalCnt':len(param['Lines']), 'importTicket':importTicket, 'tzFrom':'', 'tzTo':'', 'first100Rows':[], 'last100Rows':[], 'tzConvertCmd':''}
+if param['tzFromTo'] is not None:
+    retObj['tzFrom'] = param['tzFromTo'][0]
+    retObj['tzTo'] = param['tzFromTo'][1]
+    retObj['tzConvertCmd'] = param['tzConvertCmd']
+cnt = 0
+for onedata in param['Lines']:
+    cnt += 1
+    if cnt<=100 or cnt>=retObj['totalCnt']-100:
+        dtohlcv={'D':None, 'T':None, 'O':None, 'H':None, 'L':None, 'C':None, 'V':0, 'Idx':cnt}
+        tags=['D', 'T', 'O', 'H', 'L', 'C', 'V']
+        for i in range(0,len(tags)):
+            try:
+                dtohlcv[tags[i]] = onedata[i]
+            except:
+                pass
+        dtohlcv['Idx'] = cnt
+        if cnt<=100: retObj['first100Rows'].append(dtohlcv)
+        if retObj['totalCnt']>100 and cnt>=retObj['totalCnt']-100: retObj['last100Rows'].append(dtohlcv)
+
+querystrings=os.environ.get("QUERY_STRING", "NA=NA")
+mapQS={}
+for qs in querystrings.split("&"):
+    mapQS[qs.split("=")[0]] = qs.split("=")[1]
+
+
+if 'html' in mapQS and mapQS['html']=='1':
+    sys.stdout.write("Content-Type: text/html\r\n")
+    sys.stdout.write("\r\n")
+    if retObj['symbol'] == '':
+        sys.stdout.write('<html><body>No Sym!</body></html>')
+    else:
+        sys.stdout.write('<html><body>')
+        sys.stdout.write("<link rel='stylesheet' type='text/css' href='/style.css'>")
+        sys.stdout.write('Sym:%s, TotalLines:%d, ImportTicket:%s<br>\n'%(retObj['symbol'], retObj['totalCnt'], retObj['importTicket']))
+        if retObj['tzFrom'] != '':
+            sys.stdout.write('<font color="#f00">Convert Timezone: %s ---> %s' % (retObj['tzFrom'], retObj['tzTo']))
+        sys.stdout.write('<table>\n')
+        sys.stdout.write('<tr class="grayThing smallfont"><td>No</td><td>Date</td><td>Time</td><td>Open</td><td>High</td><td>Low</td><td>Close</td><td>Vol</td></tr>\n')
+        for dtohlcv in retObj['first100Rows']:
+            sys.stdout.write('<tr onmouseover="this.className=\'yellowThing\';" onmouseout=\"this.className=\'whiteThing\';">')
+            sys.stdout.write('<td>#%d</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>' %
+                            (dtohlcv['Idx'], dtohlcv['D'], dtohlcv['T'], dtohlcv['O'], dtohlcv['H'], dtohlcv['L'], dtohlcv['C'], dtohlcv['V']))
+        if len(retObj['last100Rows'])>0:
+            sys.stdout.write('<tr><td colspan="8">...</td>')
+            for dtohlcv in retObj['last100Rows']:
+                sys.stdout.write('<tr onmouseover="this.className=\'yellowThing\';" onmouseout=\"this.className=\'whiteThing\';">')
+                sys.stdout.write('<td>#%d</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>' % 
+                                (dtohlcv['Idx'], dtohlcv['D'], dtohlcv['T'], dtohlcv['O'], dtohlcv['H'], dtohlcv['L'], dtohlcv['C'], dtohlcv['V']))
+
+        sys.stdout.write('</table>\n')
+        sys.stdout.write('<input type="button" onclick="location.href=\'/cgi-bin/i1min_do.py?importTicket=%s\'" value=\'Confirm importing!\'></input>\n'%importTicket)
+        sys.stdout.write('</body></html>')
+    
 else:
-    #sys.stdout.write('<html><body>No Sym!</body></html>')
-    sys.stdout.write('<html><body>')
-    sys.stdout.write("<link rel='stylesheet' type='text/css' href='/style.css'>")
-    sys.stdout.write('Sym:%s, TotalLines:%d, ImportTicket:%s<br>\n'%(param['Sym'], len(param['Lines']), importTicket))
-    if (param['tzFromTo'] is not None):
-        sys.stdout.write('<font color="#f00">Convert Timezone: %s ---> %s' % (param['tzFromTo'][0], param['tzFromTo'][1]))
-    sys.stdout.write('<table>\n')
-    sys.stdout.write('<tr class="grayThing smallfont"><td>No</td><td>Date</td><td>Time</td><td>Open</td><td>High</td><td>Low</td><td>Close</td><td>Vol</td></tr>\n')
-    cnt = 0
-    for onedata in param['Lines']:
-       cnt += 1
-       if cnt>100 and cnt<len(param['Lines'])-100:
-          if cnt == 101:
-              sys.stdout.write('<tr onmouseover="this.className=\'yellowThing\';" onmouseout=\"this.className=\'whiteThing\';"><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>\n')
-          continue
-       sys.stdout.write('<tr onmouseover="this.className=\'yellowThing\';" onmouseout=\"this.className=\'whiteThing\';"><td>#%d</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n'%
-                        (cnt, onedata[0], onedata[1], onedata[2], onedata[3], onedata[4], onedata[5], onedata[6]))
-    sys.stdout.write('</table>\n')
-    sys.stdout.write('<input type="button" onclick="location.href=\'/cgi-bin/i1min_do.py?importTicket=%s\'" value=\'Confirm importing!\'></input>\n'%importTicket)
-    sys.stdout.write('</body></html>')
-sys.stdout.write("\r\n")
+    sys.stdout.write("Content-Type: application/json; charset=UTF-8\r\n")
+    sys.stdout.write("\r\n")
+    sys.stdout.write(json.dumps(retObj))
 sys.stdout.flush()
