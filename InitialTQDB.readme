@@ -5,8 +5,9 @@
     Set network by nmtui:
     $ sudo nmtui
 
-    $ sudo yum install -y epel-release wget git nc python-pip python-dateutil net-tools httpd ntpd
-    $ sudo systemctl enable ntpd && sudo systemctl start ntpd
+    $ sudo yum install -y epel-release wget git nc python-pip python-dateutil net-tools httpd ntp ntpd
+    $ sudo systemctl enable ntp && sudo systemctl start ntp
+      (sudo systemctl enable ntpd && sudo systemctl start ntpd)
     $ sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
     $ sudo yum update
     $ sudo ln -s /usr/bin/nc /usr/bin/netcat
@@ -84,8 +85,8 @@
     Just run below command to set web related configs:
     $ cd /home/tqdb/codes/tqdb/tools/for_web && sudo ./buildApache.sh
 
-    $ sudo systemctl enable lighttpd.service
-    $ sudo systemctl start lighttpd.service
+    $ sudo systemctl enable httpd 
+    $ sudo systemctl start httpd
     
 
 ***CentOS System setting***
