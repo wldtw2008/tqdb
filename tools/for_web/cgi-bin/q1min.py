@@ -20,13 +20,13 @@ fileType = 0 #0=gz 1=csv
 mapQS={}
 def getFirstValidDateTime(symbol, begDTstr, endDTstr):
     begEOPCH, endEOPCH = (-1, -1) 
-    url = 'http://127.0.0.1/cgi-bin/qsummery.py?symbol=%s&qtype=qLastPrc&lastDT=%s' % (urllib2.quote(symbol), urllib2.quote(begDTstr))
+    url = 'http://127.0.0.1/cgi-bin/qSymSummery.py?symbol=%s&qtype=qLastPrc&lastDT=%s' % (urllib2.quote(symbol), urllib2.quote(begDTstr))
     resp = urllib2.urlopen(url)
     obj = json.loads(resp.read())
     #print obj
     if obj != None and 'last' in obj and obj['last'][0] != None:
         begEOPCH = obj['last'][1]/1000
-    url = 'http://127.0.0.1/cgi-bin/qsummery.py?symbol=%s&qtype=qLastPrc&lastDT=%s' % (urllib2.quote(symbol), urllib2.quote(endDTstr))
+    url = 'http://127.0.0.1/cgi-bin/qSymSummery.py?symbol=%s&qtype=qLastPrc&lastDT=%s' % (urllib2.quote(symbol), urllib2.quote(endDTstr))
     resp = urllib2.urlopen(url)
     obj = json.loads(resp.read())
     #print obj
