@@ -34,7 +34,6 @@ def _main(keyspace, sym, qType, qDatetime):
 
     if qType == "LastValidPrc":
         queryStr = "select * from %s.tick where symbol='%s' and datetime<'%s' order by datetime desc limit 1;" % (keyspace, sym, qDatetime)
-        print queryStr
         retData = _executeQurey(session, queryStr)
         allData['Tick'] = retData['data'] if retData['Result'] == 'OK' else ['Exception!']
 
@@ -46,8 +45,7 @@ def _main(keyspace, sym, qType, qDatetime):
         retData = _executeQurey(session, queryStr)
         allData['SecBar'] = retData['data'] if retData['Result'] == 'OK' else ['Exception!']
 
-    retData = _executeQurey(session, queryStr)
-    allData['SymbolInfo'] = retData['data'] if retData['Result'] == 'OK' else ['Exception!']
+    allData['queryInfo'] = {'symbol':sym, 'qType':qType, 'qDatetime':qDatetime}
     return allData
 
 querystrings=os.environ.get("QUERY_STRING", "NA=NA")
