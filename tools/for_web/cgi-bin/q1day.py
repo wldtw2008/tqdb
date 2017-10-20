@@ -21,18 +21,15 @@ timeoffset=0
 iLocalTimeOff=480 #TW
 iGZip=1
 iRemoveQfile=1
+begDT = '2016-5-23 11:45:00'
+endDT = '2016-5-23 21:46:00'
+fileType = 0 #0=gz 1=csv
 mapQS={}
 
 
 def loopReadFromStdin():
 	global mapQS,iMkO,iMkC,iRemoveQfile
 	tmpFile="/tmp/q1min.%d.%d"%(os.getpid(),time.mktime(datetime.datetime.now().timetuple()))
-	begDT = '2015-1-1'
-	endDT = '2037-1-1'
-	if ('BEG' in mapQS):
-		begDT=mapQS['BEG']
-	if ('END' in mapQS):
-		endDT=mapQS['END']
 	if ('MKO' in mapQS and 'MKC' in mapQS):
 		iMkO = int(mapQS['MKO'])
 		iMkC = int(mapQS['MKC'])
@@ -65,7 +62,11 @@ def loopReadFromStdin():
 		sys.stdout.write("Content-Encoding: gzip\r\n")
 	else:
 		pass
-	sys.stdout.write("Content-Type: text/plain\r\n")
+        if (fileType==0):
+                sys.stdout.write("Content-Type: text/plain\r\n")
+        else:
+                sys.stdout.write("Content-Type: text/csv\r\n")
+                sys.stdout.write("Content-Disposition: attachment; filename=\"%s.1day.csv\"\r\n"%szSymbol);
 	sys.stdout.write("\r\n")
 	with open(tmpFile, 'rb') as fp:
 		sys.stdout.write(fp.read())
@@ -83,4 +84,13 @@ if 'symbol' in mapQS:
 	szSymbol = mapQS['symbol']
 if 'timeoffset' in mapQS:
 	timeoffset = int(mapQS['timeoffset'])
+if ('BEG' in mapQS):
+        begDT=mapQS['BEG']
+if ('END' in mapQS):
+        endDT=mapQS['END']
+if ('csv' in mapQS):
+    if mapQS['csv']=='1':
+        fileType = 1
+        iGZip = 0
+
 loopReadFromStdin();

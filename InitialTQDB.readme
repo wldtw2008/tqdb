@@ -1,24 +1,16 @@
 ========TQDB at CentOS 7 installation guide========
 
-***CentOS security***
-    Disable the SELinux & Firewall
-    $ sudo setenforce 0
-    $ sudo vi /etc/sysconfig/selinux
-       ==> Set disabled
-    $ sudo systemctl disable firewalld
-    $ sudo systemctl stop firewalld
-    $ sudo vi /etc/ssh/sshd_config
-       ==> PermitRootLogin no  
-
 ***CentOS releated package and envirunment***
+    ***All below steps runs as user: 'tqdb', so you have to create and login as 'tqdb' first***
     Set network by nmtui:
     $ sudo nmtui
 
-    $ sudo yum install -y epel-release wget git nc python-pip python-dateutil net-tools
+    $ sudo yum install -y epel-release wget git nc python-pip python-dateutil net-tools httpd ntp ntpd
+    $ sudo systemctl enable ntpd && sudo systemctl start ntpd
     $ sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
     $ sudo yum update
     $ sudo ln -s /usr/bin/nc /usr/bin/netcat
-    $ sudo pip install --upgrade pip
+    $ sudo yum install -y python-pip && sudo pip install --upgrade pip
     $ sudo pip install --upgrade cassandra-driver
 
     Change Hostname if needed:
@@ -28,10 +20,22 @@
        <== set host TQDBXXXX or whatever you want
 
 ***Clone TQDB from GitHub***
-    Login as user 'tqdb' and git clone:
-    $ mkdir /home/tqdb/codes && cd /home/tqdb/codes
+    $ mkdir /home/tqdb/codes 
     $ mkdir /home/tqdb/oldtick
-    
+    $ git clone https://github.com/wldtw2008/tqdb.git /home/tqdb/codes/tqdb
+
+***CentOS security***
+    Disable the SELinux & Firewall
+    $ sudo setenforce 0
+    $ sudo vi /etc/sysconfig/selinux
+       ==> Set disabled
+    $ sudo systemctl disable firewalld
+    $ sudo systemctl stop firewalld
+    $ sudo vi /etc/ssh/sshd_config
+       ==> PermitRootLogin no
+
+
+ 
 ***Java***
     Install Java:
     $ sudo yum install java-1.8.0-openjdk
@@ -49,10 +53,9 @@
         enabled = 1
         gpgcheck = 0
        
-    $ sudo yum install datastax-ddc
+    $ sudo yum install -y datastax-ddc
 
-    $ sudo systemctl enable cassandra
-    $ sudo systemctl start cassandra
+    $ sudo systemctl enable cassandra && sudo systemctl restart cassandra
 
     Verify that DataStax Distribution of Apache Cassandra is running:
     $ nodetool status
@@ -71,42 +74,23 @@
 
     Install the Cassandra-CPP-Driver:
     $ wget downloads.datastax.com/cpp-driver/centos/7/cassandra/v2.4.3/cassandra-cpp-driver-2.4.3-1.el7.centos.x86_64.rpm
-    $ sudo yum install libuv
+    $ sudo yum install -y libuv
     $ sudo rpm -ivh cassandra-cpp-driver-2.4.3-1.el7.centos.x86_64.rpm
     
-    Then you can run ./itick to check the cpp-driver is ok or not.
+    Then you can run /home/tqdb/codes/tqdb/tools/itick to check the cpp-driver is ok or not.
     
-***Lighttpd***
-    Please refering https://www.howtoforge.com/tutorial/installing-lighttpd-with-php-5-fpm-and-mysql-on-centos-7/
+***httpd (Apache)***
+    Just run below command to set web related configs:
+    $ cd /home/tqdb/codes/tqdb/tools/for_web && sudo ./buildApache.sh
 
-    Install lighttpd:
-    $ sudo yum install lighttpd
-    
-    Edit the conf file:
-    $ sudo vi /etc/lighttpd/lighttpd.conf
-        a. server.use-ipv6="disable"
-        b. server.document-root=server_root+"/"
-    
-    Edit the module file to enable old stype cgi:
-    $ sudo vi /etc/lighttpd/modules.conf
-       ==> open include "conf.d/cgi.conf"
-    
-    HTML releated files:
-    $ sudo mv /var/www/lighttpd /var/www/htdocs
-    $ chmod -R +x /home/tqdb/
-    $ chmod -R +r /home/tqdb/
-    $ cd /home/tqdb/codes/tqdb/tools/for_web && sudo ./buildWeb.sh
-
-    Enable & Restart service:
-    $ sudo systemctl enable lighttpd.service
-    $ sudo systemctl start lighttpd.service
+    $ sudo systemctl enable httpd && sudo systemctl restart httpd
     
 
 ***CentOS System setting***
     TimeZone setting:
     $ls -lrt /etc/localtime  
        <== to see current timezone setting
-    $ sudo rm /etc/localtime && ln -s /usr/share/zoneinfo/UTC /etc/localtime && echo "UTC" | sudo tee /etc/timezone
+    $ sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/UTC /etc/localtime && echo "UTC" | sudo tee /etc/timezone
        <== set UTC or whatever you want
     
     Run at booting:
@@ -124,7 +108,7 @@
     $ sudo rpm -ivh ucspi-tcp-0.88-2.2.x86_64.rpm
     
     Edit the system schedule:
-    $ vi the /etc/crontab
+    $ sudo vi /etc/crontab
         #Build yestarday 1Min from Tick at every 2:15
         15 2    * * 1,2,3,4,5,6,7   root   cd /home/tqdb/codes/tqdb/tools && ./build1MinFromTick.sh ALL 0
         30 2    * * 1,2,3,4,5,6,7   root   cd /home/tqdb/codes/tqdb/tools && ./build1SecFromTick.sh @ALL_SSEC@ 0

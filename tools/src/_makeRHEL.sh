@@ -27,7 +27,7 @@ function buildExe(){
 		rm ${BIN}/${TRG}
 	fi
 	buildObj $TRG
-	${CC}   -D_GNU_SOURCE ${SRC}/common.o ${SRC}/${TRG}.o  -o ${BIN}/${TRG} -rdynamic  -lssl -lcrypto ${CASSLIB}  -lssl -lcrypto -Wl,-rpath,./
+	${CC}   -D_GNU_SOURCE ${SRC}/common.o ${SRC}/${TRG}.o  -o ${BIN}/${TRG} -rdynamic  ${CASSLIB}   -Wl,-rpath,./
 
 	if [ "$?" == "1" ] ; then
                 echo "!!!Some error while linking..."

@@ -10,8 +10,13 @@ def doConv(tzFrom, tzTo, csvFile):
         for line in lines:
             cols = line.strip().split(',');
             if (len(cols)>2):
-                d = int(cols[0])
-                t = int(cols[1])
+                d = 0
+                t = 0 
+                try:
+                    d = int(cols[0])
+                    t = int(cols[1])
+                except:
+                    pass
                 if d==0 or t==0:
                     continue
                 dtstr = "%04d-%02d-%02d %02d:%02d:%02d" % (d/10000,(d/100)%100,d%100,t/10000,(t/100)%100,t%100)

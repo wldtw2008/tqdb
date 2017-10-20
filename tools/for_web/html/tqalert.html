@@ -39,7 +39,7 @@ function qTQConf()
 			for (i=0;i<3;++i)
 				confVal["AlertCMD"][i] = confVal["AlertCMD"][i].replace(/"/g, "&quot;").replace(/'/g, "&apos;").replace(/\\/g,"&bsol;")
 		}
-		if (!('TimeRule' in confVal)) confVal['TimeRule'] = [];
+		if (!('TimeRule' in confVal)) confVal['TimeRule'] = {};
 		if (!('AlertCMD' in confVal)) confVal['AlertCMD'] = ['', '', ''];
 		if (!('GroupSyms' in confVal)) confVal['GroupSyms'] = ['', '', '', '', '', '', '', '', '', ''];
 		makeTQTable(confVal);
@@ -139,6 +139,7 @@ function makeTQTable(jsonObj)
     for (i=0;i<3;++i)
         strTable+="<tr class='whiteThing smallfont' onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\"><td>#"+(i+1)+"</td><td><input type='text' id='editModifyRuleAltCmd"+i+"' maxlength='256' size='60' value='"+allTQConf["AlertCMD"][i]+"'></td><td><button id='btnTestAltCmd' type='button' onclick='uiTestAltCmd("+i+");'>Test</button></td></tr>"
     strTable+="<tr class='whiteThing'><td colspan=3>Example: echo \"'{HEADER}' '{BODY}'\" > /tmp/alert.txt </td></tr>"
+    strTable+="<tr><td colspan=3></td></tr>"
 //    strTable+="</table>"
 
 //    strTable+="<p><br><p><table>"
@@ -290,7 +291,14 @@ function uiTestAltCmd(i)
 	cmd = $("#editModifyRuleAltCmd"+i).val();
 	cmd = cmd.replace(/\{HEADER\}/g, header);
 	cmd = cmd.replace(/\{BODY\}/g, body);
-	alert(cmd);
+	if (confirm("Simulate command is: "+cmd+"\n------------------------------------------------------------------------\nDo you want to run this command?"))
+	{
+		url='/cgi-bin/doAction.py?cmd=TQALERT_TESTCMD&params='+i
+		DoAjax('GET', url, {},
+			function(data, textStatus, jqXHR){
+		           alert(JSON.stringify(data));
+        	});
+	}
 }
 function uiMuteGrpSym(idx, bMute)
 {
@@ -303,6 +311,7 @@ function uiMuteGrpSym(idx, bMute)
            alert(JSON.stringify(data));
         });
 }
+
 function divChange(divId)
 {
     $('#symbolTableDiv').hide();
