@@ -6,12 +6,11 @@
     $ sudo nmtui
 
     $ sudo yum install -y epel-release wget git nc python-pip python-dateutil net-tools httpd ntp ntpd
-    $ sudo systemctl enable ntp && sudo systemctl start ntp
-      (sudo systemctl enable ntpd && sudo systemctl start ntpd)
+    $ sudo systemctl enable ntpd && sudo systemctl start ntpd
     $ sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
     $ sudo yum update
     $ sudo ln -s /usr/bin/nc /usr/bin/netcat
-    $ sudo pip install --upgrade pip
+    $ sudo yum install -y python-pip && sudo pip install --upgrade pip
     $ sudo pip install --upgrade cassandra-driver
 
     Change Hostname if needed:
@@ -54,10 +53,9 @@
         enabled = 1
         gpgcheck = 0
        
-    $ sudo yum install datastax-ddc
+    $ sudo yum install -y datastax-ddc
 
-    $ sudo systemctl enable cassandra
-    $ sudo systemctl start cassandra
+    $ sudo systemctl enable cassandra && sudo systemctl restart cassandra
 
     Verify that DataStax Distribution of Apache Cassandra is running:
     $ nodetool status
@@ -76,24 +74,23 @@
 
     Install the Cassandra-CPP-Driver:
     $ wget downloads.datastax.com/cpp-driver/centos/7/cassandra/v2.4.3/cassandra-cpp-driver-2.4.3-1.el7.centos.x86_64.rpm
-    $ sudo yum install libuv
+    $ sudo yum install -y libuv
     $ sudo rpm -ivh cassandra-cpp-driver-2.4.3-1.el7.centos.x86_64.rpm
     
-    Then you can run ./itick to check the cpp-driver is ok or not.
+    Then you can run /home/tqdb/codes/tqdb/tools/itick to check the cpp-driver is ok or not.
     
 ***httpd (Apache)***
     Just run below command to set web related configs:
     $ cd /home/tqdb/codes/tqdb/tools/for_web && sudo ./buildApache.sh
 
-    $ sudo systemctl enable httpd 
-    $ sudo systemctl start httpd
+    $ sudo systemctl enable httpd && sudo systemctl restart httpd
     
 
 ***CentOS System setting***
     TimeZone setting:
     $ls -lrt /etc/localtime  
        <== to see current timezone setting
-    $ sudo rm /etc/localtime && ln -s /usr/share/zoneinfo/UTC /etc/localtime && echo "UTC" | sudo tee /etc/timezone
+    $ sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/UTC /etc/localtime && echo "UTC" | sudo tee /etc/timezone
        <== set UTC or whatever you want
     
     Run at booting:
@@ -111,7 +108,7 @@
     $ sudo rpm -ivh ucspi-tcp-0.88-2.2.x86_64.rpm
     
     Edit the system schedule:
-    $ vi the /etc/crontab
+    $ sudo vi /etc/crontab
         #Build yestarday 1Min from Tick at every 2:15
         15 2    * * 1,2,3,4,5,6,7   root   cd /home/tqdb/codes/tqdb/tools && ./build1MinFromTick.sh ALL 0
         30 2    * * 1,2,3,4,5,6,7   root   cd /home/tqdb/codes/tqdb/tools && ./build1SecFromTick.sh @ALL_SSEC@ 0
