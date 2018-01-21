@@ -161,6 +161,17 @@
          PRIMARY KEY (symbol, datetime)
      );
 
+     CREATE TABLE tqdb1.secbar (
+         symbol text,
+         datetime timestamp,
+         close double,
+         high double,
+         low double,
+         open double,
+         vol double,
+         PRIMARY KEY (symbol, datetime)
+     };
+
      CREATE TABLE tqdb1.conf (
          confKey text PRIMARY KEY,
          confVal text
