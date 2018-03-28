@@ -1,7 +1,11 @@
 ========TQDB at CentOS 7 installation guide========
 
+***All below steps runs as user: 'tqdb', so you have to create and login as 'tqdb' first***
+    $ sudo adduser tqdb
+    $ sudo passwd tqdb  <== to set a password for user 'tqdb'
+    $ sudo vi /etc/sudoers <== set root privilege for user 'tqdb'
+
 ***CentOS releated package and envirunment***
-    ***All below steps runs as user: 'tqdb', so you have to create and login as 'tqdb' first***
     Set network by nmtui:
     $ sudo nmtui
 
@@ -19,11 +23,6 @@
     $ sudo hostnamectl set-hostname TQDBXXXX
        <== set host TQDBXXXX or whatever you want
 
-***Clone TQDB from GitHub***
-    $ mkdir /home/tqdb/codes 
-    $ mkdir /home/tqdb/oldtick
-    $ git clone https://github.com/wldtw2008/tqdb.git /home/tqdb/codes/tqdb
-
 ***CentOS security***
     Disable the SELinux & Firewall
     $ sudo setenforce 0
@@ -33,8 +32,12 @@
     $ sudo systemctl stop firewalld
     $ sudo vi /etc/ssh/sshd_config
        ==> PermitRootLogin no
+    $ sudo reboot
 
-
+***Clone TQDB from GitHub***
+    $ mkdir /home/tqdb/codes 
+    $ mkdir /home/tqdb/oldtick
+    $ git clone https://github.com/wldtw2008/tqdb.git /home/tqdb/codes/tqdb
  
 ***Java***
     Install Java:
@@ -46,18 +49,19 @@
 ***Cassandra***
     Please refering http://docs.datastax.com/en/cassandra/3.x/cassandra/install/installRHEL.html
     
-    $ sudo vi /etc/yum.repos.d/datastax.repo
-        [datastax-ddc] 
-        name = DataStax Repo for Apache Cassandra
-        baseurl = http://rpm.datastax.com/datastax-ddc/3.2 <== or put other version here
-        enabled = 1
-        gpgcheck = 0
+    $ sudo vi /etc/yum.repos.d/datastax.repo    please refering below setting:
+    [datastax-ddc] 
+    name = DataStax Repo for Apache Cassandra
+    baseurl = http://rpm.datastax.com/datastax-ddc/3.2 <== or put other version here
+    enabled = 1
+    gpgcheck = 0
        
     $ sudo yum install -y datastax-ddc
 
     $ sudo systemctl enable cassandra && sudo systemctl restart cassandra
 
     Verify that DataStax Distribution of Apache Cassandra is running:
+    $ ps -ef | grep cassandra   <== To sure cassandra is running.
     $ nodetool status
 
     Make old style Cassandra dirs & files:
@@ -70,7 +74,7 @@
     $ sudo ln -s /var/lib/cassandra/ /var/cassandra/data
     $ sudo ln -s /etc/cassandra/ /var/cassandra/conf
 
-    Please refresing the bottom part of this doc to create KeySpaces & Tables.
+    ===> Please refresing the bottom part of this doc to create KeySpaces & Tables.
 
     Install the Cassandra-CPP-Driver:
     $ wget downloads.datastax.com/cpp-driver/centos/7/cassandra/v2.4.3/cassandra-cpp-driver-2.4.3-1.el7.centos.x86_64.rpm
@@ -117,6 +121,10 @@
         30 3    * * *   root    ntpdate clock.stdtime.gov.tw
         #TimeZone database update
         0 12    1 * *   root    yum update -y tzdata
+
+***Finally***
+   You have to reboot system to comfirm it receives data automatically from the server (configurated in /etc/profile.d/profile_tqdb.sh)
+   $ sudo reboot
 
 ***Check***
    1. Check Demo data is ok or not:
@@ -170,19 +178,17 @@
          open double,
          vol double,
          PRIMARY KEY (symbol, datetime)
-     };
+     );
 
      CREATE TABLE tqdb1.conf (
          confKey text PRIMARY KEY,
          confVal text
      );
 
+
+
 ***Other***
     For not RedHat/CentOS
     $ sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/profile_tqdb.sh /etc/profile.d/profile_tqdb.sh
     $ sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/tqdbStartup.sh /etc/init.d/tqdbStartup.sh
     $ cd /etc/init.d && sudo update-rc.d tqdbStartup.sh defaults
-
-
-
- 
