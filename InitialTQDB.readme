@@ -192,3 +192,7 @@
     $ sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/profile_tqdb.sh /etc/profile.d/profile_tqdb.sh
     $ sudo ln -s /home/tqdb/codes/tqdb/script_for_sys/tqdbStartup.sh /etc/init.d/tqdbStartup.sh
     $ cd /etc/init.d && sudo update-rc.d tqdbStartup.sh defaults
+
+***VirtualBox VM Download***
+https://drive.google.com/open?id=16ZawNAWJNDcGV2jGirviIWzd_EwXlNfe
+id:tqdb, pw:tqdb@888, root pw:tqdb@888
