@@ -13,6 +13,8 @@ cd $TQDB_DIR/tools/ && python -u TQAlert.py > /tmp/TQAlert.py.log &
 sleep 10
 
 cd $TQDB_DIR/tools && ./autoIns2Cass.sh > /tmp/autoIns2Cass.log &
+cd $TQDB_DIR/tools && ./watchdogAutoIns2Cass.sh &
+
 
 #su - tqdb -c "cd /home/tqdb/.ipython && ipython notebook --profile=nbserver &"
 su - tqdb -c "cd /home/tqdb/ && jupyter notebook &" 
