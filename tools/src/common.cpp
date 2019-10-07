@@ -284,7 +284,7 @@ int iQAllSymbol(std::vector<ST_SymbolInfo>* pvecSymbolInfo, const char *pszTQDB,
                             std::string strKey, strVal;
                             strKey.assign(pszMapKey, iMapKeyLen);
                             strVal.assign(pszMapVal, iMapValLen);
-                            tmpSymbolInfo.mapKeyVal[pszMapKey] = pszMapVal;
+                            tmpSymbolInfo.mapKeyVal[strKey] = strVal;
                         }
                         break;
                     }
