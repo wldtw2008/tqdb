@@ -41,12 +41,34 @@ def _procPostData():
 
     if 'file' in form:
         fileitem = form['file']
+        iYYYYMMDDType = 0 #0=yyyymmdd 1=yyyy-mm-dd 2=yyyy/mm/dd
+        iHHMMSSType = 0 #0=hhmmss 1=hh:mm:ss
         while True:
             line = fileitem.file.readline()
             if not line: break
             onedata = line.strip('\n').strip('\r').split(',')
             if len(onedata)>=6:
+                try:#First item should be year
+                    year=int(onedata[0][0:4])
+                    if year<1900 or year>2030: continue
+                except:
+                    continue
+                #check if it is mc type
+                if len(param['Lines'])==0:
+                    if len(onedata[0].split('-'))==3: iYYYYMMDDType=1
+                    if len(onedata[0].split('/'))==3: iYYYYMMDDType=2
+                    if len(onedata[1].split(':'))==3: iHHMMSSType=1
+                if iYYYYMMDDType==1:
+                    _date=onedata[0].split('-')
+                    onedata[0]="%08d"%(int(_date[0])*10000+int(_date[1])*100+int(_date[2]))
+                elif iYYYYMMDDType==2:
+                    _date=onedata[0].split('/')
+                    onedata[0]="%08d"%(int(_date[0])*10000+int(_date[1])*100+int(_date[2]))
+                if iHHMMSSType==1:
+                    _time=onedata[1].split(':')
+                    onedata[1]="%06d"%(int(_time[0])*10000+int(_time[1])*100+int(_time[2]))
                 if len(onedata) == 6: onedata.append('0') #for vol
+
                 param['Lines'].append(onedata)
 
     if param['tzFromTo'] is not None:
