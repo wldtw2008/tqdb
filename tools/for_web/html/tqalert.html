@@ -116,13 +116,13 @@ function makeTQTable(jsonObj)
 		for (j=0;j<currTimeRules.length;++j)
 		{
 			strTable+="<tr align='center' onmouseover=\"this.className='yellowThing';\" onmouseout=\"this.className='whiteThing';\" onclick=\"showModifyTimeRule('"+symbol+"',"+j+");\" >"
-			strTable+="<td>"+(Math.trunc(currTimeRules[j][0]/1000000)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
-			strTable+=(Math.trunc(currTimeRules[j][0]/100000)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
-			strTable+=(Math.trunc(currTimeRules[j][0]/10000)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
-			strTable+=(Math.trunc(currTimeRules[j][0]/1000)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
-			strTable+=(Math.trunc(currTimeRules[j][0]/100)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
-			strTable+=(Math.trunc(currTimeRules[j][0]/10)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
-			strTable+=(Math.trunc(currTimeRules[j][0]/1)%10==1?ICON_CHECK:ICON_UNCHECK)+"</td>"
+			strTable+="<td>"+(Math.floor(currTimeRules[j][0]/1000000)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
+			strTable+=(Math.floor(currTimeRules[j][0]/100000)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
+			strTable+=(Math.floor(currTimeRules[j][0]/10000)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
+			strTable+=(Math.floor(currTimeRules[j][0]/1000)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
+			strTable+=(Math.floor(currTimeRules[j][0]/100)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
+			strTable+=(Math.floor(currTimeRules[j][0]/10)%10==1?ICON_CHECK:ICON_UNCHECK)+"&nbsp;"
+			strTable+=(Math.floor(currTimeRules[j][0]/1)%10==1?ICON_CHECK:ICON_UNCHECK)+"</td>"
 			strTable+="<td>"+currTimeRules[j][1]+"&nbsp;~&nbsp;"+currTimeRules[j][2]+"</td>"
 			strTable+="<td>"+currTimeRules[j][3]+"&nbsp;/&nbsp;"+currTimeRules[j][4]+"</td>"
 			strTable+="<td onclick=\"var e = window.event;e.cancelBubble = true;if (e.stopPropagation) {e.stopPropagation();}\"><button type='button' onclick=\"uiUpdateRule('"+symbol+"', "+j+", 'Del');\">Del</button></td>"
@@ -181,13 +181,13 @@ function showModifyTimeRule(symbol, index)
 		$('#editModifyRuleEnd').val(timeRules[2]);
 		$('#editModifyRuleTick').val(timeRules[3]);
 		$('#editModifyRuleQuote').val(timeRules[4]);
-		$('#checkModifyRuleWeekday1').prop('checked', (Math.trunc(timeRules[0]/1000000)%10==1))
-		$('#checkModifyRuleWeekday2').prop('checked', (Math.trunc(timeRules[0]/100000)%10==1))
-		$('#checkModifyRuleWeekday3').prop('checked', (Math.trunc(timeRules[0]/10000)%10==1))
-		$('#checkModifyRuleWeekday4').prop('checked', (Math.trunc(timeRules[0]/1000)%10==1))
-		$('#checkModifyRuleWeekday5').prop('checked', (Math.trunc(timeRules[0]/100)%10==1))
-		$('#checkModifyRuleWeekday6').prop('checked', (Math.trunc(timeRules[0]/10)%10==1))
-		$('#checkModifyRuleWeekday7').prop('checked', (Math.trunc(timeRules[0]/1)%10==1))
+		$('#checkModifyRuleWeekday1').prop('checked', (Math.floor(timeRules[0]/1000000)%10==1))
+		$('#checkModifyRuleWeekday2').prop('checked', (Math.floor(timeRules[0]/100000)%10==1))
+		$('#checkModifyRuleWeekday3').prop('checked', (Math.floor(timeRules[0]/10000)%10==1))
+		$('#checkModifyRuleWeekday4').prop('checked', (Math.floor(timeRules[0]/1000)%10==1))
+		$('#checkModifyRuleWeekday5').prop('checked', (Math.floor(timeRules[0]/100)%10==1))
+		$('#checkModifyRuleWeekday6').prop('checked', (Math.floor(timeRules[0]/10)%10==1))
+		$('#checkModifyRuleWeekday7').prop('checked', (Math.floor(timeRules[0]/1)%10==1))
 	}
 	else
 	{
