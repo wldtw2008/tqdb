@@ -217,10 +217,10 @@ int main(int argc, char *argv[]) {
 			
 				if (iDBGFlag==1)
 					fprintf(stdout,"%s\n", szInsStr);
-				/*if (iCassExecuteInsertStatement(session, szInsStr) == 0)
+				if (iCassExecuteInsertStatement(session, szInsStr) == 0)
 				{
 					exit(0);
-				}*/
+				}
 				iInsertCnt++;
 			}
                 }
