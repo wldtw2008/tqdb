@@ -77,7 +77,7 @@ long long llGetEpoch(int iYYYYMMDD, int iHHmmSSsss)
 	t.tm_year = iYYYYMMDD/10000-1900;  // This is year-1900, so 112 = 2012
 	t.tm_mon = ((iYYYYMMDD/100)%100)-1;
 	t.tm_mday = iYYYYMMDD%100;
-	int iHHmmSS = iHHmmSSsss/100;
+	int iHHmmSS = iHHmmSSsss/1000; //milisec -->sec
 	t.tm_hour = iHHmmSS/10000;
 	t.tm_min = (iHHmmSS/100)%100;
 	t.tm_sec = (iHHmmSS%100);
