@@ -73,14 +73,14 @@ long long llGetCurrentEpoch()
 }
 long long llGetEpoch(int iYYYYMMDD, int iHHmmSSsss)
 {
-printf("%d %d\n",iYYYYMMDD,iHHmmSSsss);
 	struct tm t = {0};  // Initalize to all 0's
 	t.tm_year = iYYYYMMDD/10000-1900;  // This is year-1900, so 112 = 2012
 	t.tm_mon = ((iYYYYMMDD/100)%100)-1;
 	t.tm_mday = iYYYYMMDD%100;
-	t.tm_hour = iHHmmSSsss/10000000;
-	t.tm_min = (iHHmmSSsss/100)%100;
-	t.tm_sec = (iHHmmSSsss%100);
+	int iHHmmSS = iHHmmSSsss/100;
+	t.tm_hour = iHHmmSS/10000;
+	t.tm_min = (iHHmmSS/100)%100;
+	t.tm_sec = (iHHmmSS%100);
 	time_t timeSinceEpoch = mktime(&t);
 	return ((double)timeSinceEpoch)*1000 + (iHHmmSSsss%1000);
 }
