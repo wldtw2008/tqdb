@@ -42,5 +42,6 @@ buildExe qtick
 buildExe qquote
 buildExe qsym
 buildExe itick
+buildExe updtick
 echo "=== All builded!! ==="
 exit 0
