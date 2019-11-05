@@ -39,3 +39,19 @@ eval $CMD
 CMD="cat ${CSV_TZTo} | python /home/tqdb/codes/tqdb/tools/Min2Cass.py $CASS_IP $CASS_PORT tqdb1 '${SYM_To}'"
 echo "Ready to run: "$CMD
 eval $CMD
+
+
+
+
+CMD="wget -O ${CSV_TZFrom} 'http://${TQDB_From}/cgi-bin/q1sec.py?symbol=${SYM_From}&BEG=${BEG}&END=${END}&csv=1'"
+echo "Ready to run: "$CMD
+eval $CMD
+
+CMD="/home/tqdb/codes/tqdb/tools/csvtzconv.py '${TQDB_FromTZ}' 'local' '${CSV_TZFrom}' > ${CSV_TZTo}"
+echo "Ready to run: "$CMD
+eval $CMD
+
+CMD="cat ${CSV_TZTo} | python /home/tqdb/codes/tqdb/tools/Sec2Cass.py $CASS_IP $CASS_PORT tqdb1 '${SYM_To}'"
+echo "Ready to run: "$CMD
+eval $CMD
+
