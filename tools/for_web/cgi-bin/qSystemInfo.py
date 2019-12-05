@@ -39,6 +39,19 @@ if False:
         runCql(cql, objRet)
         summery['tick.first'] = objRet['output']
 
+if True: #get hostname
+    hostInfo = []
+    lines = runCmd('hostname')
+    for line in lines:
+        if len(line)<=0: continue
+        hostInfo.append("Hostname: %s"%line)
+    lines = runCmd('hostname -I')
+    for line in lines:
+        for ip in line.split(' '):
+            if len(ip)<=0: continue
+            hostInfo.append("IP: %s" % ip)
+    allInfo.append(['Host Info', '\n'.join(hostInfo)])
+
 if True: #get system time zone
     linuxFamily = '?'
     if True:
