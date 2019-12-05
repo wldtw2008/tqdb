@@ -14,27 +14,29 @@ timeoffset=0
 iLocalTimeOff=480 #TW
 iGZip=1
 iRemoveQfile=1
-begDT = '2016-5-23 11:45:00'
-endDT = '2016-5-23 21:46:00'
+begDT = '2030-5-23 11:45:00'
+endDT = '2030-5-23 21:46:00'
 fileType = 0 #0=gz 1=csv
 mapQS={}
 def getFirstValidDateTime(symbol, begDTstr, endDTstr):
-    begEOPCH, endEOPCH = (-1, -1) 
-    url = 'http://127.0.0.1/cgi-bin/qSymSummery.py?symbol=%s&qtype=qLastPrc&lastDT=%s' % (urllib2.quote(symbol), urllib2.quote(begDTstr))
+    trgType = 'MinBar'
+    begRefDT, endRefDT = (-1, -1)
+    url = 'http://127.0.0.1/cgi-bin/qSymRefPrc.py?symbol=%s&qType=LastValidPrc&qDatetime=%s' % (urllib2.quote(symbol), urllib2.quote(begDTstr))
     resp = urllib2.urlopen(url)
     obj = json.loads(resp.read())
     #print obj
-    if obj != None and 'last' in obj and obj['last'][0] != None:
-        begEOPCH = obj['last'][1]/1000
-    url = 'http://127.0.0.1/cgi-bin/qSymSummery.py?symbol=%s&qtype=qLastPrc&lastDT=%s' % (urllib2.quote(symbol), urllib2.quote(endDTstr))
+    if obj != None and trgType in obj and obj[trgType][0] != None:
+        begRefDT = obj[trgType][0]['datetime']
+    url = 'http://127.0.0.1/cgi-bin/qSymRefPrc.py?symbol=%s&qType=LastValidPrc&qDatetime=%s' % (urllib2.quote(symbol), urllib2.quote(endDTstr))
     resp = urllib2.urlopen(url)
     obj = json.loads(resp.read())
     #print obj
-    if obj != None and 'last' in obj and obj['last'][0] != None:
-        endEOPCH = obj['last'][1]/1000
-    #print begEOPCH,endEOPCH 
-    if begEOPCH != -1 and begEOPCH == endEOPCH:
-        dtFirstValid = datetime.datetime.fromtimestamp(begEOPCH)
+    if obj != None and trgType in obj and obj[trgType][0] != None:
+        endRefDT = obj[trgType][0]['datetime']
+    if begRefDT != -1 and begRefDT == endRefDT:
+        begRefDTobj = datetime.datetime.strptime(begRefDT, "%Y-%m-%d %H:%M:%S")
+        begRefDTEopch = (begRefDTobj - datetime.datetime(1970,1,1)).total_seconds()
+        dtFirstValid = datetime.datetime.fromtimestamp(begRefDTEopch)
         begDTstr = dtFirstValid.strftime("%Y-%m-%d %H:%M:%S")
     return begDTstr
 
