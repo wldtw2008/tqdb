@@ -39,8 +39,23 @@ function init(){
                 function(data, textStatus, jqXHR){
                     for (i=0;i<data.all.length;++i)
                         $('#tzSelect').append($('<option>', {value: data.all[i], text: data.all[i]}));
+
+                    //auto select last time zone from cookie
+                    tz = getCookie('tz')
+                    if (tz != '') $('#tzSelect').val(tz)
                 });
 
+}
+function getCookie(name) {
+  var value = "; " + document.cookie;
+  var parts = value.split("; " + name + "=");
+  if (parts.length == 2) return parts.pop().split(";").shift();
+  return "";
+}
+function onTZChagne()
+{
+    tz=$('#tzSelect').val()
+    document.cookie="tz="+tz+"; path=/";
 }
 </script>
 <form enctype="multipart/form-data" action="cgi-bin/i1min_check.py?html=1" method="post">
@@ -48,12 +63,12 @@ function init(){
 <tr class='grayThing smallfont'><td colspan='2'>===Import 1Min from CSV File===</td></tr>
 <tr><td width='100px'>Symbol</td><td><input type="text" name="sym" value="" id='sym'></td></tr>
 <tr><td>Csv File</td><td><input type="file" name="file"></td></tr>
-<tr><td>Csv TimeZone</td><td><input type="checkbox" name="tzConv">Convert Timezone</input><br><select name='tzSelect' id='tzSelect'></select></td></tr>
+<tr><td>Csv TimeZone</td><td><input type="checkbox" name="tzConv">Convert Timezone</input><br><select name='tzSelect' id='tzSelect' onchange='onTZChagne()'></select></td></tr>
 <tr><td>Action</td><td><input type="submit" value="Upload"></td></tr>
 </table>
 Note:
 CSV/TXT row format only supports [Date,Time,Open,High,Low,Close,Vol]<br>
-Date format supports [YYYYmmDD] or [YYYY-m-D] or [YYYY/m/D]<br>
-Time format supports [HHMMSS] or [h:m:s]
+Date format supports [YYYYmmDD] or [YYYY-m-D] or [YYYY/m/D] or [m/D/YYYY]<br>
+Time format supports [HHMMSS] or [h:m:s] or [h:m]
 </form>
 </body></html>
