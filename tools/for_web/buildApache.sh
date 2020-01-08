@@ -23,7 +23,8 @@ echo "PrivateTmp=false" >> /etc/systemd/system/httpd.service.d/nopt.conf
 systemctl daemon-reload
 systemctl cat httpd.service
 
-
+echo ==== Set HTTP Timeout to 10 mins ====
+echo "Timeout 600" >> /etc/httpd/conf/httpd.conf
 
 echo ==== Ready to restart httpd ====
 sudo systemctl restart httpd
