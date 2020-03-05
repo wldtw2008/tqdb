@@ -53,7 +53,7 @@ def loopReadFromStdin():
 		tagTime = int(dt.strftime("%s"))*1000
 		#print int(round(time.time() * 1000)) 
 		#print timetag 
-		straa="insert into %s (symbol, datetime, open, high, low, close, vol) values ('%s', %d, %f, %f, %f, %f, %f);" % (szCassTable, szSymbol, tagTime, float(linesplit[2]), float(linesplit[3]), float(linesplit[4]), float(linesplit[5]), float(linesplit[6]))
+		straa="insert into %s (symbol, datetime, open, high, low, close, vol) values ('%s', %d, %.9f, %.9f, %.9f, %.9f, %f);" % (szCassTable, szSymbol, tagTime, float(linesplit[2]), float(linesplit[3]), float(linesplit[4]), float(linesplit[5]), float(linesplit[6]))
 		#print straa
 		iLineCnt = iLineCnt+1
 		

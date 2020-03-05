@@ -91,7 +91,7 @@ string cszCutDouble(double& dbPrice)
 	}
 	else
 	{	
-		cszTmp = string_format("%f", dbPrice);
+		cszTmp = string_format("%.9f", dbPrice);
 		for (int j=cszTmp.length()-1;j>=1;--j)
 		{
 			if (cszTmp[j] == '0' && cszTmp[j-1] != '.')

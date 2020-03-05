@@ -31,7 +31,7 @@ const char* szDb2Str(char *pszDB, double* pdbVal)
         int iLen;
 	if (pszDB == NULL)
 		pszDB = pszDB;
-        sprintf(pszDB, "%f", *pdbVal);
+        sprintf(pszDB, "%.9f", *pdbVal);
         if (strchr(pszDB, '.') == NULL)
                 return pszDB;
 	iLen=strlen(pszDB)-1;

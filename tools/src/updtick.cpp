@@ -211,7 +211,7 @@ int main(int argc, char *argv[]) {
 				}
 				if (iCnt!=4) continue;
 				if (date<19700101) continue;
-				sprintf(szTQDBKeyVal, "{'C':%f,'V':%f,'TC':%d,'EPID':0}", price, vol, ++iTickCnt);
+				sprintf(szTQDBKeyVal, "{'C':%.9f,'V':%f,'TC':%d,'EPID':0}", price, vol, ++iTickCnt);
 				sprintf(szInsStr, "insert into %s.tick (symbol, datetime, type, keyval) values ('%s', %lld, %d, %s);",
 					pszDBName, pszSymbol, llGetEpoch(date, time*1000), 1, szTQDBKeyVal);
 			

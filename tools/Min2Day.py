@@ -78,6 +78,6 @@ keys.sort()
 for key in keys:
 	val = dailyData[key]
 	if (param['Debug']):
-		print "%d,%f,%f,%f,%f,%f,%s" % (key, val[1], val[2], val[3], val[4], val[5], val[0])
+		print "%d,%.9f,%.9f,%.9f,%.9f,%f,%s" % (key, val[1], val[2], val[3], val[4], val[5], val[0])
 	else:
-		print "%d,%f,%f,%f,%f,%f" % (key, val[1], val[2], val[3], val[4], val[5])
+		print "%d,%.9f,%.9f,%.9f,%.9f,%f" % (key, val[1], val[2], val[3], val[4], val[5])
