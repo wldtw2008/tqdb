@@ -6,6 +6,9 @@ from datetime import datetime
 from dateutil import tz, parser
 from cassandra.cluster import Cluster
 
+from webcommon import *
+profile=readProfile()
+szCassIP1=profile['CASS_IP']
 
 def _executeQurey(cassSession, queryStr):
     retData = []
@@ -28,7 +31,7 @@ def _executeQurey(cassSession, queryStr):
     return {'Result': 'OK', 'data': retData}
 
 def _main(keyspace, sym, qType, qDatetime):
-    cluster = Cluster()
+    cluster = Cluster([szCassIP1])
     session = cluster.connect(keyspace)
     allData = {} 
 

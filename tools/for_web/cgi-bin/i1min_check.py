@@ -13,9 +13,6 @@ import cgi, os
 import cgitb
 cgitb.enable()
 
-szCassIP1="127.0.0.1"
-szCassDB="tqdb1"
-
 param = {'Sym':'', 'Lines': [], 'Log':''}
 importTicket="i1min.%d.%d"%(int(time.time()), os.getpid())
 def _procPostData():

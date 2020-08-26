@@ -9,9 +9,6 @@ import os
 import subprocess
 import json
 
-szCassIP1="127.0.0.1"
-szCassDB="tqdb1"
-
 importTicket=""
 
 querystrings=os.environ.get("QUERY_STRING", "NA=NA")

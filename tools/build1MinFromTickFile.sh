@@ -1,4 +1,5 @@
 #!/bin/bash
+. /etc/profile.d/profile_tqdb.sh
 
 if [ "$1" == "" ] ; then
 	echo "Systex Error!"
@@ -15,7 +16,7 @@ FILES=`ls ${OLDTICK_FILES}`
 for F in ${FILES}
 do
     SYM=`basename ${F} .tick `
-    CMD="grep '^"${RESTORE_DATE}"' "${F}" | ./tick21min | python Min2Cass.py 127.0.0.1 9042 tqdb1 '"${SYM}"'"
+    CMD="grep '^"${RESTORE_DATE}"' "${F}" | ./tick21min | python Min2Cass.py "$CASS_IP" "$CASS_PORT" tqdb1 '"${SYM}"'"
     echo "Ready to run: "${CMD}
     if [ "${GO}" == "GO" ] ; then
         eval ${CMD}

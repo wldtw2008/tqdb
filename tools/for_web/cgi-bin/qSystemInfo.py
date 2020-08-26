@@ -9,10 +9,7 @@ import subprocess
 import json
 from webcommon import *
 
-
-szCassIP1="127.0.0.1"
 szCassDB="tqdb1"
-szBinDir='/home/tqdb/codes/tqdb/tools/'
 
 allInfo=[] #[key, val]
 

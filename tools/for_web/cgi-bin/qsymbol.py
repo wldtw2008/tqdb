@@ -8,7 +8,10 @@ from cassandra.cluster import Cluster
 import os
 import subprocess
 
-szCassIP1="127.0.0.1"
+from webcommon import *
+profile=readProfile()
+szCassIP1=profile['CASS_IP']
+szCassPort1=profile['CASS_PORT']
 szCassDB="tqdb1"
 
 querystrings=os.environ.get("QUERY_STRING", "NA=NA")
@@ -19,7 +22,7 @@ for qs in querystrings.split("&"):
 sys.stdout.write("Content-Type: text/plain\r\n")
 sys.stdout.write("\r\n")
 tmpFile="/tmp/q1min.%d.%d"%(os.getpid(),time.mktime(datetime.datetime.now().timetuple()))
-szCMD="./qsym %s %s %s.symbol 0 ALL 1 > %s" % (szCassIP1, '9042', szCassDB, tmpFile)
+szCMD="./qsym %s %s %s.symbol 0 ALL 1 > %s" % (szCassIP1, szCassPort1, szCassDB, tmpFile)
 subprocess.call(szCMD, shell=True, cwd='/home/tqdb/codes/tqdb/tools/') 
 fp = file(tmpFile, 'rb')
 sys.stdout.write(fp.read())

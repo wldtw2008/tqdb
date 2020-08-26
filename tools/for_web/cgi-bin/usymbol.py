@@ -9,8 +9,12 @@ import os
 import subprocess
 import json
 import urllib
-szCassIP1="127.0.0.1"
-szCassPort1="9042"
+
+
+from webcommon import *
+profile=readProfile()
+szCassIP1=profile['CASS_IP']
+szCassPort1=profile['CASS_PORT']
 szCassDB="tqdb1"
 
 querystrings=os.environ.get("QUERY_STRING", "NA=NA")

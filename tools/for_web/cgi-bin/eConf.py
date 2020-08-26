@@ -6,8 +6,13 @@ from datetime import datetime
 from dateutil import tz, parser
 from cassandra.cluster import Cluster
 
+from webcommon import *
+profile=readProfile()
+szCassIP1=profile['CASS_IP']
+
+
 def _main(keyspace, confKey, confVal, cmd):
-    cluster = Cluster()
+    cluster = Cluster([szCassIP1])
     session = cluster.connect(keyspace)
     qResult = None
     if cmd in ('UPDATE'):

@@ -6,6 +6,10 @@ from datetime import datetime
 from dateutil import tz, parser
 from cassandra.cluster import Cluster
 
+from webcommon import *
+profile=readProfile()
+szCassIP1=profile['CASS_IP']
+
 def _LocalDT2EOPCHFloat(localDT):
     return float(localDT.strftime('%s.%f'))
 
@@ -28,7 +32,7 @@ def _main(keyspace, table, symbol, begDTStr, endDTStr):
     begDTStr = datetime.fromtimestamp(retObj['range'][0])
     ednDTStr = datetime.fromtimestamp(retObj['range'][1])
 
-    cluster = Cluster()
+    cluster = Cluster([szCassIP1])
     session = cluster.connect(keyspace)
     queryStr = "select * from %s.%s where symbol='%s' and datetime>='%s' and datetime<'%s' order by datetime limit 20000;"%(keyspace, table, symbol, begDTStr, endDTStr)
     retObj['qcmd'] = queryStr

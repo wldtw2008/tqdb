@@ -9,8 +9,10 @@ import subprocess
 import urllib
 import json
 
-
-szCassIP1="127.0.0.1"
+from webcommon import *
+profile=readProfile()
+szCassIP1=profile['CASS_IP']
+szCassPort1=profile['CASS_PORT']
 szCassDB="tqdb1"
 
 szBinDir='/home/tqdb/codes/tqdb/tools/'
@@ -35,7 +37,7 @@ def loopReadFromStdin():
 		iMkC = int(mapQS['MKC'])
 	if (iMkO==0 and iMkC ==0):#read from DB
 		tmpFile="/tmp/qsym.%d.%d"%(os.getpid(),time.mktime(datetime.datetime.now().timetuple()))
-		szCMD="./qsym %s %s %s.symbol 0 '%s' 1 > %s" % (szCassIP1, '9042', szCassDB, szSymbol, tmpFile)
+		szCMD="./qsym %s %s %s.symbol 0 '%s' 1 > %s" % (szCassIP1, szCassPort1, szCassDB, szSymbol, tmpFile)
 		subprocess.call(szCMD, shell=True, cwd='/home/tqdb/codes/tqdb/tools/')
 		fp = file(tmpFile, 'rb')
 		jsonstr=fp.read()

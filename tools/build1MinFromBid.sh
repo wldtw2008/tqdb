@@ -1,7 +1,6 @@
 #!/bin/bash
+. /etc/profile.d/profile_tqdb.sh
 
-CASSIP="127.0.0.1"
-CASSPORT=9042
 TQDB="tqdb1"
 SYMBOL=$1
 NDAYAGO=$2
@@ -13,7 +12,7 @@ DTBEG=`date +%Y-%m-%d --date="$(($NDAYAGO+1)) day ago"`
 DTEND=`date +%Y-%m-%d --date="$NDAYAGO day ago"`
 
 if [ "$SYMBOL" != "" ] ; then
-	CMD="./qquote $CASSIP $CASSPORT ${TQDB}.tick 0 $SYMBOL BID $DTBEG $DTEND $EPID | ./tick21min | python Min2Cass.py $CASSIP $CASSPORT $TQDB ${SYMBOL}.BID
+	CMD="./qquote $CASS_IP $CASS_PORT ${TQDB}.tick 0 $SYMBOL BID $DTBEG $DTEND $EPID | ./tick21min | python Min2Cass.py $CASS_IP $CASS_PORT $TQDB ${SYMBOL}.BID
 "
 	echo "ready to run:"$CMD
 	eval $CMD
