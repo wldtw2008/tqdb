@@ -1,25 +1,24 @@
 ====Cassandra Cluster Buildup====
-If you have 2 node:
+Suppose you have 2 nodes:
 NodeA(seed):  PublicIP:192.168.1.100  /  PrivateIP:10.0.2.15
 NodeB      :  PublicIP:192.168.1.102  /  PrivateIP:10.0.2.15
 
-1. Open all nodes NAT firewall port forward:
-   *Cassandra inter-node ports
+1. Open NAT firewall port-forward for all nodes:
+   *Cassandra inter-node ports:
    7000 - Cassandra inter-node cluster communication.
    7001 - Cassandra SSL inter-node cluster communication.
    7199 - Cassandra JMX monitoring port.
-   *Cassandra client ports
+   *Cassandra client ports:
    9042 - Cassandra client port.
    9160 - Cassandra client port (Thrift).
    9142 - Default for native_transport_port_ssl
    
 2. Stop all node
    #sudo systemctl stop cassandra
-   #ps -ef | grep cassandra  <== To see if cassandra is up or down
-   if cassandra still up, you have to run below command to kill it.
+   #ps -ef | grep cassandra  <== To see if cassandra is down or up, if cassandra still up, you have to run below command to kill it.
    #kill {CassandraPID}
 
-3. #sudo rm -rf /var/lib/cassandra/data/system/*   <== To remove cassanra system file
+3. #sudo rm -rf /var/lib/cassandra/data/system/*   <== To remove cassandra system file
 
 4.1 At NodeA:
    #sudo vi /etc/cassandra/conf/cassandra.yaml
@@ -41,7 +40,7 @@ NodeB      :  PublicIP:192.168.1.102  /  PrivateIP:10.0.2.15
    broadcast_rpc_address: 192.168.1.102    (NodeB Public IP)
    endpoint_snitch: GossipingPropertyFileSnitch
 
-5. run up seed node's cassandra first then run up all others
+5. run up seed node's cassandra first then run up others
    #systemctl restart cassandra   
    
 6. check node status
