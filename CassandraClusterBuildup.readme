@@ -1,0 +1,54 @@
+====Cassandra Cluster Buildup====
+If you have 2 node:
+NodeA(seed):  PublicIP:192.168.1.100  /  PrivateIP:10.0.2.15
+NodeB      :  PublicIP:192.168.1.102  /  PrivateIP:10.0.2.15
+
+1. Open all nodes NAT firewall port forward:
+   *Cassandra inter-node ports
+   7000 - Cassandra inter-node cluster communication.
+   7001 - Cassandra SSL inter-node cluster communication.
+   7199 - Cassandra JMX monitoring port.
+   *Cassandra client ports
+   9042 - Cassandra client port.
+   9160 - Cassandra client port (Thrift).
+   9142 - Default for native_transport_port_ssl
+   
+2. Stop all node
+   #sudo systemctl stop cassandra
+   #ps -ef | grep cassandra  <== To see if cassandra is up or down
+   if cassandra still up, you have to run below command to kill it.
+   #kill {CassandraPID}
+
+3. #sudo rm -rf /var/lib/cassandra/data/system/*   <== To remove cassanra system file
+
+4.1 At NodeA:
+   #sudo vi /etc/cassandra/conf/cassandra.yaml
+   cluster_name: 'TQDBCluster'             <== ****Important!**** You have to change it, don't keep it as default 'Test Cluster'!
+   - seeds: "192.168.1.100"                (NodeA Public IP)
+   listen_address: 10.0.2.15               (NodeA Private IP)
+   broadcast_address: 192.168.1.100        (NodeA Public IP)
+   rpc_address: 0.0.0.0
+   broadcast_rpc_address: 192.168.1.100    (NodeA Public IP)
+   endpoint_snitch: GossipingPropertyFileSnitch
+
+4.2 At NodeB:
+   #sudo vi /etc/cassandra/conf/cassandra.yaml
+   cluster_name: 'TQDBCluster'             <== ****Important!**** You have to change it, don't keep it as default 'Test Cluster'!
+   - seeds: "192.168.1.100"                (NodeA Public IP)
+   listen_address: 10.0.2.15               (NodeB Private IP)
+   broadcast_address: 192.168.1.102        (NodeB Public IP)
+   rpc_address: 0.0.0.0
+   broadcast_rpc_address: 192.168.1.102    (NodeB Public IP)
+   endpoint_snitch: GossipingPropertyFileSnitch
+
+5. run up seed node's cassandra first then run up all others
+   #systemctl restart cassandra   
+   
+6. check node status
+   #nodetool status
+   
+7. At NodeB run repair to sync node
+   #nodetool repair
+   
+8. If you want detatch some node. run below command at the node.
+   #nodetool decommission
