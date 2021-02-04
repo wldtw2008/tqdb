@@ -14,7 +14,7 @@
     $ sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
     $ sudo yum update
     $ sudo ln -s /usr/bin/nc /usr/bin/netcat
-    $ sudo yum install -y python-pip && sudo pip install --upgrade pip
+    $ sudo yum install -y python-pip && sudo pip install --upgrade "pip < 21.0"
     $ sudo pip install --upgrade cassandra-driver
 
     Change Hostname if needed:
