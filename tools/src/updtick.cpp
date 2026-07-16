@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
 	int iTickCnt = 0;
 	while(fgets(szLine, sizeof(szLine), stdin))
 	{
-		szLine[sizeof(szLine)] = '\0';
+		szLine[sizeof(szLine)-1] = '\0';
 		iLen = strlen(szLine);
 		while(1)
 		{
